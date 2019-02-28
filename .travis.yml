@@ -2,5 +2,7 @@ language: csharp
 solution: Epicoin.sln
 mono: none
 dotnet: 2.1.503
-script:
+install:
  - dotnet restore
+script:
+ - dotnet build
