@@ -6,6 +6,29 @@ using System.Linq;
 
 namespace Epicoin {
 
+	public class Epicore {
+
+		internal bool stop { get; private set; }
+
+		public Epicore(){
+
+		}
+
+		protected Thread vt, st, nt;
+
+		public void Start(){
+			vt.Start();
+			nt.Start();
+			st.Start();
+		}
+
+		public void Stop(){
+			stop = true;
+			while(vt.IsAlive || st.IsAlive || nt.IsAlive) Thread.Yield();
+		}
+
+	}
+
 	internal abstract class MainComponent<ITM> where ITM : ITCMessage {
 
 		protected readonly Epicore core;
