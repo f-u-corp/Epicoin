@@ -8,10 +8,16 @@ namespace Epicoin {
 
 	public class Epicore {
 
+		internal Solver solver;
+
+		internal Action<Solver.ITM> sendITM2Solver;
+
 		internal bool stop { get; private set; }
 
 		public Epicore(){
+			st = new Thread((solver = new Solver(this)).InitAndRun);
 
+			sendITM2Solver = solver.sendITM;
 		}
 
 		protected Thread vt, st, nt;
