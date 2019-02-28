@@ -66,6 +66,13 @@ namespace Epicoin {
 
 		public M readMessageOrDefault() => messages.TryDequeue(out M m) ? m : default(M);
 
+		protected ConcurrentQueue<M> stash = new ConcurrentQueue<M>();
+		public void stashReadMessage(M message) => stash.Enqueue(message);
+
+		public void readdStash(){
+			while(stash.TryDequeue(out M m)) messages.Enqueue(m);
+		}
+
 	}
 
 	internal interface ITCMessage {
