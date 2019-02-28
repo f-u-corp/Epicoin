@@ -22,6 +22,7 @@ namespace Epicoin {
 
 		internal override void InitAndRun(){
 			LoadProblems();
+			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
 		}
 
 		protected void LoadProblems(){
