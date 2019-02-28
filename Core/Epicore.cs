@@ -68,6 +68,8 @@ namespace Epicoin {
 			return m;
 		}
 
+		protected SITM waitForITMessageOfType<SITM>() where SITM : ITM => (SITM) waitForITMessage(m => m is SITM);
+
 	}
 
 	internal class InterThreadComms<M> where M : ITCMessage  {
