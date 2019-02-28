@@ -56,6 +56,18 @@ namespace Epicoin {
 		protected InterThreadComms<ITM> itc = new InterThreadComms<ITM>();
 		public Action<ITM> sendITM { get => itc.sendMessage; }
 
+		protected void readITInbox(Action<ITM> readMessage){
+			ITM m;
+			while((m = itc.readMessageOrDefault()) != null) readMessage(m);
+		}
+
+		protected ITM waitForITMessage(Predicate<ITM> p){
+			ITM m;
+			while((m = itc.readMessageOrDefault()) == null || !p(m)) itc.stashReadMessage(m);
+			itc.readdStash();
+			return m;
+		}
+
 	}
 
 	internal class InterThreadComms<M> where M : ITCMessage  {
