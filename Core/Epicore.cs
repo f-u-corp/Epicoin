@@ -6,13 +6,20 @@ using System.Linq;
 
 namespace Epicoin {
 
-	internal abstract class MainComponent {
+	internal abstract class MainComponent<ITM> where ITM : ITCMessage {
 
 		protected readonly Epicore core;
 
 		protected MainComponent(Epicore core) => this.core = core;
 
 		internal abstract void InitAndRun();
+
+		/*
+		 * ITC
+		 */
+		
+		protected InterThreadComms<ITM> itc = new InterThreadComms<ITM>();
+		public Action<ITM> sendITM { get => itc.sendMessage; }
 
 	}
 
