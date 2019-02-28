@@ -18,15 +18,16 @@ namespace Epicoin {
 
 		public Solver(Epicore core) : base(core){}
 
-		protected Dictionary<string, NPcProblemWrapper> problemsRegistry;
+		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 		internal override void InitAndRun(){
 			LoadProblems();
 		}
 
 		protected void LoadProblems(){
-			problemsRegistry = new Dictionary<string, NPcProblemWrapper>();
+			var reg = new Dictionary<string, NPcProblemWrapper>();
 			//TODO load dlls
+			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
 		}
 
 		
