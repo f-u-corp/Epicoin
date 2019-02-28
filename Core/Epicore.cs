@@ -13,12 +13,14 @@ namespace Epicoin {
 
 		internal Action<Solver.ITM> sendITM2Solver;
 		internal Action<Validator.ITM> sendITM2Validator;
+		internal Action sendITM2Net;
 
 		internal bool stop { get; private set; }
 
 		public Epicore(){
 			st = new Thread((solver = new Solver(this)).InitAndRun);
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
+			nt = new Thread(() => {}); //TODO wire in network component
 
 			sendITM2Solver = solver.sendITM;
 			sendITM2Validator = validator.sendITM;
