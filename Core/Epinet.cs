@@ -1,12 +1,50 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
+using System.Net.WebSockets;
 
-namespace Epicoin
-{
-    class Baby
+namespace Epicoin {
+
+	/*
+	 * Parent
+	 */
+
+	class Parent
+    {
+        public Baby self { get; set; }
+        //private List<Baby> babies; Is this really useful? We already have them in the Baby class
+        private List<WebSocket> family;
+        private Socket childCareGiver;
+
+        public Parent()
+        {
+
+            //init this.childCareGiver
+            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, 9191); //Check that 9191 is not commonly used
+            this.childCareGiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            this.childCareGiver.Bind(endPoint);
+        }
+        
+    }
+    struct Tear
+    {
+        public readonly string IPAddress;
+        public readonly string publicKey;
+
+        public Tear(string receivedTear)
+        {
+            //TODO: get IPAddress from the UDP packet received
+            //TDOO: get the publicKey from the UDP packet received
+
+        }
+    }
+
+	/*
+	 * Baby
+	 */
+
+	class Baby
     {
         private Parent self;
 
@@ -66,4 +104,5 @@ namespace Epicoin
             return this.server.SendTo(data, data.Length, SocketFlags.None, this.endPoint);
         }
     }
+
 }
