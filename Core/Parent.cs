@@ -36,7 +36,8 @@ namespace Epicoin
         {
             //TODO: get IPAddress from the UDP packet received
             //TDOO: get the publicKey from the UDP packet received
-
+			IPAddress = receivedTear.Split('\n')[0];
+			publicKey = receivedTear.Split('\n')[1];
         }
     }
 }
