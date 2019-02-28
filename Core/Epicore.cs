@@ -9,15 +9,19 @@ namespace Epicoin {
 	public class Epicore {
 
 		internal Solver solver;
+		internal Validator validator;
 
 		internal Action<Solver.ITM> sendITM2Solver;
+		internal Action<Validator.ITM> sendITM2Validator;
 
 		internal bool stop { get; private set; }
 
 		public Epicore(){
 			st = new Thread((solver = new Solver(this)).InitAndRun);
+			vt = new Thread((validator = new Validator(this)).InitAndRun);
 
 			sendITM2Solver = solver.sendITM;
+			sendITM2Validator = validator.sendITM;
 		}
 
 		protected Thread vt, st, nt;
