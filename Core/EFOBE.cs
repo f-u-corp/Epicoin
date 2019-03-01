@@ -14,7 +14,10 @@ namespace Epicoin {
 
 		public struct Block {
 
-			//TODO - Block contents
+			string problem;
+			string parameters;
+			string solution;
+			//TODO - Block contents: hash
 
 		}
 	}
