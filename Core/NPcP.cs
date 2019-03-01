@@ -6,8 +6,10 @@ using System.IO;
 
 namespace Epicoin {
 
+	/// <summary>
+	/// Temporary interface for dll-based problems externalization approach
+	/// </summary>
 	public interface INPcProblem<P, S> {
-		//Temporary public interface for DLLs
 
 		S solve(P parms);
 
@@ -42,6 +44,9 @@ namespace Epicoin {
 
 	}
 
+	/// <summary>
+	/// Solver, main component, responsible for loading and solving problems.
+	/// </summary>
 	internal class Solver : MainComponent<Solver.ITM> {
 
 		public Solver(Epicore core) : base(core){}

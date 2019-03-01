@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Epicoin {
 
+	/// <summary>
+	/// The Epic Free and Open Blockchain of Epicness itself, in all its' structural glory.
+	/// </summary>
 	public struct EFOBE {
 
 		private List<Block> blocks;
@@ -16,6 +19,9 @@ namespace Epicoin {
 		}
 	}
 
+	/// <summary>
+	/// Validator, main component, responsible for validating solved problems and modyfying local EFOBE and/or notyfying the network. (Also) Fully manages local EFOBE.
+	/// </summary>
 	internal class Validator : MainComponent<Validator.ITM> {
 
 		public Validator(Epicore core) : base(core) {}
