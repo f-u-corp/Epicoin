@@ -15,27 +15,27 @@ namespace Epicoin {
 
 	}
 
-	///<summary>
-	///Internal future-fixed wrapper class for in-dev-mutable problems and solutions represented publically.
-	///</summary>
+	/// <summary>
+	/// Internal future-fixed wrapper class for in-dev-mutable problems and solutions represented publically.
+	/// </summary>
 	internal struct NPcProblemWrapper {
 		//TODO wrap
 
-		///<summary>
-		///Solves the problem given the parameters (with string representations - in any consistent way the problem may like).
-		///</summary>
-		///<param name="parms">Parameters to find the solution for.</param>
-		///<returns>The solution to the problem, represented as string (in any consitent way the problem may like).</returns>
+		/// <summary>
+		/// Solves the problem given the parameters (with string representations - in any consistent way the problem may like).
+		/// </summary>
+		/// <param name="parms">Parameters to find the solution for.</param>
+		/// <returns>The solution to the problem, represented as string (in any consitent way the problem may like).</returns>
 		string solve(string parms){
 			return "";
 		}
 
-		///<summary>
-		///Checks the solution to the problem for given parameters (with string representations - in any consistent way the problem may like).
-		///</summary>
-		///<param name="parms">Parameters to check with.</param>
-		///<param name="solution">Solution to check. </param>
-		///<returns>Whether the solution is correct.</returns>
+		/// <summary>
+		/// Checks the solution to the problem for given parameters (with string representations - in any consistent way the problem may like).
+		/// </summary>
+		/// <param name="parms">Parameters to check with.</param>
+		/// <param name="solution">Solution to check. </param>
+		/// <returns>Whether the solution is correct.</returns>
 		bool check(string parms, string solution){
 			return false;
 		}
