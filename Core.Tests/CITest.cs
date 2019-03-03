@@ -9,10 +9,5 @@ namespace Epicoin {
 			Assert.Pass();
 		}
 
-		[Test]
-		public void TestShouldFail(){
-			Assert.Fail();
-		}
-
 	}
 }
