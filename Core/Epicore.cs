@@ -5,10 +5,15 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 
+using log4net;
+
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin {
 
 	public class Epicore {
+
+		internal static readonly log4net.Repository.ILoggerRepository LOGREPO = LogManager.CreateRepository("Epicoin");
+		internal static readonly ILog LOG = LogManager.GetLogger("Epicoin", "Epicoin-Main");
 
 		internal Solver solver;
 		internal Validator validator;
