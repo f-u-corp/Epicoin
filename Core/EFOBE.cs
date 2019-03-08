@@ -70,6 +70,11 @@ namespace Epicoin {
 
 		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, JsonConvert.SerializeObject(efobe));
 
+		protected EFOBE.Block hashBlock(string problem, string parms, string sol){
+			string hash = ""; //TODO Hash
+			return new EFOBE.Block(problem, parms, sol, hash);
+		}
+
 
 		/*
 		 * ITC
