@@ -1,7 +1,10 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+
+using Newtonsoft.Json;
 
 namespace Epicoin {
 
@@ -41,13 +44,24 @@ namespace Epicoin {
 	/// </summary>
 	internal class Validator : MainComponent<Validator.ITM> {
 
+		protected EFOBE efobe;
+
 		public Validator(Epicore core) : base(core) {}
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 		internal override void InitAndRun(){
+			var cachedE = new FileInfo(EFOBEfile);
+			if(cachedE.Exists) efobe = loadEFOBE(cachedE);
+			//else TODO Request EFOBE from network
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 		}
+
+		internal const string EFOBEfile = "EFOBE.json";
+
+		internal EFOBE loadEFOBE(FileInfo file) => JsonConvert.DeserializeObject<EFOBE>(File.ReadAllText(file.FullName));
+
+		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, JsonConvert.SerializeObject(efobe));
 
 
 		/*
