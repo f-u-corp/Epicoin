@@ -8,16 +8,30 @@ namespace Epicoin {
 	/// <summary>
 	/// The Epic Free and Open Blockchain of Epicness itself, in all its' structural glory.
 	/// </summary>
-	public struct EFOBE {
+	public class EFOBE {
 
 		private List<Block> blocks;
 
+		public EFOBE(List<Block> blocks){
+			this.blocks = new List<Block>(blocks);
+		}
+
+		internal void addBlock(Block block){
+			blocks.Add(block);
+		}
+
 		public struct Block {
 
-			string problem;
-			string parameters;
-			string solution;
-			//TODO - Block contents: hash
+			string problem, parameters, solution;
+			
+			string hash;
+
+			public Block(string problem, string pars, string sol, string hash){
+				this.problem = problem;
+				this.parameters = pars;
+				this.solution = sol;
+				this.hash = hash;
+			}
 
 		}
 	}
