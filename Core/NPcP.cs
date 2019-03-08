@@ -144,7 +144,10 @@ namespace Epicoin {
 		protected void sendITMAsync(ITM itm){
 			if(!(itm is ITM.AsyncITM)) base.sendITM(itm);
 			else {
-				//TODO stuff
+				if(itm is ITM.StahpSolvingUSlowpoke){
+					var stahp = itm as ITM.StahpSolvingUSlowpoke;
+					if(cur.pr == stahp.problem && cur.pa == stahp.parms && !cur.sol.IsCompleted) cur.cts.Cancel();
+				}
 			}
 		}
 
@@ -162,6 +165,17 @@ namespace Epicoin {
 				public readonly string problem, parms;
 
 				public PlsSolve(string problem, string parms){
+					this.problem = problem;
+					this.parms = parms;
+				}
+
+			}
+
+			internal class StahpSolvingUSlowpoke : ITM, AsyncITM {
+
+				public readonly string problem, parms;
+
+				public StahpSolvingUSlowpoke(string problem, string parms){
 					this.problem = problem;
 					this.parms = parms;
 				}
