@@ -1,9 +1,11 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 
+[assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin {
 
 	public class Epicore {

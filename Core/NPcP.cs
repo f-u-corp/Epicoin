@@ -1,10 +1,12 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.IO;
 using System.Reflection;
 
+[assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin {
 
 	/// <summary>
