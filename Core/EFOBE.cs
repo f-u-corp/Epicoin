@@ -25,9 +25,9 @@ namespace Epicoin {
 
 		public struct Block {
 
-			readonly string problem, parameters, solution;
+			public readonly string problem, parameters, solution;
 			
-			readonly string hash;
+			public readonly string hash;
 
 			public Block(string problem, string pars, string sol, string hash){
 				this.problem = problem;
