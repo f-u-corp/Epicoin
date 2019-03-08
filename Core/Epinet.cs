@@ -107,4 +107,8 @@ namespace Epicoin {
         }
     }
 
+	class Epinet {
+
+	}
+
 }

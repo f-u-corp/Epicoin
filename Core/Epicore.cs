@@ -15,7 +15,7 @@ namespace Epicoin {
 
 		internal Action<Solver.ITM> sendITM2Solver;
 		internal Action<Validator.ITM> sendITM2Validator;
-		internal Action sendITM2Net;
+		internal Action<Epinet> sendITM2Net;
 
 		internal bool stop { get; private set; }
 
@@ -26,6 +26,7 @@ namespace Epicoin {
 
 			sendITM2Solver = solver.sendITM;
 			sendITM2Validator = validator.sendITM;
+			sendITM2Net = m => {}; //TODO wire in network component
 		}
 
 		protected Thread vt, st, nt;
