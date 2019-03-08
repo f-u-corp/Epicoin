@@ -106,7 +106,8 @@ namespace Epicoin {
 
 		protected void LoadProblems(){
 			var reg = new Dictionary<string, NPcProblemWrapper>();
-			new DirectoryInfo("npdlls").GetFiles("*.dll").ToList().ForEach(f => Assembly.LoadFile(f.FullName).GetExportedTypes().Where(typeof(INPcProblem).IsAssignableFrom).Select(Activator.CreateInstance).Cast<INPcProblem>().ToList().ForEach(p => reg.Add(p.getName(), new NPcProblemWrapper(p))));
+            new DirectoryInfo("npdlls").Create();
+            new DirectoryInfo("npdlls").GetFiles("*.dll").ToList().ForEach(f => Assembly.LoadFile(f.FullName).GetExportedTypes().Where(typeof(INPcProblem).IsAssignableFrom).Select(Activator.CreateInstance).Cast<INPcProblem>().ToList().ForEach(p => reg.Add(p.getName(), new NPcProblemWrapper(p))));
 			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
 		}
 
