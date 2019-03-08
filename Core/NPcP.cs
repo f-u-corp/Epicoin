@@ -110,6 +110,8 @@ namespace Epicoin {
 			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
 		}
 
+		protected string solve(string problem, string parms) => problemsRegistry[problem].solve(parms);
+
 		
 		/*
 		 * ITC
