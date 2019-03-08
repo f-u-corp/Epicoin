@@ -102,6 +102,16 @@ namespace Epicoin {
 		internal override void InitAndRun(){
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
+
+			//Parallelize interruption with Tasks
+			while(!core.stop){
+				var m = itc.readMessageOrDefault();
+				if(m is ITM.PlsSolve){
+					var pls = m as ITM.PlsSolve;
+					string sol = solve(pls.problem, pls.parms);
+					core.sendITM2Validator(new Validator.ITM.ISolvedAProblem(pls.problem, pls.parms, sol));
+				}
+			}
 		}
 
 		protected void LoadProblems(){
