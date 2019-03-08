@@ -6,6 +6,8 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 
+using Newtonsoft.Json;
+
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin {
 
@@ -31,14 +33,19 @@ namespace Epicoin {
 	internal struct NPcProblemWrapper {
 
 		private static P decodeParams<P>(string s){
-			return default(P); //TODO - string -> P
+			return JsonConvert.DeserializeObject<OFW<P>>(s).o;
 		}
 
 		private static string encodeSolution<S>(S sol){
-			return ""; //TODO - S -> string
+			return JsonConvert.SerializeObject(new OFW<S>(sol));
 		}
 		private static S decodeSolution<S>(string s){
-			return default(S); //TODO - string -> S
+			return JsonConvert.DeserializeObject<OFW<S>>(s).o;
+		}
+		
+		private class OFW<T> {
+			public T o;
+			public OFW(T t) => o = t;
 		}
 
 
