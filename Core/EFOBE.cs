@@ -52,15 +52,8 @@ namespace Epicoin {
 
 		internal override void InitAndRun(){
 			var cachedE = new FileInfo(EFOBEfile);
-			if(cachedE.Exists) efobe = loadEFOBE(cachedE);
-			else {
-				core.sendITM2Net(new Epinet.ITM.IWantAFullEFOBE());
-				var receivedEFOBELoc = waitForITMessageOfType<ITM.HeresYourEFOBE>().tmpCacheLoc;
-				var recEFOBE = loadEFOBE(receivedEFOBELoc);
-				//Validate EFOBE
-				this.efobe = recEFOBE;
-				receivedEFOBELoc.Delete();
-			}
+			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
+			else core.sendITM2Net(new Epinet.ITM.IWantAFullEFOBE());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 
 			keepChecking();
@@ -69,6 +62,13 @@ namespace Epicoin {
 		internal void keepChecking(){
 			while(!core.stop){
 				var m = itc.readMessageOrDefault();
+				if(m is ITM.HeresYourEFOBE){
+					var receivedEFOBELoc = (m as ITM.HeresYourEFOBE).tmpCacheLoc;
+					var recEFOBE = loadEFOBE(receivedEFOBELoc);
+					//TODO Validate EFOBE
+					this.efobe = recEFOBE;
+					receivedEFOBELoc.Delete();
+				}
 				if(m is ITM.ISolvedAProblem){
 					var sol = m as ITM.ISolvedAProblem;
 					var blok = hashBlock(sol.problem, sol.parms, sol.solution);
@@ -80,6 +80,7 @@ namespace Epicoin {
 					var ssa = m as ITM.SomeoneSolvedAProblem;
 					var blok = new EFOBE.Block(ssa.problem, ssa.parms, ssa.solution, ssa.hash);
 					//TODO validate
+					core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
 					efobe.addBlock(blok);
 				}
 			}
