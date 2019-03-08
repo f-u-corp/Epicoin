@@ -107,4 +107,30 @@ namespace Epicoin {
         }
     }
 
+	class Epinet {
+
+		/*
+		* ITC - will be used after merger
+		*/
+
+		internal class ITM : ITCMessage {
+
+			internal class IWantAFullEFOBE : ITM {}
+
+			internal class TellEveryoneIKnowHowToMeth : ITM {
+
+				public readonly string problem, parms, solution, hash;
+
+				public TellEveryoneIKnowHowToMeth(string problem, string parms, string sol, string hash){
+					this.problem = problem;
+					this.parms = parms;
+					this.solution = sol;
+					this.hash = hash;
+				}
+
+			}
+
+		}
+	}
+
 }

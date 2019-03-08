@@ -13,7 +13,7 @@ namespace Epicoin {
 	/// </summary>
 	public class EFOBE {
 
-		private List<Block> blocks;
+		private readonly List<Block> blocks;
 
 		public EFOBE(List<Block> blocks) {
 			this.blocks = new List<Block>(blocks);
@@ -27,9 +27,9 @@ namespace Epicoin {
 
 		public struct Block {
 
-			string problem, parameters, solution;
+			public readonly string problem, parameters, solution;
 			
-			string hash;
+			public readonly string hash;
 
 			public Block(string problem, string pars, string sol, string hash){
 				this.problem = problem;
@@ -48,6 +48,8 @@ namespace Epicoin {
 	/// </summary>
 	internal class Validator : MainComponent<Validator.ITM> {
 
+		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
+
 		protected EFOBE efobe;
 
 		public Validator(Epicore core) : base(core) {}
@@ -56,9 +58,39 @@ namespace Epicoin {
 
 		internal override void InitAndRun(){
 			var cachedE = new FileInfo(EFOBEfile);
-			if(cachedE.Exists) efobe = loadEFOBE(cachedE);
-			//else TODO Request EFOBE from network
+			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
+			else core.sendITM2Net(new Epinet.ITM.IWantAFullEFOBE());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
+			LOG.Info("Received problems registry.");
+
+			keepChecking();
+		}
+
+		internal void keepChecking(){
+			while(!core.stop){
+				var m = itc.readMessageOrDefault();
+				if(m is ITM.HeresYourEFOBE){
+					var receivedEFOBELoc = (m as ITM.HeresYourEFOBE).tmpCacheLoc;
+					var recEFOBE = loadEFOBE(receivedEFOBELoc);
+					//TODO Validate EFOBE
+					this.efobe = recEFOBE;
+					receivedEFOBELoc.Delete();
+				}
+				if(m is ITM.ISolvedAProblem){
+					var sol = m as ITM.ISolvedAProblem;
+					var blok = hashBlock(sol.problem, sol.parms, sol.solution);
+					//TODO validate
+					efobe.addBlock(blok);
+					core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, blok.hash));
+				}
+				if(m is ITM.SomeoneSolvedAProblem){
+					var ssa = m as ITM.SomeoneSolvedAProblem;
+					var blok = new EFOBE.Block(ssa.problem, ssa.parms, ssa.solution, ssa.hash);
+					//TODO validate
+					core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
+					efobe.addBlock(blok);
+				}
+			}
 		}
 
 		internal const string EFOBEfile = "EFOBE.json";
@@ -66,6 +98,11 @@ namespace Epicoin {
 		internal EFOBE loadEFOBE(FileInfo file) => JsonConvert.DeserializeObject<EFOBE>(File.ReadAllText(file.FullName));
 
 		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, JsonConvert.SerializeObject(efobe));
+
+		protected EFOBE.Block hashBlock(string problem, string parms, string sol){
+			string hash = ""; //TODO Hash
+			return new EFOBE.Block(problem, parms, sol, hash);
+		}
 
 
 		/*
@@ -79,6 +116,41 @@ namespace Epicoin {
 				public readonly ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 				public GetProblemsRegistry(IDictionary<string, NPcProblemWrapper> reg) => problemsRegistry = reg is ImmutableDictionary<string, NPcProblemWrapper> ? reg as ImmutableDictionary<string, NPcProblemWrapper> : ImmutableDictionary.ToImmutableDictionary(reg);
+
+			}
+
+			internal class ISolvedAProblem : ITM {
+
+				public readonly string problem, parms, solution;
+
+				public ISolvedAProblem(string problem, string parms, string sol){
+					this.problem = problem;
+					this.parms = parms;
+					this.solution = sol;
+				}
+
+			}
+
+			internal class HeresYourEFOBE : ITM {
+
+				public readonly FileInfo tmpCacheLoc;
+
+				public HeresYourEFOBE(FileInfo tmpCacheLoc){
+					this.tmpCacheLoc = tmpCacheLoc;
+				}
+
+			}
+
+			internal class SomeoneSolvedAProblem : ITM {
+
+				public readonly string problem, parms, solution, hash;
+
+				public SomeoneSolvedAProblem(string problem, string parms, string sol, string hash){
+					this.problem = problem;
+					this.parms = parms;
+					this.solution = sol;
+					this.hash = hash;
+				}
 
 			}
 

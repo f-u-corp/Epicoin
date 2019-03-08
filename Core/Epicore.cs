@@ -5,17 +5,27 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 
+using log4net;
+
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin {
 
 	public class Epicore {
+
+		internal static readonly log4net.Repository.ILoggerRepository LOGREPO = LogManager.CreateRepository("Epicoin");
+		internal static readonly ILog LOG = LogManager.GetLogger("Epicoin", "Epicore");
+		private static void LogLoadConfig(System.IO.FileInfo config) => log4net.Config.XmlConfigurator.Configure(LOGREPO, config);
+
+		static Epicore(){
+			LogLoadConfig(new System.IO.FileInfo("log4net.config"));
+		}
 
 		internal Solver solver;
 		internal Validator validator;
 
 		internal Action<Solver.ITM> sendITM2Solver;
 		internal Action<Validator.ITM> sendITM2Validator;
-		internal Action sendITM2Net;
+		internal Action<Epinet.ITM> sendITM2Net;
 
 		internal bool stop { get; private set; }
 
@@ -26,6 +36,7 @@ namespace Epicoin {
 
 			sendITM2Solver = solver.sendITM;
 			sendITM2Validator = validator.sendITM;
+			sendITM2Net = m => {}; //TODO wire in network component
 		}
 
 		protected Thread vt, st, nt;
@@ -60,7 +71,7 @@ namespace Epicoin {
 		 */
 		
 		protected InterThreadComms<ITM> itc = new InterThreadComms<ITM>();
-		public Action<ITM> sendITM { get => itc.sendMessage; }
+		public virtual Action<ITM> sendITM { get => itc.sendMessage; }
 
 		protected void readITInbox(Action<ITM> readMessage){
 			ITM m;
