@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Epicoin Core", "Core\Epicoi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Epicoin Core Tests", "Core.Tests\Core.Tests.csproj", "{A7BE1928-324B-4EB0-8E65-0DCABBEDD0BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPcP - Integer Factorization", "NPcP - Integer Factorization\NPcP - Integer Factorization.csproj", "{26311E07-B8E2-40C0-8A2F-B24F0750F992}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{A7BE1928-324B-4EB0-8E65-0DCABBEDD0BF}.Release|x64.Build.0 = Release|Any CPU
 		{A7BE1928-324B-4EB0-8E65-0DCABBEDD0BF}.Release|x86.ActiveCfg = Release|Any CPU
 		{A7BE1928-324B-4EB0-8E65-0DCABBEDD0BF}.Release|x86.Build.0 = Release|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Debug|x64.Build.0 = Debug|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Debug|x86.Build.0 = Debug|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Release|x64.ActiveCfg = Release|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Release|x64.Build.0 = Release|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Release|x86.ActiveCfg = Release|Any CPU
+		{26311E07-B8E2-40C0-8A2F-B24F0750F992}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
