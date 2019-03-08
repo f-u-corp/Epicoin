@@ -61,7 +61,7 @@ namespace Epicoin {
 		 */
 		
 		protected InterThreadComms<ITM> itc = new InterThreadComms<ITM>();
-		public Action<ITM> sendITM { get => itc.sendMessage; }
+		public virtual Action<ITM> sendITM { get => itc.sendMessage; }
 
 		protected void readITInbox(Action<ITM> readMessage){
 			ITM m;
