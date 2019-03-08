@@ -11,6 +11,7 @@ bld
 [Bb]in
 [Oo]bj
 [Ll]og
+[Ll]ogs
 
 # Visual Studio 2015/2017
 .vs/

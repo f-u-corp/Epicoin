@@ -27,12 +27,15 @@ namespace Epicoin {
 	/// </summary>
 	internal class Validator : MainComponent<Validator.ITM> {
 
+		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
+
 		public Validator(Epicore core) : base(core) {}
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 		internal override void InitAndRun(){
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
+			LOG.Info("Received problems registry.");
 		}
 
 
