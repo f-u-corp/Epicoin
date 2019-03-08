@@ -37,6 +37,8 @@ namespace Epicoin {
 
 		public class InefficientIntFactProblem : INPcProblem<int, List<int>> {
 
+			public string getName() => "inef-int-fact";
+
 			public List<int> solve(int i){
 				int nextFact(int pf){
 					for(int nf = pf; nf <= i; nf++) if(nf != 1 && i % nf == 0){ i /= nf; return nf; }
