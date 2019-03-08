@@ -13,7 +13,7 @@ namespace Epicoin {
 	/// </summary>
 	public class EFOBE {
 
-		private List<Block> blocks;
+		private readonly List<Block> blocks;
 
 		public EFOBE(List<Block> blocks){
 			this.blocks = new List<Block>(blocks);
@@ -25,9 +25,9 @@ namespace Epicoin {
 
 		public struct Block {
 
-			string problem, parameters, solution;
+			readonly string problem, parameters, solution;
 			
-			string hash;
+			readonly string hash;
 
 			public Block(string problem, string pars, string sol, string hash){
 				this.problem = problem;
