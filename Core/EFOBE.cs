@@ -63,6 +63,10 @@ namespace Epicoin {
 			}
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 
+			keepChecking();
+		}
+
+		internal void keepChecking(){
 			while(!core.stop){
 				var m = itc.readMessageOrDefault();
 				if(m is ITM.ISolvedAProblem){
