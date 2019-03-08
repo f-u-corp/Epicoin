@@ -97,6 +97,8 @@ namespace Epicoin {
 	/// </summary>
 	internal class Solver : MainComponent<Solver.ITM> {
 
+		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Solver");
+
 		public override Action<ITM> sendITM { get => sendITMAsync; }
 
 		public Solver(Epicore core) : base(core){}
@@ -111,10 +113,12 @@ namespace Epicoin {
 		}
 
 		protected void LoadProblems(){
+			LOG.Info("Loading problems...");
 			var reg = new Dictionary<string, NPcProblemWrapper>();
 			new DirectoryInfo("npdlls").Create();
 			new DirectoryInfo("npdlls").GetFiles("*.dll").ToList().ForEach(f => Assembly.LoadFile(f.FullName).GetExportedTypes().Where(typeof(INPcProblem).IsAssignableFrom).Select(Activator.CreateInstance).Cast<INPcProblem>().ToList().ForEach(p => reg.Add(p.getName(), new NPcProblemWrapper(p))));
 			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
+			LOG.Info($"Successfuly loaded problems - {problemsRegistry.Count} ({String.Join(", ", problemsRegistry.Keys)})");
 		}
 
 		protected (string pr, string pa, Task<string> sol, CancellationTokenSource cts) cur = (null, null, null, null);

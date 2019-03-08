@@ -44,6 +44,8 @@ namespace Epicoin {
 	/// </summary>
 	internal class Validator : MainComponent<Validator.ITM> {
 
+		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
+
 		protected EFOBE efobe;
 
 		public Validator(Epicore core) : base(core) {}
@@ -55,6 +57,7 @@ namespace Epicoin {
 			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
 			else core.sendITM2Net(new Epinet.ITM.IWantAFullEFOBE());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
+			LOG.Info("Received problems registry.");
 
 			keepChecking();
 		}

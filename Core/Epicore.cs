@@ -5,10 +5,20 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 
+using log4net;
+
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin {
 
 	public class Epicore {
+
+		internal static readonly log4net.Repository.ILoggerRepository LOGREPO = LogManager.CreateRepository("Epicoin");
+		internal static readonly ILog LOG = LogManager.GetLogger("Epicoin", "Epicore");
+		private static void LogLoadConfig(System.IO.FileInfo config) => log4net.Config.XmlConfigurator.Configure(LOGREPO, config);
+
+		static Epicore(){
+			LogLoadConfig(new System.IO.FileInfo("log4net.config"));
+		}
 
 		internal Solver solver;
 		internal Validator validator;
