@@ -25,7 +25,11 @@ namespace Epicoin {
 	/// <summary>
 	/// INTERNAL: DO NOT USE!!!
 	/// </summary>
-	public interface INPcProblem {}
+	public interface INPcProblem {
+
+		string getName();
+
+	}
 
 	/// <summary>
 	/// Internal future-fixed wrapper class for in-dev-mutable problems and solutions represented publically.
