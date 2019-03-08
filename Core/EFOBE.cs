@@ -35,6 +35,7 @@ namespace Epicoin {
 
 		internal override void InitAndRun(){
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
+			LOG.Info("Received problems registry.");
 		}
 
 
