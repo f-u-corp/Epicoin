@@ -52,8 +52,8 @@ namespace Epicoin {
 			this.parmsT = gir[0];
 			this.solT = gir[1];
 
-			this.solvePi = typeof(NPcProblemWrapper).GetMethod("solveP").MakeGenericMethod(parmsT, solT);
-			this.checkPi = typeof(NPcProblemWrapper).GetMethod("checkP").MakeGenericMethod(parmsT, solT);
+			this.solvePi = typeof(NPcProblemWrapper).GetMethod("solveP", BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(parmsT, solT);
+			this.checkPi = typeof(NPcProblemWrapper).GetMethod("checkP", BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(parmsT, solT);
 		}
 
 		/// <summary>
