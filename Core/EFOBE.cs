@@ -53,7 +53,14 @@ namespace Epicoin {
 		internal override void InitAndRun(){
 			var cachedE = new FileInfo(EFOBEfile);
 			if(cachedE.Exists) efobe = loadEFOBE(cachedE);
-			//else TODO Request EFOBE from network
+			else {
+				core.sendITM2Net(new Epinet.ITM.IWantAFullEFOBE());
+				var receivedEFOBELoc = waitForITMessageOfType<ITM.HeresYourEFOBE>().tmpCacheLoc;
+				var recEFOBE = loadEFOBE(receivedEFOBELoc);
+				//Validate EFOBE
+				this.efobe = recEFOBE;
+				receivedEFOBELoc.Delete();
+			}
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 		}
 
