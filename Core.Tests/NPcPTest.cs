@@ -19,7 +19,7 @@ namespace Epicoin {
 
 			public List<int> solve(int i){
 				int nextFact(int pf){
-					for(int nf = pf; nf <= i; nf++) if(pf != 1 && i % nf == 0){ i /= nf; return nf; }
+					for(int nf = pf; nf <= i; nf++) if(nf != 1 && i % nf == 0){ i /= nf; return nf; }
 					return 1;
 				}
 				List<int> facts = new List<int>();
