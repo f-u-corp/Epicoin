@@ -117,6 +117,17 @@ namespace Epicoin {
 
 		internal class ITM : ITCMessage {
 
+			internal class PlsSolve : ITM {
+
+				public readonly string problem, parms;
+
+				public PlsSolve(string problem, string parms){
+					this.problem = problem;
+					this.parms = parms;
+				}
+
+			}
+
 		}
 
 	}

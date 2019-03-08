@@ -78,6 +78,41 @@ namespace Epicoin {
 
 			}
 
+			internal class ISolvedAProblem : ITM {
+
+				public readonly string problem, parms, solution;
+
+				public ISolvedAProblem(string problem, string parms, string sol){
+					this.problem = problem;
+					this.parms = parms;
+					this.solution = sol;
+				}
+
+			}
+
+			internal class HeresYourEFOBE : ITM {
+
+				public readonly FileInfo tmpCacheLoc;
+
+				public HeresYourEFOBE(FileInfo tmpCacheLoc){
+					this.tmpCacheLoc = tmpCacheLoc;
+				}
+
+			}
+
+			internal class SomeoneSolvedAProblem : ITM {
+
+				public readonly string problem, parms, solution, hash;
+
+				public SomeoneSolvedAProblem(string problem, string parms, string sol, string hash){
+					this.problem = problem;
+					this.parms = parms;
+					this.solution = sol;
+					this.hash = hash;
+				}
+
+			}
+
 		}
 
 	}
