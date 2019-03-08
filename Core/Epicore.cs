@@ -15,7 +15,7 @@ namespace Epicoin {
 
 		internal Action<Solver.ITM> sendITM2Solver;
 		internal Action<Validator.ITM> sendITM2Validator;
-		internal Action<Epinet> sendITM2Net;
+		internal Action<Epinet.ITM> sendITM2Net;
 
 		internal bool stop { get; private set; }
 
