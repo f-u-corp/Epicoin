@@ -62,6 +62,23 @@ namespace Epicoin {
 				receivedEFOBELoc.Delete();
 			}
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
+
+			while(!core.stop){
+				var m = itc.readMessageOrDefault();
+				if(m is ITM.ISolvedAProblem){
+					var sol = m as ITM.ISolvedAProblem;
+					var blok = hashBlock(sol.problem, sol.parms, sol.solution);
+					//TODO validate
+					efobe.addBlock(blok);
+					core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, blok.hash));
+				}
+				if(m is ITM.SomeoneSolvedAProblem){
+					var ssa = m as ITM.SomeoneSolvedAProblem;
+					var blok = new EFOBE.Block(ssa.problem, ssa.parms, ssa.solution, ssa.hash);
+					//TODO validate
+					efobe.addBlock(blok);
+				}
+			}
 		}
 
 		internal const string EFOBEfile = "EFOBE.json";
