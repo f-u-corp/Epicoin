@@ -13,7 +13,7 @@ namespace Epicoin {
 	public class Epicore {
 
 		internal static readonly log4net.Repository.ILoggerRepository LOGREPO = LogManager.CreateRepository("Epicoin");
-		internal static readonly ILog LOG = LogManager.GetLogger("Epicoin", "Epicoin-Main");
+		internal static readonly ILog LOG = LogManager.GetLogger("Epicoin", "Epicore");
 		private static void LogLoadConfig(System.IO.FileInfo config) => log4net.Config.XmlConfigurator.Configure(LOGREPO, config);
 
 		static Epicore(){

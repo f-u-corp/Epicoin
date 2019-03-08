@@ -95,6 +95,8 @@ namespace Epicoin {
 	/// </summary>
 	internal class Solver : MainComponent<Solver.ITM> {
 
+		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Solver");
+
 		public Solver(Epicore core) : base(core){}
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
