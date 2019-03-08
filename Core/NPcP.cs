@@ -1,5 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -105,15 +107,7 @@ namespace Epicoin {
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
 
-			//Parallelize interruption with Tasks
-			while(!core.stop){
-				var m = itc.readMessageOrDefault();
-				if(m is ITM.PlsSolve){
-					var pls = m as ITM.PlsSolve;
-					string sol = solve(pls.problem, pls.parms);
-					core.sendITM2Validator(new Validator.ITM.ISolvedAProblem(pls.problem, pls.parms, sol));
-				}
-			}
+			keepSolving();
 		}
 
 		protected void LoadProblems(){
@@ -121,6 +115,28 @@ namespace Epicoin {
 			new DirectoryInfo("npdlls").Create();
 			new DirectoryInfo("npdlls").GetFiles("*.dll").ToList().ForEach(f => Assembly.LoadFile(f.FullName).GetExportedTypes().Where(typeof(INPcProblem).IsAssignableFrom).Select(Activator.CreateInstance).Cast<INPcProblem>().ToList().ForEach(p => reg.Add(p.getName(), new NPcProblemWrapper(p))));
 			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
+		}
+
+		protected (string pr, string pa, Task<string> sol, CancellationTokenSource cts) cur = (null, null, null, null);
+
+		protected void keepSolving(){ 
+			while(!core.stop){
+				if(cur.sol != null && (cur.sol.IsCompleted || cur.sol.IsCanceled)){
+					if(cur.sol.IsCompletedSuccessfully) core.sendITM2Validator(new Validator.ITM.ISolvedAProblem(cur.pr, cur.pr, cur.sol.Result));
+					cur.sol.Dispose();
+					cur.cts.Dispose();
+					cur = (null, null, null, null);
+				}
+				if(cur.sol == null){
+					var m = itc.readMessageOrDefault();
+					if(m is ITM.PlsSolve){
+						var pls = m as ITM.PlsSolve;
+						CancellationTokenSource cts = new CancellationTokenSource();
+						var task = Task.Run(() => solve(pls.problem, pls.parms), cts.Token);
+						cur = (pls.problem, pls.parms, task, cts);
+					}
+				}
+			}
 		}
 
 		protected string solve(string problem, string parms) => problemsRegistry[problem].solve(parms);
