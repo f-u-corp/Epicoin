@@ -95,6 +95,8 @@ namespace Epicoin {
 	/// </summary>
 	internal class Solver : MainComponent<Solver.ITM> {
 
+		public override Action<ITM> sendITM { get => sendITMAsync; }
+
 		public Solver(Epicore core) : base(core){}
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
@@ -123,12 +125,21 @@ namespace Epicoin {
 
 		protected string solve(string problem, string parms) => problemsRegistry[problem].solve(parms);
 
+		protected void sendITMAsync(ITM itm){
+			if(!(itm is ITM.AsyncITM)) base.sendITM(itm);
+			else {
+				//TODO stuff
+			}
+		}
+
 		
 		/*
 		 * ITC
 		 */
 
 		internal class ITM : ITCMessage {
+
+			internal interface AsyncITM {}
 
 			internal class PlsSolve : ITM {
 
