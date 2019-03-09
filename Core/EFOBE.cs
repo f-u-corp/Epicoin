@@ -19,6 +19,8 @@ namespace Epicoin {
 			this.blocks = new List<Block>(blocks);
 		}
 
+		public Block TopBlock() => blocks.Last();
+
 		internal void addBlock(Block block){
 			blocks.Add(block);
 		}
