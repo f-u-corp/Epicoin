@@ -116,7 +116,7 @@ namespace Epicoin {
 		}
 
 		internal void cleanup(){
-
+			saveEFOBE(efobe, new FileInfo(EFOBEfile));
 		}
 
 		internal const string EFOBEfile = "EFOBE.json";
