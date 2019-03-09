@@ -122,7 +122,7 @@ namespace Epicoin {
 		public long readLong() => readBitsL(sizeof(long)*8);
 		public ulong readULong() => (ulong) readBitsL(sizeof(ulong)*8);
 		public float readFloat() => BitConverter.Int32BitsToSingle(readInt());
-		public double readDouble() => BitConverter.DoubleToInt64Bits(readLong());
+		public double readDouble() => BitConverter.Int64BitsToDouble(readLong());
 
 		/// <summary>
 		/// Sets read position.
