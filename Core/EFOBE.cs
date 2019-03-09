@@ -92,17 +92,19 @@ namespace Epicoin {
 				}
 				if(m is ITM.ISolvedAProblem){
 					var sol = m as ITM.ISolvedAProblem;
-					var blok = hashBlock(sol.problem, sol.parms, sol.solution);
-					//TODO validate
-					efobe.addBlock(blok);
-					core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, blok.hash));
+					if(validateSolution(sol.problem, sol.parms, sol.solution)){
+						var blok = hashBlock(efobe.TopBlock(), sol.problem, sol.parms, sol.solution);
+						efobe.addBlock(blok);
+						core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, blok.hash));
+					}
 				}
 				if(m is ITM.SomeoneSolvedAProblem){
 					var ssa = m as ITM.SomeoneSolvedAProblem;
 					var blok = new EFOBE.Block(ssa.problem, ssa.parms, ssa.solution, ssa.hash);
-					//TODO validate
-					core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
-					efobe.addBlock(blok);
+					if(validateBlock(efobe.TopBlock(), blok)){
+						core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
+						efobe.addBlock(blok);
+					}
 				}
 			}
 		}
