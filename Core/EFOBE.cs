@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.IO;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -7,6 +8,7 @@ using System.Linq;
 
 using Newtonsoft.Json;
 
+[assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin {
 
 	/// <summary>
