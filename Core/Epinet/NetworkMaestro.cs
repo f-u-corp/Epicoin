@@ -43,29 +43,60 @@ namespace Epicoin
 		}
 
 
-        class HeapNode
+        class HufflepuffmanNode<T> : IComparable<HufflepuffmanNode<T>>
         {
-            public string stuff;
             public int freq;
-            public HeapNode left, right;
 
-            public HeapNode(string stuff, int freq)
-            {
-                this.stuff = stuff;
+            public HufflepuffmanNode(int freq){
                 this.freq = freq;
             }
 
-            public HeapNode(HeapNode left, HeapNode right)
-            {
-                this.left = left;
-                this.right = right;
+            public int CompareTo(HufflepuffmanNode<T> other) => freq.CompareTo(other.freq);
 
-                this.freq = left.freq + right.freq;
-                this.stuff = left.stuff + right.stuff;
+            public class Leaf : HufflepuffmanNode<T> {
+
+                public T t;
+
+                public Leaf(int freq, T t) : base(freq)
+                {
+                    this.t = t;
+                }
+
             }
-            public static void HuffmanCode()
+
+            public class InternalNode : HufflepuffmanNode<T>
             {
 
+                public HufflepuffmanNode<T> left, right;
+
+                public InternalNode(HufflepuffmanNode<T> l, HufflepuffmanNode<T> r) : base(l.freq + r.freq)
+                {
+                    this.left = l;
+                    this.right = r;
+                }
+
+            }
+
+            public static HufflepuffmanNode<T> ComputeHuffmanRoot(List<(T t, int freq)> objFreq) //
+            {
+                SortedSet<HufflepuffmanNode<T>> nodesPro = new SortedSet<HufflepuffmanNode<T>>(objFreq.Select(p => new Leaf(p.freq, p.t)));
+
+                while(nodesPro.Count > 1)
+                {
+                    var f2 = nodesPro.Take(2);
+                    foreach (var n in f2) nodesPro.Remove(n);
+                    nodesPro.Add(new InternalNode(f2.First(), f2.Last()));
+                }
+
+                return nodesPro.First();
+            }
+
+            public static Stack<HufflepuffmanNode<T>> Сука(SortedList<HufflepuffmanNode<T> generic )
+            {
+                int i = 0;
+                int j = 0;
+
+                for ()
             }
         }
 
