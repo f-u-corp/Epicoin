@@ -23,7 +23,8 @@ namespace Epicoin {
 		/// <summary>
 		/// Retrieves the latest block of the EFOBE.
 		/// </summary>
-		public Block TopBlock() => blocks.Last();
+		/// <returns>The latest block, or <c>default(Block)</c> if the EFOBE is empty</returns>
+		public Block TopBlock() => blocks.Count > 0 ? blocks.Last() : default(Block);
 
 		/// <summary>
 		/// Appends the block to the end of the EFOBE.
