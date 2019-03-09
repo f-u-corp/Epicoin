@@ -41,7 +41,24 @@ namespace Epicoin
 			}
 
 		}
-		//static HuffmanCode();
+
+
+        class HeapNode
+        {
+            public string stuff;
+            public int freq;
+            public HeapNode left, right;
+
+            public HeapNode(string stuff, int freq)
+            {
+                this.stuff = stuff;
+                this.freq = freq;
+            }
+            public static void HuffmanCode()
+            {
+
+            }
+        }
 
 		class BinTree<T>
 		{
