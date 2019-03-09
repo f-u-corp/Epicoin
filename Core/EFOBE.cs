@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 using Newtonsoft.Json;
@@ -15,13 +16,26 @@ namespace Epicoin {
 
 		private readonly List<Block> blocks;
 
-		public EFOBE(List<Block> blocks) {
+		public EFOBE(List<Block> blocks){
 			this.blocks = new List<Block>(blocks);
 		}
 
-		internal void addBlock(Block block) {
+		/// <summary>
+		/// Retrieves the latest block of the EFOBE.
+		/// </summary>
+		public Block TopBlock() => blocks.Last();
+
+		/// <summary>
+		/// Appends the block to the end of the EFOBE.
+		/// </summary>
+		internal void addBlock(Block block){
 			blocks.Add(block);
 		}
+
+		/// <summary>
+		/// Creates a read-only <i>view</i> of the entire EFOBE.
+		/// </summary>
+		internal ReadOnlyCollection<Block> blocksV() => new ReadOnlyCollection<Block>(blocks);
 
 		public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
 
