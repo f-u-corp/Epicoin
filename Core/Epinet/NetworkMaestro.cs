@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,110 +43,6 @@ namespace Epicoin
 
 		}
 
-
-        class HufflepuffmanNode<T> : IComparable<HufflepuffmanNode<T>>
-        {
-            public int freq;
-            public HufflepuffmanNode<T> left, right;
-
-
-            public HufflepuffmanNode(int freq){
-                this.freq = freq;
-            }
-
-            public int CompareTo(HufflepuffmanNode<T> other) => freq.CompareTo(other.freq);
-
-            public class Leaf : HufflepuffmanNode<T> {
-
-                public T t;
-
-                public Leaf(int freq, T t) : base(freq)
-                {
-                    this.t = t;
-                }
-
-            }
-
-            public class InternalNode : HufflepuffmanNode<T>
-            {
-
-                public HufflepuffmanNode<T> left, right;
-
-                public InternalNode(HufflepuffmanNode<T> l, HufflepuffmanNode<T> r) : base(l.freq + r.freq)
-                {
-                    this.left = l;
-                    this.right = r;
-                }
-
-            }
-
-            public static HufflepuffmanNode<T> ComputeHuffmanRoot(List<(T t, int freq)> objFreq) //
-            {
-                SortedSet<HufflepuffmanNode<T>> nodesPro = new SortedSet<HufflepuffmanNode<T>>(objFreq.Select(p => new Leaf(p.freq, p.t)));
-
-                while(nodesPro.Count > 1)
-                {
-                    var f2 = nodesPro.Take(2);
-                    foreach (var n in f2) nodesPro.Remove(n);
-                    nodesPro.Add(new InternalNode(f2.First(), f2.Last()));
-                }
-
-                return nodesPro.First();
-            }
-
-            public static void Make (HufflepuffmanNode<T> parent, T key)
-            {
-                if (parent != null)
-                {
-                    Make(parent.left, key);
-                }
-
-                if (parent.left == null && parent.right == null)
-                {
-                    Make(parent.right, key);
-                }
-            }
-
-            public static void Revert(HufflepuffmanNode<T> parent , HufflepuffmanNode<T> presentnode, T laser , T inp)
-            {
-                if (inp.Length == laser)
-                {
-                    if (presentnode.left == null && presentnode.right == null)
-                    {
-                        return;
-                    }
-                }
-
-                else
-                {
-                    if (presentnode.left == null && presentnode.right == null)
-                    {
-                        Revert(parent, parent, laser, inp);
-                    }
-                    
-                    else
-                    {
-                        if (inp.Split(laser) == "0")
-                        {
-                            Revert(parent, presentnode.left, laser, inp);
-                            laser = laser + 1;
-                            
-                        }
-
-                        else
-                        {
-                            Revert(parent, presentnode.right, laser, inp);
-                            laser = laser + 1;
-                        }
-                    }
-                }
-
-
-            }
-
-
-        }
-
 		class BinTree<T>
 		{
 			public T InnerValue { get; set; }
@@ -160,4 +57,5 @@ namespace Epicoin
 			}
 		}
 	}
+
 }
