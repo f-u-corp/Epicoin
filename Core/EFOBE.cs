@@ -99,10 +99,11 @@ namespace Epicoin {
 
 		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, JsonConvert.SerializeObject(efobe));
 
-		protected EFOBE.Block hashBlock(string problem, string parms, string sol){
-			string hash = ""; //TODO Hash
-			return new EFOBE.Block(problem, parms, sol, hash);
-		}
+		protected string computeHash(EFOBE.Block preceding, string problem, string parms, string sol) => (pre: preceding.hash, pro: problem, parms: parms, sol: sol).GetHashCode().ToString(); //Yes, i am really that lazy :P
+		protected EFOBE.Block hashBlock(EFOBE.Block preceding, string problem, string parms, string sol) => new EFOBE.Block(problem, parms, sol, computeHash(preceding, problem, parms, sol));
+
+		protected bool validateSolution(string problem, string parms, string solution) => problemsRegistry[problem].check(parms, solution);
+		protected bool validateBlock(EFOBE.Block preceding, EFOBE.Block v) => validateSolution(v.problem, v.parameters, v.solution) && computeHash(preceding, v.problem, v.parameters, v.solution) == v.hash;
 
 
 		/*
