@@ -69,6 +69,7 @@ namespace Epicoin {
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
 
 		protected EFOBE efobe;
+		internal EFOBE eeffoobbee { get => efobe; }
 
 		public Validator(Epicore core) : base(core) {}
 
@@ -131,7 +132,7 @@ namespace Epicoin {
 
 		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, JsonConvert.SerializeObject(efobe));
 
-		protected string computeHash(EFOBE.Block preceding, string problem, string parms, string sol) => (pre: preceding.hash, pro: problem, parms: parms, sol: sol).GetHashCode().ToString(); //Yes, i am really that lazy :P
+		internal string computeHash(EFOBE.Block preceding, string problem, string parms, string sol) => (pre: preceding.hash, pro: problem, parms: parms, sol: sol).GetHashCode().ToString(); //Yes, i am really that lazy :P
 		protected EFOBE.Block hashBlock(EFOBE.Block preceding, string problem, string parms, string sol) => new EFOBE.Block(problem, parms, sol, computeHash(preceding, problem, parms, sol));
 
 		protected bool validateSolution(string problem, string parms, string solution) => problemsRegistry[problem].check(parms, solution);
