@@ -58,6 +58,8 @@ namespace Epicoin {
 			validator.sendITM(new Validator.ITM.SomeoneSolvedAProblem(gp.pro, gp.par, gp.sol, validator.computeHash(outdatedTop, gp.pro, gp.par, gp.sol)));
 			validator.keepChecking();
 			Assert.IsTrue(efobeView.Count == 2, "Invalid hash passed validation.");
+
+			validator.cleanup();
 		}
 
 	}
