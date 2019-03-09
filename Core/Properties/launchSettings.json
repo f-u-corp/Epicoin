@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Epicoin Core": {
+      "commandName": "Project",
+      "workingDirectory": "..\\..\\Epicoin\\Core"
+    }
+  }
+}
