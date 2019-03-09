@@ -109,9 +109,8 @@ namespace Epicoin {
 
             while (nodesPro.Count > 1)
             {
-                var f2 = new List<HufflepuffmanNode<T>>(nodesPro.Take(2));
-                foreach(var n in f2) nodesPro.Remove(n);
-                nodesPro.Add(new HufflepuffmanNode<T>.InternalNode(f2.First(), f2.Last()));
+                var f2 = nodesPro.TakeFirst(2);
+                nodesPro.Add(new HufflepuffmanNode<T>.InternalNode(f2[0], f2[1]));
             }
 
             return nodesPro.First();
@@ -186,6 +185,8 @@ namespace Epicoin {
                 {
                     return 831258139 + EqualityComparer<T>.Default.GetHashCode(t);
                 }
+
+                public override string ToString() => $"🍀[{t} x{freq}]";
             }
 
             public class InternalNode : HufflepuffmanNode<T>
@@ -215,10 +216,77 @@ namespace Epicoin {
                     return hashCode;
                 }
 
+                public override string ToString() => $"🌳[{left} , {right}]";
+
             }
 
         }
 
+    }
+
+    public class SortedList<T> : IList<T> {
+        private List<T> list = new List<T>();
+
+        public SortedList(){}
+        public SortedList(IEnumerable<T> copy){
+            foreach(var t in copy) Add(t);
+        }
+
+        public int IndexOf(T item){
+            var index = list.BinarySearch(item);
+            return index < 0 ? -1 : index;
+        }
+
+        public void Insert(int index, T item) => throw new NotImplementedException("Cannot insert at index; must preserve order.");
+
+        public void RemoveAt(int index) => list.RemoveAt(index);
+
+        public T this[int index] {
+            get => list[index];
+            set {
+                list.RemoveAt(index);
+                this.Add(value);
+            }
+        }
+
+        public void Add(T item){
+            var i = list.BinarySearch(item);
+            i = i >= 0 ? i : ~i;
+            if(i >= list.Count) list.Add(item);
+            else list.Insert(i, item);
+        }
+
+        public void Clear() => list.Clear();
+
+        public bool Contains(T item) => list.BinarySearch(item) >= 0;
+
+        public void CopyTo(T[] array, int arrayIndex) => list.CopyTo(array, arrayIndex);
+
+        public int Count { get => list.Count; }
+
+        public bool IsReadOnly { get => false; }
+
+        public T TakeFirst(){
+            T t = list[0];
+            list.RemoveAt(0);
+            return t;
+        }
+        public T[] TakeFirst(int amount){
+            T[] ts = new T[amount];
+            for (int i = 0; i < amount; i++) ts[i] = TakeFirst();
+            return ts;
+        }
+
+        public bool Remove(T item){
+            var index = list.BinarySearch(item);
+            if (index < 0) return false;
+            list.RemoveAt(index);
+            return true;
+        }
+
+        public IEnumerator<T> GetEnumerator() => list.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => list.GetEnumerator();
     }
 
 }
