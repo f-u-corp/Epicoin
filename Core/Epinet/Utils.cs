@@ -6,7 +6,7 @@ using System.Linq;
 namespace Epicoin {
 
 	/// <summary>
-	/// Automatically advancing bit buffer, to simplify bit-level IO.
+	/// Automatically advancing bit buffer, with self-adjusting capacity, to simplify bit-level IO.
 	/// </summary>
 	public class BitBuffer {
 
