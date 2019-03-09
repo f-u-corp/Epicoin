@@ -15,11 +15,11 @@ namespace Epicoin {
 
 		private List<Block> blocks;
 
-		public EFOBE(List<Block> blocks) {
+		public EFOBE(List<Block> blocks){
 			this.blocks = new List<Block>(blocks);
 		}
 
-		internal void addBlock(Block block) {
+		internal void addBlock(Block block){
 			blocks.Add(block);
 		}
 
