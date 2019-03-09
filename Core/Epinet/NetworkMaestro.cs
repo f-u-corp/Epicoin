@@ -54,6 +54,15 @@ namespace Epicoin
                 this.stuff = stuff;
                 this.freq = freq;
             }
+
+            public HeapNode(HeapNode left, HeapNode right)
+            {
+                this.left = left;
+                this.right = right;
+
+                this.freq = left.freq + right.freq;
+                this.stuff = left.stuff + right.stuff;
+            }
             public static void HuffmanCode()
             {
 
