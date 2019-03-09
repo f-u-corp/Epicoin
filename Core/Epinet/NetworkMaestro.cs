@@ -46,6 +46,8 @@ namespace Epicoin
         class HufflepuffmanNode<T> : IComparable<HufflepuffmanNode<T>>
         {
             public int freq;
+            public HufflepuffmanNode<T> left, right;
+
 
             public HufflepuffmanNode(int freq){
                 this.freq = freq;
@@ -91,13 +93,57 @@ namespace Epicoin
                 return nodesPro.First();
             }
 
-            public static Stack<HufflepuffmanNode<T>> Сука(SortedList<HufflepuffmanNode<T> generic )
+            public static void Make (HufflepuffmanNode<T> parent, T key)
             {
-                int i = 0;
-                int j = 0;
+                if (parent != null)
+                {
+                    Make(parent.left, key);
+                }
 
-                for ()
+                if (parent.left == null && parent.right == null)
+                {
+                    Make(parent.right, key);
+                }
             }
+
+            public static void Revert(HufflepuffmanNode<T> parent , HufflepuffmanNode<T> presentnode, T laser , T inp)
+            {
+                if (inp.Length == laser)
+                {
+                    if (presentnode.left == null && presentnode.right == null)
+                    {
+                        return;
+                    }
+                }
+
+                else
+                {
+                    if (presentnode.left == null && presentnode.right == null)
+                    {
+                        Revert(parent, parent, laser, inp);
+                    }
+                    
+                    else
+                    {
+                        if (inp.Split(laser) == "0")
+                        {
+                            Revert(parent, presentnode.left, laser, inp);
+                            laser = laser + 1;
+                            
+                        }
+
+                        else
+                        {
+                            Revert(parent, presentnode.right, laser, inp);
+                            laser = laser + 1;
+                        }
+                    }
+                }
+
+
+            }
+
+
         }
 
 		class BinTree<T>
