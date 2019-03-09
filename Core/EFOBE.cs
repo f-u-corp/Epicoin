@@ -86,9 +86,10 @@ namespace Epicoin {
 				if(m is ITM.HeresYourEFOBE){
 					var receivedEFOBELoc = (m as ITM.HeresYourEFOBE).tmpCacheLoc;
 					var recEFOBE = loadEFOBE(receivedEFOBELoc);
-					//TODO Validate EFOBE
+					EFOBE.Block prev = new EFOBE.Block();
+					foreach(var nb in recEFOBE.blocksV()) if(!validateBlock(prev, prev = nb)) goto finaly;
 					this.efobe = recEFOBE;
-					receivedEFOBELoc.Delete();
+					finaly: receivedEFOBELoc.Delete();
 				}
 				if(m is ITM.ISolvedAProblem){
 					var sol = m as ITM.ISolvedAProblem;
