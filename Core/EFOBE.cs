@@ -142,6 +142,7 @@ namespace Epicoin {
 			byte[] prevHash = Convert.FromBase64String(preceding.hash == null ? ":(:" : preceding.hash);
 			int p, r, s;
 			byte[] preHash = new byte[(s = (r = (p = prevHash.Length) + enc.GetByteCount(problem)) + enc.GetByteCount(parms)) + enc.GetByteCount(sol)];
+			Array.Copy(prevHash, preHash, prevHash.Length);
 			enc.GetBytes(problem, 0, problem.Length, preHash, p);
 			enc.GetBytes(parms, 0, parms.Length, preHash, r);
 			enc.GetBytes(sol, 0, sol.Length, preHash, s);
