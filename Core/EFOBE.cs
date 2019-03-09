@@ -139,7 +139,7 @@ namespace Epicoin {
 
 		internal string computeHash(EFOBE.Block preceding, string problem, string parms, string sol){
 			Encoding enc = Encoding.ASCII;
-			byte[] prevHash = Convert.FromBase64String(preceding.hash == null ? ":(:" : preceding.hash);
+			byte[] prevHash = Convert.FromBase64String(preceding.hash == null ? "dGltZSB0aGVyZSBpcyBubw==" : preceding.hash);
 			int p, r, s;
 			byte[] preHash = new byte[(s = (r = (p = prevHash.Length) + enc.GetByteCount(problem)) + enc.GetByteCount(parms)) + enc.GetByteCount(sol)];
 			Array.Copy(prevHash, preHash, prevHash.Length);
