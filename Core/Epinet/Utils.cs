@@ -213,6 +213,7 @@ namespace Epicoin {
 		}
 
 		public bool Remove(T item){
+			throw new InvalidOperationException("Me do not remove :P");
 			var index = list.BinarySearch(item);
 			if(index < 0) return false;
 			list.RemoveAt(index);
