@@ -25,6 +25,8 @@ namespace Epicoin {
 			double d = rnd.NextDouble();
 			int maskedI = rnd.Next(); int maskI = rnd.Next(12, 27);
 			long maskedL = (((long) rnd.Next()) << 32) | ((long) rnd.Next()); int maskL = rnd.Next(12, 53);
+			byte len = (byte) rnd.Next(17, 59);
+			List<int> ints = Enumerable.Repeat(0, len).Select(whatava => rnd.Next()).ToList();
 
 			BitBuffer bb = new BitBuffer();
 			bb.write(bo);
@@ -38,6 +40,8 @@ namespace Epicoin {
 			bb.writeDouble(d);
 			bb.writeBits(maskedI, maskI);
 			bb.writeBits(maskedL, maskL);
+			bb.writeByte(len);
+			bb.writeInts(ints);
 			bb.flip();
 			Assert.AreEqual(bo, bb.read(), "Bool read/write failed.");
 			Assert.AreEqual(b, bb.readByte(), "Byte read/write failed.");
@@ -50,6 +54,7 @@ namespace Epicoin {
 			Assert.AreEqual(d, bb.readDouble(), "Double read/write failed.");
 			Assert.AreEqual(maskedI & ((1<<maskI)-1), bb.readBits(maskI), "Arbitrary bit count [int] read/write failed.");
 			Assert.AreEqual(maskedL & ((1L<<maskL)-1L), bb.readBitsL(maskL), "Arbitrary bit count [long] read/write failed.");
+			Assert.AreEqual(ints, bb.readInts(bb.readByte()), "Int collection read/write failed.");
 		}
 
 		[Test(TestOf = typeof(BitBuffer))]

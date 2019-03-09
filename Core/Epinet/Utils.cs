@@ -67,6 +67,15 @@ namespace Epicoin {
 		public BitBuffer writeFloat(float f) => writeInt(BitConverter.SingleToInt32Bits(f));
 		public BitBuffer writeDouble(double d) => writeLong(BitConverter.DoubleToInt64Bits(d));
 
+		private BitBuffer writeMultiple<E>(IEnumerable<E> es, Func<E, BitBuffer> writer){
+			foreach(var e in es) writer(e);
+			return this;
+		}
+		public BitBuffer writeBits(IEnumerable<bool> es) => writeMultiple(es, write);
+		public BitBuffer writeBytes(IEnumerable<byte> es) => writeMultiple(es, writeByte);
+		public BitBuffer writeChars(IEnumerable<char> es) => writeMultiple(es, writeChar);
+		public BitBuffer writeInts(IEnumerable<int> es) => writeMultiple(es, writeInt);
+
 		/// <summary>
 		/// Sets write position.
 		/// </summary>
@@ -123,6 +132,12 @@ namespace Epicoin {
 		public ulong readULong() => (ulong) readBitsL(sizeof(ulong)*8);
 		public float readFloat() => BitConverter.Int32BitsToSingle(readInt());
 		public double readDouble() => BitConverter.Int64BitsToDouble(readLong());
+
+		private List<E> readMultiple<E>(int count, Func<E> reader) => Enumerable.Repeat(default(E), count).Select(e => reader()).ToList();
+		public List<bool> readBitsM(int count) => readMultiple(count, read);
+		public List<byte> readBytes(int count) => readMultiple(count, readByte);
+		public List<char> readChars(int count) => readMultiple(count, readChar);
+		public List<int> readInts(int count) => readMultiple(count, readInt);
 
 		/// <summary>
 		/// Sets read position.
