@@ -20,12 +20,21 @@ namespace Epicoin {
 			this.blocks = new List<Block>(blocks);
 		}
 
+		/// <summary>
+		/// Retrieves the latest block of the EFOBE.
+		/// </summary>
 		public Block TopBlock() => blocks.Last();
 
+		/// <summary>
+		/// Appends the block to the end of the EFOBE.
+		/// </summary>
 		internal void addBlock(Block block){
 			blocks.Add(block);
 		}
 
+		/// <summary>
+		/// Creates a read-only <i>view</i> of the entire EFOBE.
+		/// </summary>
 		internal ReadOnlyCollection<Block> blocksV() => new ReadOnlyCollection<Block>(blocks);
 
 		public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
