@@ -11,6 +11,7 @@ namespace Epicoin {
 	public class BitBufferTest {
 
 		[Test(TestOf = typeof(BitBuffer))]
+		[Repeat(10)]
 		public void TestBitBufferRW(){
 			Random rnd = new Random();
 			bool bo = rnd.Next(100) < 50;
@@ -35,7 +36,8 @@ namespace Epicoin {
 			bb.writeULong(ul);
 			bb.writeFloat(f);
 			bb.writeDouble(d);
-			bb.writeBits(masked, mask);
+			bb.writeBits(maskedI, maskI);
+			bb.writeBits(maskedL, maskL);
 			bb.flip();
 			Assert.AreEqual(bo, bb.read(), "Bool read/write failed.");
 			Assert.AreEqual(b, bb.readByte(), "Byte read/write failed.");
@@ -46,7 +48,8 @@ namespace Epicoin {
 			Assert.AreEqual(ul, bb.readULong(), "ULong read/write failed.");
 			Assert.AreEqual(f, bb.readFloat(), "Float read/write failed.");
 			Assert.AreEqual(d, bb.readDouble(), "Double read/write failed.");
-			Assert.AreEqual(masked & ((1<<mask)-1), bb.readBitsL(mask), "Arbitrary bit count read/write failed.");
+			Assert.AreEqual(maskedI & ((1<<maskI)-1), bb.readBits(maskI), "Arbitrary bit count [int] read/write failed.");
+			Assert.AreEqual(maskedL & ((1L<<maskL)-1L), bb.readBitsL(maskL), "Arbitrary bit count [long] read/write failed.");
 		}
 
 		[Test(TestOf = typeof(BitBuffer))]
