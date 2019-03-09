@@ -19,23 +19,24 @@ namespace Epicoin {
 	/// </summary>
 	public class EFOBE {
 
-		private readonly List<Block> blocks;
+		private readonly Dictionary<string, Block> blockTree = new Dictionary<string, Block>();
 
-		public EFOBE(List<Block> blocks){
-			this.blocks = new List<Block>(blocks);
+		private readonly List<Block> bedrocks;
+
+		public EFOBE(List<Block> bedrocks){
+			this.bedrocks = new List<Block>(bedrocks);
 		}
 
-		/// <summary>
-		/// Retrieves the latest block of the EFOBE.
-		/// </summary>
-		/// <returns>The latest block, or <c>default(Block)</c> if the EFOBE is empty</returns>
-		public Block TopBlock() => blocks.Count > 0 ? blocks.Last() : default(Block);
 
 		/// <summary>
 		/// Appends the block to the end of the EFOBE.
 		/// </summary>
-		internal void addBlock(Block block){
-			blocks.Add(block);
+		internal void addBlock(string problem, string pars, string sol, string hash, string precedingHash){
+			if(blockTree.ContainsKey(precedingHash)){
+				Block next = new Block(problem, pars, sol, hash, precedingHash);
+				blockTree.Add(hash, next);
+				blockTree[precedingHash].append(next);
+			}
 		}
 
 		/// <summary>
@@ -43,22 +44,31 @@ namespace Epicoin {
 		/// </summary>
 		internal ReadOnlyCollection<Block> blocksV() => new ReadOnlyCollection<Block>(blocks);
 
-		public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
+		//public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
 
-		public struct Block {
+		public class Block {
 
 			public readonly string problem, parameters, solution;
 			
 			public readonly string hash;
 
-			public Block(string problem, string pars, string sol, string hash){
+			private readonly string precedingHash;
+			private readonly List<string> next;
+
+			internal Block(string problem, string pars, string sol, string hash, string precedingHash){
 				this.problem = problem;
 				this.parameters = pars;
 				this.solution = sol;
 				this.hash = hash;
+
+				this.next = new List<string>(1); //Default assumption - stable linear network
 			}
 
-			public override string ToString() => $"[{problem} @ {hash}]";
+			internal void append(Block block){
+				next.Add(block.hash);
+			}
+
+			//public override string ToString() => $"[{problem} @ {hash}]";
 
 		}
 	}
