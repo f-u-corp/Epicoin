@@ -46,7 +46,7 @@ namespace Epicoin {
 		/// <param name="l">Primitive ending with n LSB bits to copy-write.</param>
 		/// <param name="bits">n - number of LSB bits to write/copy from l.</param>
 		public BitBuffer writeBits(long l, int bits){
-			for(int b = bits - 1; b >= 0; b--) write(((l >> b) & 1) != 0);
+			for(int b = bits - 1; b >= 0; b--) write(((l >> b) & 1L) != 0L);
 			return this;
 		}
 

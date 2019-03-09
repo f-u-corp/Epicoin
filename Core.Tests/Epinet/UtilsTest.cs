@@ -22,7 +22,8 @@ namespace Epicoin {
 			ulong ul = (((ulong) rnd.Next()) << 32) | ((ulong) rnd.Next());
 			float f = (float) rnd.NextDouble();
 			double d = rnd.NextDouble();
-			long masked = (((long) rnd.Next()) << 32) | ((long) rnd.Next()); int mask = rnd.Next(12, 53);
+			int maskedI = rnd.Next(); int maskI = rnd.Next(12, 27);
+			long maskedL = (((long) rnd.Next()) << 32) | ((long) rnd.Next()); int maskL = rnd.Next(12, 53);
 
 			BitBuffer bb = new BitBuffer();
 			bb.write(bo);
