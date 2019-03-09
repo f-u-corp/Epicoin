@@ -33,7 +33,7 @@ namespace Epicoin {
             }
             void writeIb(int i, int bits)
             {
-                for (int b = bits - 1; b >= 0; b++) write(((i >> b) & 1) != 0);
+                for (int b = bits - 1; b >= 0; b--) write(((i >> b) & 1) != 0);
             }
 
             writeIb(dict.Count, 16);
@@ -109,8 +109,8 @@ namespace Epicoin {
 
             while (nodesPro.Count > 1)
             {
-                var f2 = nodesPro.Take(2);
-                foreach (var n in f2) nodesPro.Remove(n);
+                var f2 = new List<HufflepuffmanNode<T>>(nodesPro.Take(2));
+                foreach(var n in f2) nodesPro.Remove(n);
                 nodesPro.Add(new HufflepuffmanNode<T>.InternalNode(f2.First(), f2.Last()));
             }
 
