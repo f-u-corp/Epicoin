@@ -1,23 +1,44 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+
+using Newtonsoft.Json;
 
 namespace Epicoin {
 
 	/// <summary>
 	/// The Epic Free and Open Blockchain of Epicness itself, in all its' structural glory.
 	/// </summary>
-	public struct EFOBE {
+	public class EFOBE {
 
 		private List<Block> blocks;
 
+		public EFOBE(List<Block> blocks) {
+			this.blocks = new List<Block>(blocks);
+		}
+
+		internal void addBlock(Block block) {
+			blocks.Add(block);
+		}
+
+		public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
+
 		public struct Block {
 
-			string problem;
-			string parameters;
-			string solution;
-			//TODO - Block contents: hash
+			string problem, parameters, solution;
+			
+			string hash;
+
+			public Block(string problem, string pars, string sol, string hash){
+				this.problem = problem;
+				this.parameters = pars;
+				this.solution = sol;
+				this.hash = hash;
+			}
+
+			public override string ToString() => $"[{problem} @ {hash}]";
 
 		}
 	}
@@ -29,14 +50,25 @@ namespace Epicoin {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
 
+		protected EFOBE efobe;
+
 		public Validator(Epicore core) : base(core) {}
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 		internal override void InitAndRun(){
+			var cachedE = new FileInfo(EFOBEfile);
+			if(cachedE.Exists) efobe = loadEFOBE(cachedE);
+			//else TODO Request EFOBE from network
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
 		}
+
+		internal const string EFOBEfile = "EFOBE.json";
+
+		internal EFOBE loadEFOBE(FileInfo file) => JsonConvert.DeserializeObject<EFOBE>(File.ReadAllText(file.FullName));
+
+		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, JsonConvert.SerializeObject(efobe));
 
 
 		/*
