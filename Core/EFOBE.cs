@@ -15,13 +15,15 @@ namespace Epicoin {
 
 		private readonly List<Block> blocks;
 
-		public EFOBE(List<Block> blocks){
+		public EFOBE(List<Block> blocks) {
 			this.blocks = new List<Block>(blocks);
 		}
 
-		internal void addBlock(Block block){
+		internal void addBlock(Block block) {
 			blocks.Add(block);
 		}
+
+		public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
 
 		public struct Block {
 
@@ -35,6 +37,8 @@ namespace Epicoin {
 				this.solution = sol;
 				this.hash = hash;
 			}
+
+			public override string ToString() => $"[{problem} @ {hash}]";
 
 		}
 	}
