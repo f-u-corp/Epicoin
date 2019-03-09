@@ -105,7 +105,7 @@ namespace Epicoin {
 
         public static HufflepuffmanNode<T> ComputeHuffmanRoot<T>(IEnumerable<(T t, int freq)> objFreq) //
         {
-            SortedSet<HufflepuffmanNode<T>> nodesPro = new SortedSet<HufflepuffmanNode<T>>(objFreq.Select(p => new HufflepuffmanNode<T>.Leaf(p.freq, p.t)));
+            SortedList<HufflepuffmanNode<T>> nodesPro = new SortedList<HufflepuffmanNode<T>>(objFreq.Select(p => new HufflepuffmanNode<T>.Leaf(p.freq, p.t)));
 
             while (nodesPro.Count > 1)
             {
@@ -175,6 +175,17 @@ namespace Epicoin {
                     this.t = t;
                 }
 
+                public override bool Equals(object obj)
+                {
+                    var leaf = obj as Leaf;
+                    return leaf != null &&
+                           EqualityComparer<T>.Default.Equals(t, leaf.t);
+                }
+
+                public override int GetHashCode()
+                {
+                    return 831258139 + EqualityComparer<T>.Default.GetHashCode(t);
+                }
             }
 
             public class InternalNode : HufflepuffmanNode<T>
@@ -186,6 +197,22 @@ namespace Epicoin {
                 {
                     this.left = l;
                     this.right = r;
+                }
+
+                public override bool Equals(object obj)
+                {
+                    var node = obj as InternalNode;
+                    return node != null &&
+                           EqualityComparer<HufflepuffmanNode<T>>.Default.Equals(left, node.left) &&
+                           EqualityComparer<HufflepuffmanNode<T>>.Default.Equals(right, node.right);
+                }
+
+                public override int GetHashCode()
+                {
+                    var hashCode = -124503083;
+                    hashCode = hashCode * -1521134295 + EqualityComparer<HufflepuffmanNode<T>>.Default.GetHashCode(left);
+                    hashCode = hashCode * -1521134295 + EqualityComparer<HufflepuffmanNode<T>>.Default.GetHashCode(right);
+                    return hashCode;
                 }
 
             }
