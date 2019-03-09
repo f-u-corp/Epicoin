@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.IO;
+using System.Text;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -71,6 +73,8 @@ namespace Epicoin {
 		protected EFOBE efobe;
 		internal EFOBE eeffoobbee { get => efobe; }
 
+		HashAlgorithm hasher = SHA256.Create();
+
 		public Validator(Epicore core) : base(core) {}
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
@@ -124,6 +128,7 @@ namespace Epicoin {
 
 		internal void cleanup(){
 			saveEFOBE(efobe, new FileInfo(EFOBEfile));
+			hasher.Dispose();
 		}
 
 		internal const string EFOBEfile = "EFOBE.json";
@@ -132,7 +137,16 @@ namespace Epicoin {
 
 		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, JsonConvert.SerializeObject(efobe));
 
-		internal string computeHash(EFOBE.Block preceding, string problem, string parms, string sol) => (pre: preceding.hash, pro: problem, parms: parms, sol: sol).GetHashCode().ToString(); //Yes, i am really that lazy :P
+		internal string computeHash(EFOBE.Block preceding, string problem, string parms, string sol){
+			Encoding enc = Encoding.ASCII;
+			byte[] prevHash = Convert.FromBase64String(preceding.hash);
+			int p, r, s;
+			byte[] preHash = new byte[(s = (r = (p = prevHash.Length) + enc.GetByteCount(problem)) + enc.GetByteCount(parms)) + enc.GetByteCount(sol)];
+			enc.GetBytes(problem, 0, problem.Length, preHash, p);
+			enc.GetBytes(parms, 0, parms.Length, preHash, r);
+			enc.GetBytes(sol, 0, sol.Length, preHash, s);
+			return Convert.ToBase64String(hasher.ComputeHash(preHash));
+		}
 		protected EFOBE.Block hashBlock(EFOBE.Block preceding, string problem, string parms, string sol) => new EFOBE.Block(problem, parms, sol, computeHash(preceding, problem, parms, sol));
 
 		protected bool validateSolution(string problem, string parms, string solution) => problemsRegistry[problem].check(parms, solution);
