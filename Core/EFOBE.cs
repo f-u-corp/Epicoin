@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 using Newtonsoft.Json;
@@ -24,6 +25,8 @@ namespace Epicoin {
 		internal void addBlock(Block block){
 			blocks.Add(block);
 		}
+
+		internal ReadOnlyCollection<Block> blocksV() => new ReadOnlyCollection<Block>(blocks);
 
 		public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
 
