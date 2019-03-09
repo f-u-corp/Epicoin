@@ -5,6 +5,176 @@ using System.Linq;
 
 namespace Epicoin {
 
+	/// <summary>
+	/// Automatically advancing bit buffer, to simplify bit-level IO.
+	/// </summary>
+	public class BitBuffer {
+
+		protected readonly BitArray ba;
+
+		/// <summary>
+		/// Initializes the empty bit buffer - all bits set to 0.
+		/// </summary>
+		/// <param name="ic">Initial capacity (in bits) of the buffer.</param>
+		public BitBuffer(int ic = 4096) => ba = new BitArray(ic);
+
+		/// <summary>
+		/// Initializes the bit buffer from the provided binary data.
+		/// </summary>
+		/// <param name="data">Raw binary data for bits for the buffer.</param>
+		/// <param name="lbsbc">Whether last byte is used to store number of overflown bits spaces (can be used to re-init a bit buffer with exactly the same number of bits).</param>
+		public BitBuffer(byte[] data, bool lbsbc = true){
+			ba = new BitArray(data);
+			if(lbsbc) ba.Length -= 8 + data[data.Length-1];
+		}
+
+		int wbp = 0, rbp = 0;
+
+		/// <summary>
+		/// Writes a single bit to the buffer, and advances write position by 1.
+		/// </summary>
+		/// <param name="bit">Next bit to write.</param>
+		public BitBuffer write(bool bit){
+			ba[wbp++] = bit;
+			if(wbp == ba.Length) extend();
+			return this;
+		}
+
+		/// <summary>
+		/// Writes a n bits to the buffer, and advances write position by n.
+		/// </summary>
+		/// <param name="l">Primitive ending with n LSB bits to copy-write.</param>
+		/// <param name="bits">n - number of LSB bits to write/copy from l.</param>
+		public BitBuffer writeBits(long l, int bits){
+			for(int b = bits - 1; b >= 0; b--) write(((l >> b) & 1) != 0);
+			return this;
+		}
+
+		/// <summary>
+		/// Writes a n bits to the buffer, and advances write position by n.
+		/// </summary>
+		/// <param name="i">Primitive ending with n LSB bits to copy-write.</param>
+		/// <param name="bits">n - number of LSB bits to write/copy from i.</param>
+		public BitBuffer writeBits(int i, int bits) => writeBits((long) i, bits);
+
+		public BitBuffer writeByte(byte b) => writeBits(b, sizeof(byte)*8);
+		public BitBuffer writeChar(char ch) => writeBits(ch, sizeof(char)*8);
+		public BitBuffer writeInt(int i) => writeBits(i, sizeof(int)*8);
+		public BitBuffer writeUInt(uint i) => writeBits(i, sizeof(uint)*8);
+
+		public BitBuffer writeLong(long i) => writeBits(i, sizeof(long)*8);
+		public BitBuffer writeULong(ulong i) => writeBits((long) i, sizeof(ulong)*8);
+		public BitBuffer writeFloat(float f) => writeInt(BitConverter.SingleToInt32Bits(f));
+		public BitBuffer writeDouble(double d) => writeLong(BitConverter.DoubleToInt64Bits(d));
+
+		/// <summary>
+		/// Sets write position.
+		/// </summary>
+		/// <param name="p">New write position.</param>
+		public BitBuffer setWritePos(int p){
+			wbp = p;
+			return this;
+		}
+
+		/// <summary>
+		/// Explicitly extends buffer's capacity.
+		/// </summary>
+		/// <param name="bits">Additional number to add to current capacity (default - 4096).</param>
+		public BitBuffer extend(int bits = 4096){
+			ba.Length += bits;
+			return this;
+		}
+
+		/// <summary>
+		/// Flips the buffer, from write to read mode: Sets the explicit capacity to current write position, Resets current write position to 0.
+		/// </summary>
+		public BitBuffer flip(){
+			ba.Length = wbp;
+			wbp = 0;
+			return this;
+		}
+
+		/// <summary>
+		/// Reads the next bit from the buffer, advancing read position by 1.
+		/// </summary>
+		public bool read() => ba[rbp++];
+		
+		/// <summary>
+		/// Reads the next n bits from the buffer, copying them into n LSB of a primitive, advancing read position by n.
+		/// </summary>
+		/// <param name="bits">n - number of bits to read from the buffer / copy into n LSB of the primitive</param>
+		public long readBitsL(int bits){
+			long l = 0;
+			for(int b = bits - 1; b >= 0; b--) l |= (read() ? 1L : 0L) << b;
+			return l;
+		}
+
+		/// <summary>
+		/// Reads the next n bits from the buffer, copying them into n LSB of a primitive, advancing read position by n.
+		/// </summary>
+		/// <param name="bits">n - number of bits to read from the buffer / copy into n LSB of the primitive</param>
+		public int readBits(int bits) => (int) readBitsL(bits);
+
+		public byte readByte() => (byte) readBits(sizeof(byte)*8);
+		public char readChar() => (char) readBits(sizeof(char)*8);
+		public int readInt() => readBits(sizeof(int)*8);
+		public uint readUInt() => (uint) readBits(sizeof(uint)*8);
+		public long readLong() => readBitsL(sizeof(long)*8);
+		public ulong readULong() => (ulong) readBitsL(sizeof(ulong)*8);
+		public float readFloat() => BitConverter.Int32BitsToSingle(readInt());
+		public double readDouble() => BitConverter.DoubleToInt64Bits(readLong());
+
+		/// <summary>
+		/// Sets read position.
+		/// </summary>
+		/// <param name="p">New write position.</param>
+		public BitBuffer setReadPos(int p){
+			rbp = p;
+			return this;
+		}
+
+
+
+		public BitArray getUnderlying() => ba;
+		/// <summary>[Explicit] number of bits this buffer contains.</summary>
+		public int BitCount { get => ba.Length; }
+		/// <summary>[Explicit] number of bytes this buffer takes up (<c>ceil(bits/8)</c>).</summary>
+		public int ByteCount { get => (int) Math.Ceiling(BitCount/8d); }
+
+
+		/// <summary>
+		/// Copies the bits of the buffer to the destination starting at provided position. Increases the start index ref to the next available byte (next byte after the last copied byte).
+		/// </summary>
+		/// <param name="arr">Destination array to copy to [zero-based].</param>
+		/// <param name="index">Starting index of copy in the destination array [zero-based].</param>
+		/// <param name="lbsbc">Whether last byte is used to store number of overflown bits spaces (can be used to re-init a bit buffer with exactly the same number of bits).</param>
+		public void CopyTo(byte[] arr, ref int index, bool lbsbc = true){
+			ba.CopyTo(arr, index);
+			index += ByteCount;
+			if(lbsbc){
+				arr[index] = (byte) (ByteCount*8 - BitCount);
+				index++;
+			}
+		}
+		/// <summary>
+		/// Copies the bits of the buffer to the destination starting at provided position.
+		/// </summary>
+		/// <param name="arr">Destination array to copy to [zero-based].</param>
+		/// <param name="index">Starting index of copy in the destination array [zero-based].</param>
+		/// <param name="lbsbc">Whether last byte is used to store number of overflown bits spaces (can be used to re-init a bit buffer with exactly the same number of bits).</param>
+		public void CopyTo(byte[] arr, int index = 0, bool lbsbc = true) => CopyTo(arr, ref index, lbsbc);
+		/// <summary>
+		/// Creates and copies the bits of the buffer into a byte array.
+		/// </summary>
+		/// <param name="lbsbc">Whether last byte is used to store number of overflown bits spaces (can be used to re-init a bit buffer with exactly the same number of bits).</param>
+		public byte[] CopyTo(bool lbsbc = true){
+			byte[] bytes = new byte[ByteCount + (lbsbc ? 1 : 0)];
+			CopyTo(bytes, 0, lbsbc);
+			return bytes;
+		}
+
+	}
+
 	public class Huffman {
 
 		public static BitArray HuffmanCompress<T>(IEnumerable<T> stuff, Action<T, Action<int, int>> TbitWriter){
