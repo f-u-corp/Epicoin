@@ -8,7 +8,7 @@ namespace Epicoin {
     public class Huffman
     {
 
-        public static BitArray HuffmanCompress<T>(IEnumerable<T> stuff, Action<T, Action<bool>> TbitWriter)
+        public static BitArray HuffmanCompress<T>(IEnumerable<T> stuff, Action<T, Action<int, int>> TbitWriter)
         {
             HufflepuffmanNode<T> rut = ComputeHuffmanRoot(stuff.Select(t => (t: t, f: 1)).GroupBy(p => p.t, (k, ps) => (k, ps.Sum(p => p.f))));
             Dictionary<T, int> dict = new Dictionary<T, int>();
@@ -22,7 +22,7 @@ namespace Epicoin {
                     huffdict(n.right, (enc << 1) + 1);
                 }
             }
-            huffdict(rut, 0);
+            huffdict(rut, 1);
 
             BitArray ba = new BitArray(stuff.Count() * 2);
             int abl = 0;
@@ -43,38 +43,37 @@ namespace Epicoin {
                 {
                     write(true);
                     writeIb(te.Value, 32);
-                    continue;
+                } else {
+                    write(false);
+                    if (te.Value > 0xFF)
+                    {
+                        write(true);
+                        writeIb(te.Value, 16);
+                    } else write(false);
                 }
-                write(false);
-                if (te.Value > 0xFF)
-                {
-                    write(true);
-                    writeIb(te.Value, 16);
-                    continue;
-                }
-                write(false);
                 writeIb(te.Value, 8);
-                TbitWriter(te.Key, write);
+                TbitWriter(te.Key, writeIb);
             }
 
             foreach (var s in stuff)
             {
                 var huff = dict[s];
-                writeIb(huff, (int)Math.Ceiling(Math.Log(huff, 2)));
+                writeIb(huff, (int)Math.Ceiling(Math.Log(huff+.5d, 2)));
             }
 
             ba.Length = abl;
             return ba;
         }
 
-        public static List<T> HuffmanDecompress<T>(BitArray ba, Func<Func<bool>, T> TbitReader)
+        public static List<T> HuffmanDecompress<T>(BitArray ba, Func<Func<int, int>, T> TbitReader)
         {
             int abl = 0;
             bool read() => ba[abl++];
             int readIb(int bits)
             {
                 int i = 0;
-                for (int b = bits - 1; bits >= 0; bits++) i |= (read() ? 1 : 0) << b;
+                for (int b = bits - 1; b >= 0; b--)
+                    i |= (read() ? 1 : 0) << b;
                 return i;
             }
 
@@ -86,7 +85,8 @@ namespace Epicoin {
                 if (read()) enc = 32;
                 else if (read()) enc = 16;
                 else enc = 8;
-                dict.Add(enc, TbitReader(read));
+                var len = readIb(enc);
+                dict.Add(len, TbitReader(readIb));
             }
 
             List<T> res = new List<T>();
@@ -115,43 +115,6 @@ namespace Epicoin {
 
             return nodesPro.First();
         }
-
-        /*public static void Revert(HufflepuffmanNode<T> parent, HufflepuffmanNode<T> presentnode, T laser, T inp)
-        {
-            if (inp.Length == laser)
-            {
-                if (presentnode.left == null && presentnode.right == null)
-                {
-                    return;
-                }
-            }
-
-            else
-            {
-                if (presentnode.left == null && presentnode.right == null)
-                {
-                    Revert(parent, parent, laser, inp);
-                }
-
-                else
-                {
-                    if (inp.Split(laser) == "0")
-                    {
-                        Revert(parent, presentnode.left, laser, inp);
-                        laser = laser + 1;
-
-                    }
-
-                    else
-                    {
-                        Revert(parent, presentnode.right, laser, inp);
-                        laser = laser + 1;
-                    }
-                }
-            }
-
-
-        }*/
 
         public class HufflepuffmanNode<T> : IComparable<HufflepuffmanNode<T>>
         {
