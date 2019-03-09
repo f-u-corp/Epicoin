@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 
 namespace Epicoin {
-	public class SHA256 {
+	/*public class SHA256 {
 		public static uint ror(uint c, int n){
 			int uint_mask = 32 - 1;
 
@@ -116,5 +116,5 @@ namespace Epicoin {
 			return output;
 		}
 
-	}
+	}*/
 }
