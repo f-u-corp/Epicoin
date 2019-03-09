@@ -106,10 +106,14 @@ namespace Epicoin {
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 		internal override void InitAndRun(){
+			init();
+			while(!core.stop) keepSolving();
+			cleanup();
+		}
+
+		internal void init(){
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
-
-			keepSolving();
 		}
 
 		protected void LoadProblems(){
@@ -124,7 +128,7 @@ namespace Epicoin {
 		protected (string pr, string pa, Task<string> sol, CancellationTokenSource cts) cur = (null, null, null, null);
 
 		protected void keepSolving(){ 
-			while(!core.stop){
+			{
 				if(cur.sol != null && (cur.sol.IsCompleted || cur.sol.IsCanceled)){
 					if(cur.sol.IsCompletedSuccessfully) core.sendITM2Validator(new Validator.ITM.ISolvedAProblem(cur.pr, cur.pr, cur.sol.Result));
 					cur.sol.Dispose();
@@ -144,6 +148,8 @@ namespace Epicoin {
 		}
 
 		protected string solve(string problem, string parms) => problemsRegistry[problem].solve(parms);
+
+		internal void cleanup(){}
 
 		protected void sendITMAsync(ITM itm){
 			if(!(itm is ITM.AsyncITM)) base.sendITM(itm);

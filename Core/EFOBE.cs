@@ -72,17 +72,21 @@ namespace Epicoin {
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 		internal override void InitAndRun(){
+			init();
+			while(!core.stop) keepChecking();
+			cleanup();
+		}
+
+		internal void init(){
 			var cachedE = new FileInfo(EFOBEfile);
 			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
 			else core.sendITM2Net(new Epinet.ITM.IWantAFullEFOBE());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
-
-			keepChecking();
 		}
 
 		internal void keepChecking(){
-			while(!core.stop){
+			{
 				var m = itc.readMessageOrDefault();
 				if(m is ITM.HeresYourEFOBE){
 					var receivedEFOBELoc = (m as ITM.HeresYourEFOBE).tmpCacheLoc;
@@ -109,6 +113,10 @@ namespace Epicoin {
 					}
 				}
 			}
+		}
+
+		internal void cleanup(){
+
 		}
 
 		internal const string EFOBEfile = "EFOBE.json";
