@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.IO;
+using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -97,7 +98,7 @@ namespace Epicoin {
 					foreach(var nb in recEFOBE.blocksV()) if(!validateBlock(prev, prev = nb)) goto finaly;
 					this.efobe = recEFOBE;
 					finaly: receivedEFOBELoc.Delete();
-				}
+				} else
 				if(m is ITM.ISolvedAProblem){
 					var sol = m as ITM.ISolvedAProblem;
 					if(validateSolution(sol.problem, sol.parms, sol.solution)){
@@ -105,7 +106,7 @@ namespace Epicoin {
 						efobe.addBlock(blok);
 						core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, blok.hash));
 					}
-				}
+				} else
 				if(m is ITM.SomeoneSolvedAProblem){
 					var ssa = m as ITM.SomeoneSolvedAProblem;
 					var blok = new EFOBE.Block(ssa.problem, ssa.parms, ssa.solution, ssa.hash);
@@ -113,6 +114,9 @@ namespace Epicoin {
 						core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
 						efobe.addBlock(blok);
 					}
+				} else {
+					Thread.Yield();
+					Thread.Sleep(10); //Nuffin to do
 				}
 			}
 		}
