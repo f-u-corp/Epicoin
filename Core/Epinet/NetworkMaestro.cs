@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Epicoin
 {
-	class NetworkMaestro
+	class NetworkMaestro : MainComponent<NetworkMaestro.ITM>
 	{
 		public static CancellationTokenSource cts = new CancellationTokenSource();
 		protected string OwnIp;
@@ -20,8 +20,9 @@ namespace Epicoin
 		private readonly Baby baby;
 		private readonly Parent parent;
 
-		public NetworkMaestro()
+		public NetworkMaestro(Epicore core) : base(core)
 		{
+			//TODO Do this stuff in InitAndRun
 			string localIP;
 			using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
 			{
@@ -31,6 +32,9 @@ namespace Epicoin
 			}
 			this.parent = new Parent();
 			this.baby = new Baby(parent);
+		}
+		internal override void InitAndRun()
+		{
 		}
 		public void NetworkLogic()
 		{
@@ -42,6 +46,15 @@ namespace Epicoin
 
 		}
 		//static HuffmanCode();
+
+		/*
+		 * ITC
+		 */
+
+		internal class ITM : ITCMessage
+		{
+
+		}
 
 		class BinTree<T>
 		{
