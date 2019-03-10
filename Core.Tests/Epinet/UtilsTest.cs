@@ -71,14 +71,14 @@ namespace Epicoin {
 
 			BitBuffer wb = new BitBuffer();
 			wb.writeByte(len);
-			foreach(int i in data) wb.writeInt(i);
+			wb.writeInts(data);
 			wb.flip();
 
 			byte[] raw = wb.CopyTo();
 
 			BitBuffer rb = new BitBuffer(raw);
 			byte rlen = rb.readByte();
-			List<int> rdata = Enumerable.Repeat(0, rlen).Select(i => rb.readInt()).ToList();
+			List<int> rdata = rb.readInts(rlen);
 
 			Assert.AreEqual(data, rdata, "Arbitrary amount of data - IO failed.");
 		}
