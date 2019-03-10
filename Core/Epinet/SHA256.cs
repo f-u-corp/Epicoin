@@ -33,7 +33,7 @@ namespace Epicoin {
 			uint[] hashesSqr = new uint[HASHESSQR.Length];
 			Array.Copy(HASHESSQR, hashesSqr, HASHESSQR.Length);
 
-			BitBuffer msg = new BitBuffer(input, false);
+			/*BitBuffer msg = new BitBuffer(input, false);
 			int ibc = input.Length*8, K = ibc%512 < 448 ? 448 - ibc%512 : 512 + 448 - ibc%512;
 			msg.setWritePos(ibc).extend(K);
 
@@ -41,7 +41,7 @@ namespace Epicoin {
 			msg.write(true);
 			for(int i = 0; i < K; i++) msg.write(false);
 			msg.writeULong((ulong) ibc);
-			msg.flip();
+			msg.flip();*/
 
 			uint fCH(uint x, uint y, uint z) => (x&y)^((~x)&z);
 			uint fMAJ(uint x, uint y, uint z) => (x&y)^(x&z)^(y&z);
@@ -52,9 +52,19 @@ namespace Epicoin {
 			uint fσ1(uint x) => fσ(x, 7, 18, 3);
 			uint fσ2(uint x) => fσ(x, 17, 19, 10);
 
-			for(int ch = 0; ch < msg.BitCount/512; ch++){
+			int ibc = input.Length*8, KB = input.Length%64 < 56 ? 56 - input.Length%64 : 64 + 56 - input.Length%64;
+			byte[] pad = new byte[KB+8];
+			for(int k = 0; k < KB; k++) pad[k] = 0;
+			Buffer.BlockCopy(BitConverter.GetBytes((long) ibc), 0, pad, KB, 8);
+			byte getByte(int b) => b < input.Length ? input[b] : pad[b - input.Length];
+			uint getByteI(int b) => (uint) getByte(b);
+			uint getBlock(int chunk, int block){
+				int sB = chunk*64 + block*4;
+				return (getByteI(sB)<<24)|(getByteI(sB+1)<<16)|(getByteI(sB+2)<<8)|(getByteI(sB+3));
+			}
+			for(int ch = 0; ch < (input.Length+KB)/64; ch++){
 				var sched = new uint[64];
-				for(int w = 0; w < 16; w++) sched[w] = msg.readUInt();
+				for(int w = 0; w < 16; w++) sched[w] = getBlock(ch, w);
 
 				for(int i = 16; i < 64; i++) sched[i] = sched[i-16] + fσ1(sched[i-15]) + sched[i-7] + fσ2(sched[i-2]);
 
