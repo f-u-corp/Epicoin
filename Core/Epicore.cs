@@ -12,6 +12,7 @@ namespace Epicoin {
 
 		internal Solver solver;
 		internal Validator validator;
+		internal NetworkMaestro maestro;
 
 		internal Action<Solver.ITM> sendITM2Solver;
 		internal Action<Validator.ITM> sendITM2Validator;
