@@ -34,9 +34,14 @@ namespace Epicoin
 
 		public Tear(string receivedTear)
 		{
-			//TODO: get IPAddress from the UDP packet received
-			//TDOO: get the publicKey from the UDP packet received
-			throw new NotImplementedException();
+            //TODO: get IPAddress from the UDP packet received
+            /*IPEndPoint endPoint = new IPEndPoint(address);
+
+            int bytes = UdpClient.ReceiveFrom(ref UDPclient);
+
+            string UDPPort = ((IPEndPoint)ClientWebSocket).Port.ToString()*/
+            //TDOO: get the publicKey from the UDP packet received
+            throw new NotImplementedException();
 		}
 	}
 }
