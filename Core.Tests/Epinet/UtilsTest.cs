@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 using System.Linq;
 
 using NUnit.Framework;
@@ -81,6 +82,30 @@ namespace Epicoin {
 			List<int> rdata = rb.readInts(rlen);
 
 			Assert.AreEqual(data, rdata, "Arbitrary amount of data - IO failed.");
+		}
+
+	}
+
+	[TestFixture]
+	public class SHA256Test {
+
+		[Test]
+		public void TestROR(){
+			Assert.AreEqual(0x900000BC, SHA256.ror(0xBC9, 4), "RoR failed you");
+			Assert.AreEqual(0xBC90, SHA256.ror(0xBC9, -4), "RoR failed you");
+			Assert.AreEqual(0x4BAC, SHA256.ror(0x12EB0, 34), "RoR failed you");
+		}
+
+		[Test(TestOf = typeof(SHA256))]
+		public void TestSHA256(){
+			Random random = new Random();
+			byte[] data = new byte[random.Next(69, 1283)];
+			for(int b = 0; b < data.Length; b++) data[b] = (byte) random.Next(255);
+			using(var builtin = System.Security.Cryptography.SHA256.Create()){
+				var rd3 = new Sha2.Sha256();
+				File.WriteAllLines("2 hashes.txt", new string[]{String.Concat(builtin.ComputeHash(new byte[0]).Select(b => Convert.ToString(b, 16))), String.Concat(rd3.GetHash().Select(b => Convert.ToString(b, 16))), String.Concat(SHA256.Hash(new byte[0]).Select(b => Convert.ToString(b, 16)))});
+				Assert.AreEqual(builtin.ComputeHash(data), SHA256.Hash(data), "Hashing result did not match .NET builtin output.");
+			}
 		}
 
 	}
