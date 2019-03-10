@@ -53,7 +53,7 @@ namespace Epicoin {
 			uint fσ2(uint x) => fσ(x, 17, 19, 10);
 
 			int ibc = input.Length*8;
-			int kb = (512 - (ibc+1+64)%512)%512;
+			int kb = 512 - (ibc+1+64)%512;
 			kb = kb < 0 ? 512+kb : kb;
 			int KB = (kb+1)/8;
 			byte[] pad = new byte[KB+8];
@@ -66,7 +66,7 @@ namespace Epicoin {
 				int sB = chunk*64 + block*4;
 				return (getByteI(sB)<<24)|(getByteI(sB+1)<<16)|(getByteI(sB+2)<<8)|(getByteI(sB+3));
 			}
-			for(int ch = 0; ch < (input.Length+KB)/64; ch++){
+			for(int ch = 0; ch < (input.Length+KB+8)/64; ch++){
 				var sched = new uint[64];
 				for(int w = 0; w < 16; w++) sched[w] = getBlock(ch, w);
 
@@ -90,7 +90,13 @@ namespace Epicoin {
 			}
 
 			byte[] res = new byte[32];
-			Buffer.BlockCopy(hashesSqr, 0, res, 0, res.Length);
+			for(int i = 0; i < hashesSqr.Length; i++) {
+				var h = hashesSqr[i];
+				res[i * 4 + 3] = (byte)((h >> 0) & 0xFF);
+				res[i * 4 + 2] = (byte)((h >> 8) & 0xFF);
+				res[i * 4 + 1] = (byte)((h >> 16) & 0xFF);
+				res[i * 4 + 0] = (byte) ((h >> 24) & 0xFF);
+			}
 			return res;
 
 			/*
