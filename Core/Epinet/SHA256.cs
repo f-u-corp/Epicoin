@@ -52,7 +52,10 @@ namespace Epicoin {
 			uint fσ1(uint x) => fσ(x, 7, 18, 3);
 			uint fσ2(uint x) => fσ(x, 17, 19, 10);
 
-			int ibc = input.Length*8, KB = input.Length%64 < 56 ? 56 - input.Length%64 : 64 + 56 - input.Length%64;
+			int ibc = input.Length*8;
+			int kb = (512 - (ibc+1+64)%512)%512;
+			kb = kb < 0 ? 512+kb : kb;
+			int KB = (kb+1)/8;
 			byte[] pad = new byte[KB+8];
 			pad[0] = 0b10000000;
 			for(int k = 1; k < KB; k++) pad[k] = 0;
