@@ -54,7 +54,8 @@ namespace Epicoin {
 
 			int ibc = input.Length*8, KB = input.Length%64 < 56 ? 56 - input.Length%64 : 64 + 56 - input.Length%64;
 			byte[] pad = new byte[KB+8];
-			for(int k = 0; k < KB; k++) pad[k] = 0;
+			pad[0] = 0b10000000;
+			for(int k = 1; k < KB; k++) pad[k] = 0;
 			Buffer.BlockCopy(BitConverter.GetBytes((long) ibc), 0, pad, KB, 8);
 			byte getByte(int b) => b < input.Length ? input[b] : pad[b - input.Length];
 			uint getByteI(int b) => (uint) getByte(b);
