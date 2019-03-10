@@ -98,12 +98,18 @@ namespace Epicoin {
 
 		[Test(TestOf = typeof(SHA256))]
 		public void TestSHA256(){
-			Random random = new Random();
-			byte[] data = new byte[random.Next(69, 1283)];
-			for(int b = 0; b < data.Length; b++) data[b] = (byte) random.Next(255);
 			using(var builtin = System.Security.Cryptography.SHA256.Create()){
+				//static
+				string hex(byte[] bs) => String.Concat(bs.Select(b => Convert.ToString(b, 16)));
+				Assert.AreEqual("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", hex(SHA256.Hash(new byte[0])), "0-Hash invalid");
+				Assert.AreEqual("7509e5bda0c762d2bac7f90d758b5b2263fa01ccbc542ab5e3df163be08e6ca9", hex(SHA256.Hash(Encoding.UTF8.GetBytes("hello world!"))), "Hello world! -Hash invalid");
+				//rnd
+				Random random = new Random();
+				byte[] data = new byte[random.Next(69, 1283)];
+				for (int b = 0; b < data.Length; b++) data[b] = (byte)random.Next(255);
 				var rd3 = new Sha2.Sha256();
-				File.WriteAllLines("2 hashes.txt", new string[]{String.Concat(builtin.ComputeHash(new byte[0]).Select(b => Convert.ToString(b, 16))), String.Concat(rd3.GetHash().Select(b => Convert.ToString(b, 16))), String.Concat(SHA256.Hash(new byte[0]).Select(b => Convert.ToString(b, 16)))});
+				rd3.AddData(data, 0, (uint) data.Length);
+				File.WriteAllLines("2 hashes.txt", new string[]{String.Concat(builtin.ComputeHash(data).Select(b => Convert.ToString(b, 16))), String.Concat(rd3.GetHash().Select(b => Convert.ToString(b, 16))), String.Concat(SHA256.Hash(data).Select(b => Convert.ToString(b, 16)))});
 				Assert.AreEqual(builtin.ComputeHash(data), SHA256.Hash(data), "Hashing result did not match .NET builtin output.");
 			}
 		}
