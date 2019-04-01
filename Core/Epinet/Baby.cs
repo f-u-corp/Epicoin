@@ -160,7 +160,7 @@ namespace Epicoin
 	static class RSA
 	{
 		//RSA keys' generation related method
-		private static bool IsPrime(int n)
+		internal static bool IsPrime(int n)
 		{
 			if (n < 2)
 				return false;
@@ -175,7 +175,7 @@ namespace Epicoin
 			return true;
 		}
 
-		private static int GCD(int n, int m)
+		internal static int GCD(int n, int m)
 		{
 			if (n == 0 || m == 0)
 				return 0;
@@ -193,12 +193,12 @@ namespace Epicoin
 			}
 		}
 
-		private static bool AreCoprime(int n, int m)
+		internal static bool AreCoprime(int n, int m)
 		{
 			return GCD(n, m) == 1;
 		}
 
-		private static int Sign(int n)
+		internal static int Quot(int n, int m)
 		{
 			if (n > 0)
 				return 1;
@@ -217,8 +217,8 @@ namespace Epicoin
 			return n / m - Sign(m);
 		}
 
-		private static int Modulo(int n, int m)
 		{
+		internal static int Modulo(int n, int m)
 			//assuming m is positive, but that should be enough for RSA
 			if (Sign(n) == 1)
 				return n % m;
@@ -226,7 +226,7 @@ namespace Epicoin
 			return (n % m) + ((Sign(m) == 1) ? (m) : (-m));
 		}
 
-		private static int[] Bezout(int n, int m)
+		internal static int[] Bezout(int n, int m)
 		{
 			if (m == 0)
 			{
@@ -239,7 +239,7 @@ namespace Epicoin
 			}
 		}
 
-		private static int ModMultInv(int a, int n)
+		internal static int ModMultInv(int a, int n)
 		{
 			int[] foo = Bezout(a, n);
 			return Modulo(foo[0], n);
@@ -250,12 +250,12 @@ namespace Epicoin
 			so it could be nice to implement it as a bonus.
 			However, I'm going for Erathostenes right now because it's quicker to implement
 		*/
-		private static int[] AtkinSieve(int limit)
+		internal static int[] AtkinSieve(int limit)
 		{
 			throw new NotImplementedException();
 		}
 
-		private static List<int> EratosthenesSieve(int n)
+		internal static List<int> EratosthenesSieve(int n)
 		{
 			if (n < 2)
 				throw new Exception("Eratosthenes: invalid input");
@@ -282,7 +282,7 @@ namespace Epicoin
 			return output;
 		}
 
-		private static int GenerateRandomNumber()
+		private static int GenerateRandomNumber() //FIXME Do you maybe want a uint here? -E-gy
 		{
 			int output = 0;
 
