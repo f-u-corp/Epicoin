@@ -249,25 +249,21 @@ namespace Epicoin
 		internal static List<int> EratosthenesSieve(int n)
 		{
 			if (n < 2)
-				throw new Exception("Eratosthenes: invalid input");
+				throw new InvalidOperationException("Eratosthenes: invalid input");
 
 			//making a list of all prime candidates
-			List<int> output = new List<int>() { 2 };
-			for (int i = 3; i < n; i = i + 2)
+			var sieve = new SortedSet<int>() { 2 };
+			for (int i = 3; i <= n; i += 2)
 			{
-				output.Add(i);
+				sieve.Add(i);
 			}
-
+			
+			var output = new List<int>();
 			//getting rid of the candidates that aren't actually prime
-			for (int i = output[0]; i < output.Count; i++)
-			{
-				for (int j = output[i + 1]; j < output.Count - 1; j++)
-				{
-					if (output[j] % i == 0)
-					{
-						output.Remove(output[j]);
-					}
-				}
+			while(sieve.Count > 0){
+				var next = sieve.Min;
+				sieve.RemoveWhere(k => k%next == 0);
+				output.Add(next);
 			}
 
 			return output;
