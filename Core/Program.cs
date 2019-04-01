@@ -5,19 +5,14 @@ namespace Epicoin {
 	class Program {
 		static void Main(string[] args){
 			Epicore core = new Epicore();
-
-			Console.WriteLine("Starting up...");
+			Epicore.LOG.Info("Starting up...");
 			core.Start();
-
-			Console.WriteLine("Start up successful.");
-
-			Console.WriteLine("Press any key to exit.");
-
+			Epicore.LOG.Info("Start up successful.");
+			Epicore.LOG.Info("Press any key to exit.");
 			while(!Console.KeyAvailable) Thread.Yield();
-			Console.WriteLine("Shutting down...");
+			Epicore.LOG.Info("Shutting down...");
 			core.Stop();
-
-			Console.WriteLine("Shutdown complete.");
+			Epicore.LOG.Info("Shutdown complete.");
 		}
 	}
 }
