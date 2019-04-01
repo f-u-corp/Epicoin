@@ -179,20 +179,10 @@ namespace Epicoin
 
 		internal static int GCD(int n, int m)
 		{
-			if (n == 0 || m == 0)
-				return 0;
-
-			if (n == m)
-				return n;
-
-			if (n > m)
-			{
-				return GCD(n - m, m);
-			}
-			else
-			{
-				return GCD(n, m - n);
-			}
+			if(m == 0 )
+			if(n == m) return n;
+			int gcrec(int i, int j) => j == 0 ? i : gcrec(j, Modulo(i, j));
+			return gcrec(Math.Max(n, m), Math.Min(n, m));
 		}
 
 		internal static bool AreCoprime(int n, int m)

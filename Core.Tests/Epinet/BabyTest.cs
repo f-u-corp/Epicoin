@@ -34,6 +34,18 @@ namespace Epicoin {
 		}
 
 		[Test]
+		public void TestGCD(){
+			Assert.AreEqual(1, RSA.GCD(1, 1), "Invalid GCD 1,1");
+			Assert.AreEqual(5, RSA.GCD(5, 5), "Invalid GCD 5,5");
+			Assert.AreEqual(1, RSA.GCD(5, 7), "Invalid GCD 5,7");
+			Assert.AreEqual(2, RSA.GCD(6, 8), "Invalid GCD 6,8");
+
+			Assert.AreEqual(2, RSA.GCD(-6, -8), "Invalid GCD -6,-8");
+			Assert.AreEqual(5, RSA.GCD(-35, 60), "Invalid GCD 5,10");
+			Assert.AreEqual(3, RSA.GCD(69, -93), "Invalid GCD 5,10");
+		}
+
+		[Test]
 		public void TestEratosthenesSieve(){
 			Assert.Throws(typeof(InvalidOperationException), () => RSA.EratosthenesSieve(0), "Era sieve must not work for 0");
 			Assert.Throws(typeof(InvalidOperationException), () => RSA.EratosthenesSieve(-8129), "Era sieve must not work for negative numbers");
