@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.IO;
 using System.Collections.Generic;
 using System.Net;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 using System.Text;
 using System.Security.Cryptography;
 
-
+[assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin
 {
 	class Baby
