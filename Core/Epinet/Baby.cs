@@ -277,12 +277,12 @@ namespace Epicoin
 		{
 			int output = 0;
 
-			Byte[] rndByte = new byte[Baby.nbSecurityBytes];
+			var rndByte = new byte[Baby.nbSecurityBytes];
 			Baby.rngCsp.GetBytes(rndByte);
 
 			for (int i = 0; i < rndByte.Length; i++)
 			{
-				output += (int)(rndByte[i] * Math.Pow(8, i));
+				output |= rndByte[i] << (sizeof(byte)*i);
 			}
 
 			return output;
