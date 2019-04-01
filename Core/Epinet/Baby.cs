@@ -202,30 +202,19 @@ namespace Epicoin
 
 		internal static int Quot(int n, int m)
 		{
-			if (n > 0)
-				return 1;
-
-			if (n == 0)
-				return 0;
-
-			return (-1);
-		}
-
-		private static int Quot(int n, int m)
-		{
-			if (Sign(m) == 1)
+			if (Math.Sign(m) == 1)
 				return n / m;
 
-			return n / m - Sign(m);
+			return n / m - Math.Sign(m);
 		}
 
-		{
 		internal static int Modulo(int n, int m)
+		{//TODO E-gy: Reuse primitive extensions when SHA is complete
 			//assuming m is positive, but that should be enough for RSA
-			if (Sign(n) == 1)
+			if (Math.Sign(n) == 1)
 				return n % m;
 
-			return (n % m) + ((Sign(m) == 1) ? (m) : (-m));
+			return (n % m) + ((Math.Sign(m) == 1) ? (m) : (-m));
 		}
 
 		internal static int[] Bezout(int n, int m)
