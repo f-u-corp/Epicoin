@@ -18,12 +18,12 @@ namespace Epicoin
 		//usage of fixed port for now
 		public static int Port = 27945; //not in use according to https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
-		private readonly Baby baby;
-		private readonly Parent parent;
+		private /*readonly*/ Baby baby;
+		private /*readonly*/ Parent parent;
 
-		public NetworkMaestro(Epicore core) : base(core)
+		public NetworkMaestro(Epicore core) : base(core) {}
+		internal override void InitAndRun()
 		{
-			//TODO Do this stuff in InitAndRun
 			string localIP;
 			using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
 			{
@@ -33,9 +33,6 @@ namespace Epicoin
 			}
 			this.parent = new Parent();
 			this.baby = new Baby(parent);
-		}
-		internal override void InitAndRun()
-		{
 		}
 		public void NetworkLogic()
 		{
