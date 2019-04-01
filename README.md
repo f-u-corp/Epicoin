@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/f-u-corp/Epicoin.svg?branch=(re)struct)](https://travis-ci.org/f-u-corp/Epicoin) [![Latest](http://github-release-version.herokuapp.com/github/f-u-corp/Epicoin/release.svg?style=flat)](https://github.com/f-u-corp/Epicoin/releases/latest)
-# Epicoin
-Epita S2 Project. Epicoin is a blockchain system where the proof of work is replaced by the solving of NP-Complete problems.
-The project's official website is www.againai.ml ; there you can find additional information about it and its authors.
+[![Build Status](https://travis-ci.org/Fundamentally-Uncentralizable-Cookies/Epicoin.svg](https://travis-ci.org/Fundamentally-Uncentralizable-Cookies/Epicoin) [![Latest](http://github-release-version.herokuapp.com/github/Fundamentally-Uncentralizable-Cookies/Epicoin/release.svg?style=flat)](https://github.com/Fundamentally-Uncentralizable-Cookies/Epicoin/releases/latest)
+
+[![Logo](LOGO.png)](https://epitacoin.ml)
+# [Epicoin](https://epitacoin.ml)
+Epita S2 Project. Epicoin is a blockchain where the proof of work is done by the solving of NP-Complete problems.
+[More information is available on the official website, epitacoin.ml](https://epitacoin.ml)
