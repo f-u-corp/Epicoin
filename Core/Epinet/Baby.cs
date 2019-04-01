@@ -35,6 +35,7 @@ namespace Epicoin
 
 		public Baby(Parent parent)
 		{
+			NetworkMaestro.LOG.Info("Loading Baby");
 			//fields init routines
 			this.self = parent;
 			parent.Self = this;
@@ -43,6 +44,7 @@ namespace Epicoin
 
 			//generate RSAPrivate and Public Key
 			RSA.GenerateRSAKeys(out this.RSAPrivateKey, out this.RSAPublicKey);
+			NetworkMaestro.LOG.Info("Generated RSA keys");
 
 			//making list of friends
 			using (StreamReader sr = new StreamReader(Baby.knownParentsFile))
@@ -60,8 +62,10 @@ namespace Epicoin
 					}
 				}
 			}
+			NetworkMaestro.LOG.Info("Loaded friends from local cache");
 
 			//Try to connect to friends
+			NetworkMaestro.LOG.Info("Contacting old friends");
 			foreach (Friend f in this.friends)
 			{
 				Call(f);
@@ -109,7 +113,7 @@ namespace Epicoin
 		{
 			for(int i = 0; i < Baby.MaxCryTries;)
 			{
-				//“We need never be ashamed of our tears.” - Dickens
+				//ï¿½We need never be ashamed of our tears.ï¿½ - Dickens
 				if (this.shoulders.Count == Baby.MaxNumberOfShoulders)
 				{
 					PotentialParent firstShoulder = this.shoulders.Peek();

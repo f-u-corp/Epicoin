@@ -19,11 +19,12 @@ namespace Epicoin
 
 		public Parent()
 		{
-
+			NetworkMaestro.LOG.Info("Loading Parent");
 			//init this.childCareGiver
 			IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, 9191); //Check that 9191 is not commonly used
 			this.childCareGiver = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 			this.childCareGiver.Bind(endPoint);
+			NetworkMaestro.LOG.Info("Initialized child caregiver");
 		}
 
 	}

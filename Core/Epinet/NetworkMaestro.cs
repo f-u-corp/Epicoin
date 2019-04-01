@@ -12,6 +12,8 @@ namespace Epicoin
 {
 	class NetworkMaestro : MainComponent<NetworkMaestro.ITM>
 	{
+		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Network");
+
 		public static CancellationTokenSource cts = new CancellationTokenSource();
 		protected string OwnIp;
 
@@ -24,6 +26,7 @@ namespace Epicoin
 		public NetworkMaestro(Epicore core) : base(core) {}
 		internal override void InitAndRun()
 		{
+			LOG.Info("Pre-Loading networking");
 			string localIP;
 			using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
 			{
@@ -31,6 +34,8 @@ namespace Epicoin
 				IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
 				localIP = endPoint.Address.ToString();
 			}
+			LOG.Info("Local IP established");
+			LOG.Info("Loading networking components");
 			this.parent = new Parent();
 			this.baby = new Baby(parent);
 		}
