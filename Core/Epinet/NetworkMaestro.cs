@@ -9,15 +9,18 @@ using System.Threading.Tasks;
 
 namespace Epicoin
 {
-	public abstract class NetworkActor
+	class NetworkMaestro
 	{
 		public static CancellationTokenSource cts = new CancellationTokenSource();
 		protected string OwnIp;
 
 		//usage of fixed port for now
-		protected static int Port = 27945; //not in use according to https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
+		public static int Port = 27945; //not in use according to https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
-		public NetworkActor()
+		private readonly Baby baby;
+		private readonly Parent parent;
+
+		public NetworkMaestro()
 		{
 			string localIP;
 			using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
@@ -26,8 +29,18 @@ namespace Epicoin
 				IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
 				localIP = endPoint.Address.ToString();
 			}
+			this.parent = new Parent();
+			this.baby = new Baby(parent);
 		}
+		public void NetworkLogic()
+		{
+			//If has no parents and no friends, cry
+			if (this.baby.friends.Count == 0)
+			{
+				baby.Cry(); 
+			}
 
+		}
 		//static HuffmanCode();
 
 		class BinTree<T>
