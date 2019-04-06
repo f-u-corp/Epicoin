@@ -292,9 +292,10 @@ namespace Epicoin.Core {
 				if(m is ITM.ISolvedAProblem){
 					var sol = m as ITM.ISolvedAProblem;
 					if(validateSolution(sol.problem, sol.parms, sol.solution)){
-						var blok = hashBlock(efobe.TopBlock(), sol.problem, sol.parms, sol.solution);
-						efobe.addBlock(blok);
-						core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, blok.hash));
+						var prevHash = efobe.TopBlock();
+						var hash = computeHash(prevHash, sol.problem, sol.parms, sol.solution);
+						efobe.addBlock(sol.problem, sol.parms, sol.solution, hash, prevHash);
+						core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, hash));
 					}
 				} else
 				if(m is ITM.SomeoneSolvedAProblem){
