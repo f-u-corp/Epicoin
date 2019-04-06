@@ -225,7 +225,7 @@ namespace Epicoin.Core {
 			/// <summary>
 			/// An uncertain block, whose existance may end any moment, requires additional information for survival.
 			/// </summary>
-			public class UncertainBlock : Block {
+			internal class UncertainBlock : Block {
 
 				internal List<List<string>> branches = new List<List<string>>();
 
