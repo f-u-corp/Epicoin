@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Epicoin.Core {
 
@@ -37,7 +38,33 @@ namespace Epicoin.Core {
 	/// Solver component of the Core. Responsible for loading problems (on initialization) and solving them when given the parameters, if solving problems was enabled.
 	/// </summary>
 	public interface ISolver {
-		
+
+		/// <summary>
+		/// Returns collection of all loaded problems.
+		/// </summary>
+		/// <returns>Collection of loaded problems.</returns>
+		IEnumerable<string> GetProblems();
+
+		/// <summary>
+		/// Is the solver enabled.
+		/// </summary>
+		/// <returns>Whether problem solving is enabled.</returns>
+		bool SolvingEnabled();
+
+		/// <summary>
+		/// Is solving problems with given ID/name enabled. Undefined if problem solving (overall) is disabled.
+		/// </summary>
+		/// <param name="problem">Problem ID/name</param>
+		/// <returns>Whether solving given problem is enabled.</returns>
+		bool SolvingEnabled(string problem);
+
+		/// <summary>
+		/// Marks solving problems with given ID/name as enabled/disabled. Result is not explicitly defined if problem solving (overall) is disabled.
+		/// </summary>
+		/// <param name="problem">Problem ID/name</param>
+		/// <param name="doSolve">Whether to solve these problems</param>
+		void SetSolvingEnabled(string problem, bool doSolve);
+
 	}
 
 	/// <summary>

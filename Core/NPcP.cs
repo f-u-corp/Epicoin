@@ -102,7 +102,19 @@ namespace Epicoin.Core {
 			this.doSolve = doSolve;
 		}
 
+		public bool SolvingEnabled() => doSolve;
+
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
+		protected HashSet<string> problemsICanSolve;
+
+		public IEnumerable<string> GetProblems() => problemsRegistry.Keys;
+		public bool SolvingEnabled(string problem) => problemsICanSolve.Contains(problem);
+		public void SetSolvingEnabled(string problem, bool doSolve){
+			if(problemsRegistry.ContainsKey(problem)){
+				if(doSolve) problemsICanSolve.Add(problem);
+				else problemsICanSolve.Remove(problem);
+			}
+		}
 
 		internal override void InitAndRun(){
 			LoadProblems();
@@ -115,6 +127,7 @@ namespace Epicoin.Core {
 			new DirectoryInfo("npdlls").Create();
 			new DirectoryInfo("npdlls").GetFiles("*.dll").ToList().ForEach(f => Assembly.LoadFile(f.FullName).GetExportedTypes().Where(typeof(INPcProblem).IsAssignableFrom).Select(Activator.CreateInstance).Cast<INPcProblem>().ToList().ForEach(p => reg.Add(p.getName(), new NPcProblemWrapper(p))));
 			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
+			this.problemsICanSolve = new HashSet<string>(problemsRegistry.Keys); //TODO persistent config? I'd say it does not belong to core...
 			LOG.Info($"Successfuly loaded problems - {problemsRegistry.Count} ({String.Join(", ", problemsRegistry.Keys)})");
 		}
 
