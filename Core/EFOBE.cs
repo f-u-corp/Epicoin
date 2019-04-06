@@ -106,8 +106,10 @@ namespace Epicoin.Core {
 				var nca = branches[0][0];
 				if(branches.All(br => br[0] == nca)){
 					bedrocks.Add(new Block(LCA));
+					blockTree.Remove(LCA.hash);
 					var nLCA = blockTree[nca];
 					LCA = new Block.UncertainBlock(nLCA.problem, nLCA.parameters, nLCA.solution, nLCA.hash, null);
+					blockTree[LCA.hash] = LCA;
 					branches.ForEach(b => b.RemoveAt(0));
 					longestBranch--;
 				} else break;
