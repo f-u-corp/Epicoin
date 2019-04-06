@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Epicoin {
+namespace Epicoin.Test {
 	[TestFixture]
 	public class CITest {
 

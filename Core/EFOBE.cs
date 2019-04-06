@@ -12,7 +12,7 @@ using System.Linq;
 using Newtonsoft.Json;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
-namespace Epicoin {
+namespace Epicoin.Core {
 
 	/// <summary>
 	/// The Epic Free and Open Blockchain of Epicness itself, in all its' structural glory.
@@ -76,16 +76,17 @@ namespace Epicoin {
 	/// <summary>
 	/// Validator, main component, responsible for validating solved problems and modyfying local EFOBE and/or notyfying the network. (Also) Fully manages local EFOBE.
 	/// </summary>
-	internal class Validator : MainComponent<Validator.ITM> {
+	internal class Validator : MainComponent<Validator.ITM>, IValidator {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
 
 		protected EFOBE efobe;
-		internal EFOBE eeffoobbee { get => efobe; }
 
 		HashAlgorithm hasher = SHA256.Create();
 
 		public Validator(Epicore core) : base(core) {}
+
+		public EFOBE GetLocalEFOBE() => efobe;
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 

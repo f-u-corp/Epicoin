@@ -9,7 +9,7 @@ using System.Text;
 using System.Security.Cryptography;
 
 
-namespace Epicoin
+namespace Epicoin.Core
 {
 	class Baby
 	{
@@ -109,7 +109,7 @@ namespace Epicoin
 		{
 			for(int i = 0; i < Baby.MaxCryTries;)
 			{
-				//“We need never be ashamed of our tears.” - Dickens
+				//ï¿½We need never be ashamed of our tears.ï¿½ - Dickens
 				if (this.shoulders.Count == Baby.MaxNumberOfShoulders)
 				{
 					PotentialParent firstShoulder = this.shoulders.Peek();
