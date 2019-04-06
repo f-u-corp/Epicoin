@@ -100,7 +100,7 @@ namespace Epicoin.Core {
 		/// Returns the hash of the top-most block (last block on the longest branch).
 		/// </summary>
 		/// <returns>Hash of last block on the longest branch.</returns>
-		public string TopBlock() => branches.OrderByDescending(br => br.Count).First().Last();
+		public string TopBlock() => branches.Count == 0 ? LCA.hash : branches.OrderByDescending(br => br.Count).First().Last();
 
 		/// <summary>
 		/// Checks whether a branch can grow or derive from block with given hash.
