@@ -300,10 +300,9 @@ namespace Epicoin.Core {
 				} else
 				if(m is ITM.SomeoneSolvedAProblem){
 					var ssa = m as ITM.SomeoneSolvedAProblem;
-					var blok = new EFOBE.Block(ssa.problem, ssa.parms, ssa.solution, ssa.hash);
-					if(validateBlock(efobe.TopBlock(), blok)){
+					if(efobe.CanBranch(ssa.prevHash) && validateBlock(ssa.prevHash, (ssa.problem, ssa.parms, ssa.solution, ssa.hash))){
 						core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
-						efobe.addBlock(blok);
+						efobe.addBlock(ssa.problem, ssa.parms, ssa.solution, ssa.hash, ssa.prevHash);
 					}
 				} else {
 					Thread.Yield();
@@ -376,13 +375,14 @@ namespace Epicoin.Core {
 
 			internal class SomeoneSolvedAProblem : ITM {
 
-				public readonly string problem, parms, solution, hash;
+				public readonly string problem, parms, solution, hash, prevHash;
 
-				public SomeoneSolvedAProblem(string problem, string parms, string sol, string hash){
+				public SomeoneSolvedAProblem(string problem, string parms, string sol, string hash, string prevHash){
 					this.problem = problem;
 					this.parms = parms;
 					this.solution = sol;
 					this.hash = hash;
+					this.prevHash = prevHash;
 				}
 
 			}
