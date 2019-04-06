@@ -2,6 +2,9 @@ using System;
 
 namespace Epicoin.Core {
 
+	/// <summary>
+	/// Core of the Core. Provides methods for starting/stopping the core, as well as accessing components; aka all methods that any self-respecting epicore [implementation] must implement.
+	/// </summary>
 	public interface IEpicore {
 
 		///<summary>Retrieves the solver core component.</summary>
@@ -30,14 +33,23 @@ namespace Epicoin.Core {
 
 	}
 
+	/// <summary>
+	/// Solver component of the Core. Responsible for loading problems (on initialization) and solving them when given the parameters, if solving problems was enabled.
+	/// </summary>
 	public interface ISolver {
-
+		
 	}
 
+	/// <summary>
+	/// Validator component of the Core. Responsible for validating problems solutions (both by-self and received) as well as the EFOBE.
+	/// </summary>
 	public interface IValidator {
 		
 	}
 
+	/// <summary>
+	/// Networking component of the Core.
+	/// </summary>
 	public interface INet {
 		
 	}
