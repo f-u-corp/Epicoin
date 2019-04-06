@@ -307,9 +307,9 @@ namespace Epicoin.Core {
 
 		internal const string EFOBEfile = "EFOBE.json";
 
-		internal EFOBE loadEFOBE(FileInfo file) => JsonConvert.DeserializeObject<EFOBE>(File.ReadAllText(file.FullName));
+		internal EFOBE loadEFOBE(FileInfo file) => EFOBE.Deserialize(File.ReadAllText(file.FullName));
 
-		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, JsonConvert.SerializeObject(efobe));
+		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, EFOBE.Serialize(efobe));
 
 		internal string computeHash(EFOBE.Block preceding, string problem, string parms, string sol){
 			Encoding enc = Encoding.ASCII;
