@@ -10,4 +10,8 @@ namespace Epicoin.Core {
 		
 	}
 
+	public interface INet {
+		
+	}
+
 }
