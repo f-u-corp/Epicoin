@@ -286,10 +286,9 @@ namespace Epicoin.Core {
 				var m = itc.readMessageOrDefault();
 				if(m is ITM.HeresYourEFOBE){
 					var receivedEFOBELoc = (m as ITM.HeresYourEFOBE).tmpCacheLoc;
-					var recEFOBE = loadEFOBE(receivedEFOBELoc);
-					EFOBE.Block prev = default(EFOBE.Block);
-					foreach(var nb in recEFOBE.blocksV()) if(!validateBlock(prev, prev = nb)) goto finaly;
-					this.efobe = recEFOBE;
+					var decomp = JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(File.ReadAllText(receivedEFOBELoc.FullName));
+					if(!decomp.All(validateBlock)) goto finaly;
+					this.efobe = EFOBE.Compile(decomp);
 					finaly: receivedEFOBELoc.Delete();
 				} else
 				if(m is ITM.ISolvedAProblem){
