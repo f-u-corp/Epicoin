@@ -50,7 +50,7 @@ namespace Epicoin.Core {
 		///<summary>Retrieves the validator core component.</summary>
 		public IValidator GetValidator() => validator;
 		///<summary>Retrieves the network manager/maestro core component.</summary>
-		public INet GetNetworkManager() => null;
+		public INet GetNetworkManager() => maestro;
 
 		protected Thread vt, st, nt;
 

@@ -12,7 +12,7 @@ using System.Security.Cryptography;
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin.Core
 {
-	class Baby
+	class Baby : INetBaby
 	{
 		public static int nbSecurityBytes = 3; //arbitrary number, the bigger the better but the longer to compute. So I put a small number for the tests
 		private static string knownParentsFile = "ressources/baby_known_parents.prnt";

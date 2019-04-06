@@ -10,7 +10,7 @@ namespace Epicoin.Core
      * TODO: Write the event handler (on reception, add tear)
      * 
      */
-	class Parent
+	class Parent : INetParent
 	{
 		public Baby Self { get; set; }
 		//private List<Baby> babies; Is this really useful? We already have them in the Baby class

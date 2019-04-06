@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Epicoin.Core
 {
-	class NetworkMaestro : MainComponent<NetworkMaestro.ITM>
+	class NetworkMaestro : MainComponent<NetworkMaestro.ITM>, INet
 	{
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Network");
 
@@ -24,6 +24,10 @@ namespace Epicoin.Core
 		private /*readonly*/ Parent parent;
 
 		public NetworkMaestro(Epicore core) : base(core) {}
+
+		public INetBaby GetBaby() => baby;
+		public INetParent GetParent() => parent;
+
 		internal override void InitAndRun()
 		{
 			LOG.Info("Pre-Loading networking");
