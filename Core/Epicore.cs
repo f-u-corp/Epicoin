@@ -33,6 +33,7 @@ namespace Epicoin.Core {
 		/// <summary>
 		/// Creates new Epicore instance. Fast - all actual initialization happens async on startup (when Start is invoked).
 		/// </summary>
+		/// <param name="solverEnabled">Whether [local] problem solving is enabled.</param>
 		public Epicore(bool solverEnabled = true){
 			st = new Thread((solver = new Solver(this, solverEnabled)).InitAndRun);
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
