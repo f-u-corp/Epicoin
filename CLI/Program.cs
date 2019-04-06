@@ -9,7 +9,7 @@ namespace Epicoin.CLI {
 
 	class Program {
 		static void Main(string[] args){
-			Epicore core = new Epicore();
+			IEpicore core = new Epicore();
 			ILog LOG = LogManager.GetLogger("Epicoin", "CLI");
 			LOG.Info("Starting up...");
 			core.Start();
