@@ -19,10 +19,25 @@ namespace Epicoin.Core {
 	/// </summary>
 	public class EFOBE {
 
+		/// <summary>
+		/// Serializes EFOBE into JSON string.
+		/// </summary>
+		/// <param name="efobe">EFOBE for serialization.</param>
+		/// <returns>JSON string serialization of EFOBE.</returns>
 		public static string Serialize(EFOBE efobe) => JsonConvert.SerializeObject(Decompile(efobe));
 
+		/// <summary>
+		/// Deserializes EFOBE from JSON string.
+		/// </summary>
+		/// <param name="efobe">JSON string for EFOBE deserialization.</param>
+		/// <returns>Deserialized EFOBE from JSON string.</returns>
 		public static EFOBE Deserialize(string efobe) => Compile(JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(efobe));
 
+		/// <summary>
+		/// Decompiles EFOBE into more basic data structure.
+		/// </summary>
+		/// <param name="efobe">EFOBE for decompilation.</param>
+		/// <returns>Decompiled basic efobe representation.</returns>
 		public static List<(string problem, string parameters, string solution, string hash, string prevHash)> Decompile(EFOBE efobe){
 			var bcol = new List<(string problem, string parameters, string solution, string hash, string prevHash)>();
 			var prevHash = NullHash;
@@ -41,6 +56,11 @@ namespace Epicoin.Core {
 			return bcol;
 		}
 
+		/// <summary>
+		/// Compiles EFOBE from basic data structure.
+		/// </summary>
+		/// <param name="raw">Decompiled EFOBE representation</param>
+		/// <returns>Compiled EFOBE</returns>
 		public static EFOBE Compile(List<(string problem, string parameters, string solution, string hash, string prevHash)> raw){
 			EFOBE efobe = new EFOBE();
 			efobe.skipUpdateCheck = true;
@@ -54,13 +74,18 @@ namespace Epicoin.Core {
 		private const string NullHash = "dGltZSB0aGVyZSBpcyBubw==";
 
 		private readonly Dictionary<string, Block.UncertainBlock> blockTree = new Dictionary<string, Block.UncertainBlock>();
+		///<summary>Locked Common Ancestor - transcending block, block whose certainty has been confirmed, yet he must exist in the tree awaiting arrival of the next chosen one.</summary>
 		private Block.UncertainBlock LCA;
 
 		private int longestBranch = 0;
 		private readonly List<List<string>> branches;
 
+		///<summary>Blocks whose existance is undeniable.</summary>
 		private readonly List<Block> bedrocks;
 
+		/// <summary>
+		/// Creates new empty EFOBE.
+		/// </summary>
 		public EFOBE(){
 			branches = new List<List<string>>();
 			LCA = new Block.UncertainBlock(null, null, null, NullHash, null);
@@ -149,6 +174,9 @@ namespace Epicoin.Core {
 			}
 		}
 
+		/// <summary>
+		/// Terminates existence of a branch, and all blocks existing [exclusively] on it.
+		/// </summary>
 		internal void destroyBranch(List<string> branch){
 			branches.Remove(branch);
 			foreach(var b in branch.Select(b => blockTree[b])){
@@ -162,6 +190,9 @@ namespace Epicoin.Core {
 
 		//public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
 
+		/// <summary>
+		/// Everything a self-respecting block requires.
+		/// </summary>
 		public class Block {
 
 			public readonly string problem, parameters, solution;
@@ -177,6 +208,9 @@ namespace Epicoin.Core {
 
 			internal Block(Block b) : this(b.problem, b.parameters, b.solution, b.hash){}
 
+			/// <summary>
+			/// An uncertain block, whose existance may end any moment, requires additional information for survival.
+			/// </summary>
 			public class UncertainBlock : Block {
 
 				internal List<List<string>> branches = new List<List<string>>();
