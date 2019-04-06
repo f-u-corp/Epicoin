@@ -97,7 +97,10 @@ namespace Epicoin.Core {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Solver");
 
-		public Solver(Epicore core) : base(core){}
+		protected bool doSolve;
+		public Solver(Epicore core, bool doSolve) : base(core){
+			this.doSolve = doSolve;
+		}
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 

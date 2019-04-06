@@ -33,8 +33,8 @@ namespace Epicoin.Core {
 		/// <summary>
 		/// Creates new Epicore instance. Fast - all actual initialization happens async on startup (when Start is invoked).
 		/// </summary>
-		public Epicore(){
-			st = new Thread((solver = new Solver(this)).InitAndRun);
+		public Epicore(bool solverEnabled = true){
+			st = new Thread((solver = new Solver(this, solverEnabled)).InitAndRun);
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
 			nt = new Thread(() => {}); //TODO wire in network component
 
