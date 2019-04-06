@@ -51,7 +51,19 @@ namespace Epicoin.Core {
 	/// Networking component of the Core.
 	/// </summary>
 	public interface INet {
-		
+
+		INetBaby GetBaby();
+
+		INetParent GetParent();
+
+	}
+
+	public interface INetBaby {
+
+	}
+
+	public interface INetParent {
+
 	}
 
 }
