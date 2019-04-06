@@ -19,6 +19,10 @@ namespace Epicoin.Core {
 	/// </summary>
 	public class EFOBE {
 
+		public static string Serialize(EFOBE efobe) => JsonConvert.SerializeObject(Decompile(efobe));
+
+		public static EFOBE Deserialize(string efobe) => Compile(JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(efobe));
+
 		public static List<(string problem, string parameters, string solution, string hash, string prevHash)> Decompile(EFOBE efobe){
 			var bcol = new List<(string problem, string parameters, string solution, string hash, string prevHash)>();
 			var prevHash = NullHash;
