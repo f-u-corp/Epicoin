@@ -11,7 +11,7 @@ using log4net;
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin.Core {
 
-	public class Epicore {
+	public class Epicore : IEpicore {
 
 		internal static readonly log4net.Repository.ILoggerRepository LOGREPO = LogManager.CreateRepository("Epicoin");
 		internal static readonly ILog LOG = LogManager.GetLogger("Epicoin", "Epicore");
@@ -34,6 +34,7 @@ namespace Epicoin.Core {
 		/// <summary>
 		/// Creates new Epicore instance. Fast - all actual initialization happens async on startup (when Start is invoked).
 		/// </summary>
+		/// <param name="solverEnabled">Whether [local] problem solving is enabled.</param>
 		public Epicore(bool solverEnabled = true){
 			st = new Thread((solver = new Solver(this, solverEnabled)).InitAndRun);
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
@@ -43,6 +44,13 @@ namespace Epicoin.Core {
 			sendITM2Validator = validator.sendITM;
 			sendITM2Net = maestro.sendITM;
 		}
+
+		///<summary>Retrieves the solver core component.</summary>
+		public ISolver GetSolver() => solver;
+		///<summary>Retrieves the validator core component.</summary>
+		public IValidator GetValidator() => validator;
+		///<summary>Retrieves the network manager/maestro core component.</summary>
+		public INet GetNetworkManager() => null;
 
 		protected Thread vt, st, nt;
 
