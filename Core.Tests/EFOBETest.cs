@@ -39,7 +39,7 @@ namespace Epicoin.Test {
 			File.WriteAllText(tmpE.FullName, "{ \"blocks\": [] }");
 			validator.sendITM(new Validator.ITM.HeresYourEFOBE(tmpE));
 			validator.keepChecking(); //Will receive and bind EFOBE
-			var efobeView = validator.eeffoobbee.blocksV();
+			var efobeView = validator.GetLocalEFOBE().blocksV();
 
 			Assert.IsEmpty(efobeView, "EFOBE did not reset, or reset to a non-empty state.");
 
@@ -51,7 +51,7 @@ namespace Epicoin.Test {
 			validator.keepChecking();
 			Assert.IsTrue(efobeView.Count == 1, "Invaluid result passed validation");
 
-			var outdatedTop = validator.eeffoobbee.TopBlock();
+			var outdatedTop = validator.GetLocalEFOBE().TopBlock();
 			var gp = (pro: ifp.getName(), par: "{ \"o\": 242 }", sol: "{ \"o\": [2,11,11] }");
 			validator.sendITM(new Validator.ITM.SomeoneSolvedAProblem(gp.pro, gp.par, gp.sol, validator.computeHash(outdatedTop, gp.pro, gp.par, gp.sol)));
 			validator.keepChecking();
