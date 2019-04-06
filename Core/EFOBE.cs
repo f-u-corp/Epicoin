@@ -83,6 +83,9 @@ namespace Epicoin.Core {
 		///<summary>Blocks whose existance is undeniable.</summary>
 		private readonly List<Block> bedrocks;
 
+		///<summary>Blocks whose existance is undeniable. [read-only view]</summary>
+		public ReadOnlyCollection<Block> Bedrocks => bedrocks.AsReadOnly();
+
 		/// <summary>
 		/// Creates new empty EFOBE.
 		/// </summary>
