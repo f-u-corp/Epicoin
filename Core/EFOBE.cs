@@ -93,6 +93,11 @@ namespace Epicoin.Core {
 			bedrocks = new List<Block>{};
 		}
 
+		/// <summary>
+		/// Returns the hash of the top-most block (last block on the longest branch).
+		/// </summary>
+		/// <returns>Hash of last block on the longest branch.</returns>
+		public string TopBlock() => branches.OrderByDescending(br => br.Count).First().Last();
 
 		/// <summary>
 		/// Adds block to the tree.
