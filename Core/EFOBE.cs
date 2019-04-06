@@ -202,6 +202,12 @@ namespace Epicoin.Core {
 			}
 		}
 
+		/*
+		 * Testing
+		 */
+		
+		internal int TotalBlockCount => bedrocks.Count + blockTree.Count;
+
 		//public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
 
 		/// <summary>

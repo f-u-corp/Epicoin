@@ -31,35 +31,37 @@ namespace Epicoin.Test {
 		[Test]
 		public void TestEFOBEValidation(){
 			var validator = dummyValidator();
+			File.Delete(Validator.EFOBEfile); //We don't want previous tests to interfere
 			var ifp = new NPcPProblemWrapperTest.InefficientIntFactProblem();
 			validator.sendITM(new Validator.ITM.GetProblemsRegistry(new Dictionary<string, NPcProblemWrapper>{ {ifp.getName(), new NPcProblemWrapper(ifp)} }));
 			validator.init();
 
 			var tmpE = new FileInfo("temp-test-efobe.json");
-			File.WriteAllText(tmpE.FullName, "{ \"blocks\": [] }");
+			File.WriteAllText(tmpE.FullName, "[]");
 			validator.sendITM(new Validator.ITM.HeresYourEFOBE(tmpE));
 			validator.keepChecking(); //Will receive and bind EFOBE
-			var efobeView = validator.GetLocalEFOBE().blocksV();
+			var efobe = validator.GetLocalEFOBE();
 
-			Assert.IsEmpty(efobeView, "EFOBE did not reset, or reset to a non-empty state.");
+			Assert.IsTrue(efobe.TotalBlockCount == 1, "EFOBE did not reset, or reset to a non-empty state.");
 
 			validator.sendITM(new Validator.ITM.ISolvedAProblem(ifp.getName(), "{ \"o\": 242 }", "{ \"o\": [2,11,11] }"));
 			validator.keepChecking();
-			Assert.IsTrue(efobeView.Count == 1, "Valid result did not pass validation.");
+			Assert.IsTrue(efobe.TotalBlockCount == 2, "Valid result did not pass validation.");
 
 			validator.sendITM(new Validator.ITM.ISolvedAProblem(ifp.getName(), "{ \"o\": 242 }", "{ \"o\": [2,12,12] }"));
 			validator.keepChecking();
-			Assert.IsTrue(efobeView.Count == 1, "Invaluid result passed validation");
+			Assert.IsTrue(efobe.TotalBlockCount == 2, "Invaluid result passed validation");
 
-			var outdatedTop = validator.GetLocalEFOBE().TopBlock();
+			var top = validator.GetLocalEFOBE().TopBlock();
 			var gp = (pro: ifp.getName(), par: "{ \"o\": 242 }", sol: "{ \"o\": [2,11,11] }");
-			validator.sendITM(new Validator.ITM.SomeoneSolvedAProblem(gp.pro, gp.par, gp.sol, validator.computeHash(outdatedTop, gp.pro, gp.par, gp.sol)));
+			validator.sendITM(new Validator.ITM.SomeoneSolvedAProblem(gp.pro, gp.par, gp.sol, validator.computeHash(top, gp.pro, gp.par, gp.sol), top));
 			validator.keepChecking();
-			Assert.IsTrue(efobeView.Count == 2, "Valid hash did not pass validation.");
+			Assert.IsTrue(efobe.TotalBlockCount == 3, "Valid hash did not pass validation.");
 			
-			validator.sendITM(new Validator.ITM.SomeoneSolvedAProblem(gp.pro, gp.par, gp.sol, validator.computeHash(outdatedTop, gp.pro, gp.par, gp.sol)));
+			top = validator.GetLocalEFOBE().TopBlock();
+			validator.sendITM(new Validator.ITM.SomeoneSolvedAProblem(gp.pro, gp.par, gp.sol, validator.computeHash("Z2c=", gp.pro, gp.par, gp.sol), top));
 			validator.keepChecking();
-			Assert.IsTrue(efobeView.Count == 2, "Invalid hash passed validation.");
+			Assert.IsTrue(efobe.TotalBlockCount == 3, "Invalid hash passed validation.");
 
 			validator.cleanup();
 		}
