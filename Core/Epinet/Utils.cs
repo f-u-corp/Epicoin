@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Epicoin {
+namespace Epicoin.Core {
 
 	/// <summary>
 	/// Automatically advancing bit buffer, with self-adjusting capacity, to simplify bit-level IO.
