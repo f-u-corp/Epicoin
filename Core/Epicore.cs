@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -8,9 +9,9 @@ using System.Linq;
 using log4net;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
-namespace Epicoin {
+namespace Epicoin.Core {
 
-	public class Epicore {
+	public class Epicore : IEpicore {
 
 		internal static readonly log4net.Repository.ILoggerRepository LOGREPO = LogManager.CreateRepository("Epicoin");
 		internal static readonly ILog LOG = LogManager.GetLogger("Epicoin", "Epicore");
@@ -29,8 +30,12 @@ namespace Epicoin {
 
 		internal bool stop { get; private set; }
 
-		public Epicore(){
-			st = new Thread((solver = new Solver(this)).InitAndRun);
+		/// <summary>
+		/// Creates new Epicore instance. Fast - all actual initialization happens async on startup (when Start is invoked).
+		/// </summary>
+		/// <param name="solverEnabled">Whether [local] problem solving is enabled.</param>
+		public Epicore(bool solverEnabled = true){
+			st = new Thread((solver = new Solver(this, solverEnabled)).InitAndRun);
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
 			nt = new Thread(() => {}); //TODO wire in network component
 
@@ -38,17 +43,37 @@ namespace Epicoin {
 			sendITM2Validator = validator.sendITM;
 		}
 
+		///<summary>Retrieves the solver core component.</summary>
+		public ISolver GetSolver() => solver;
+		///<summary>Retrieves the validator core component.</summary>
+		public IValidator GetValidator() => validator;
+		///<summary>Retrieves the network manager/maestro core component.</summary>
+		public INet GetNetworkManager() => null;
+
 		protected Thread vt, st, nt;
 
+		/// <summary>
+		/// Starts Epicore (and all related threads). Parallel, non-blocking - Epicore creates and manages all threads it requires automatically.
+		/// </summary>
 		public void Start(){
 			vt.Start();
 			nt.Start();
 			st.Start();
 		}
 
+		/// <summary>
+		/// Stops Epicore (and all related threads). Blocking - blocks until all Epicore components have stopped.
+		/// </summary>
 		public void Stop(){
 			stop = true;
 			while(vt.IsAlive || st.IsAlive || nt.IsAlive) Thread.Yield();
+		}
+
+		/// <summary>
+		/// Stops Epicore (and all related threads). Non-blocking - task is marked as completed when all components have stopped.
+		/// </summary>
+		public async Task StopNB(){
+			await Task.Run((Action) Stop);
 		}
 
 	}
