@@ -19,6 +19,33 @@ namespace Epicoin.Core {
 	/// </summary>
 	public class EFOBE {
 
+		public static List<(string problem, string parameters, string solution, string hash, string prevHash)> Decompile(EFOBE efobe){
+			var bcol = new List<(string problem, string parameters, string solution, string hash, string prevHash)>();
+			var prevHash = NullHash;
+			{
+				foreach(var b in efobe.bedrocks) if(b.hash != prevHash){
+					bcol.Add((b.problem, b.parameters, b.solution, b.hash, prevHash));
+					prevHash = b.hash;
+				}
+			}
+			{
+				var LCA = efobe.LCA;
+				bcol.Add((LCA.problem, LCA.parameters, LCA.solution, LCA.hash, prevHash));
+				prevHash = LCA.hash;
+			}
+			foreach(var b in efobe.blockTree.Values) if(b.hash != efobe.LCA.hash) bcol.Add((b.problem, b.parameters, b.solution, b.hash, b.precedingHash));
+			return bcol;
+		}
+
+		public static EFOBE Compile(List<(string problem, string parameters, string solution, string hash, string prevHash)> raw){
+			EFOBE efobe = new EFOBE();
+			efobe.skipUpdateCheck = true;
+			raw.ForEach(b => efobe.addBlock(b.problem, b.parameters, b.solution, b.hash, b.prevHash));
+			efobe.skipUpdateCheck = false;
+			efobe.updateCheckBranches(true);
+			return efobe;
+		}
+
 		private const int BedrockDelta = 1024, BranchLengthDelta = 1024;
 		private const string NullHash = "dGltZSB0aGVyZSBpcyBubw==";
 
