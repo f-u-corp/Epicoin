@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
 
-namespace Epicoin
+namespace Epicoin.Core
 {
 	/*
      * TODO: Write the event handler (on reception, add tear)

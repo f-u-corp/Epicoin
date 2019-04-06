@@ -10,7 +10,7 @@ using System.Text;
 using System.Security.Cryptography;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
-namespace Epicoin
+namespace Epicoin.Core
 {
 	class Baby
 	{
