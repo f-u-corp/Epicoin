@@ -100,6 +100,12 @@ namespace Epicoin.Core {
 		public string TopBlock() => branches.OrderByDescending(br => br.Count).First().Last();
 
 		/// <summary>
+		/// Checks whether a branch can grow or derive from block with given hash.
+		/// </summary>
+		/// <returns>Whether branching from given block can occur.</returns>
+		public bool CanBranch(string hash) => hash == LCA.hash || blockTree.ContainsKey(hash);
+
+		/// <summary>
 		/// Adds block to the tree.
 		/// </summary>
 		internal void addBlock(string problem, string pars, string sol, string hash, string precedingHash){
