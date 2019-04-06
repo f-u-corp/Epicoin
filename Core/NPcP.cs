@@ -93,7 +93,7 @@ namespace Epicoin.Core {
 	/// <summary>
 	/// Solver, main component, responsible for loading and solving problems.
 	/// </summary>
-	internal class Solver : MainComponent<Solver.ITM> {
+	internal class Solver : MainComponent<Solver.ITM>, ISolver {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Solver");
 

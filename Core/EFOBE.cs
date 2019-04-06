@@ -61,7 +61,7 @@ namespace Epicoin.Core {
 	/// <summary>
 	/// Validator, main component, responsible for validating solved problems and modyfying local EFOBE and/or notyfying the network. (Also) Fully manages local EFOBE.
 	/// </summary>
-	internal class Validator : MainComponent<Validator.ITM> {
+	internal class Validator : MainComponent<Validator.ITM>, IValidator {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
 
