@@ -45,6 +45,8 @@ namespace Epicoin.Core {
 			if(blockTree.ContainsKey(precedingHash)){
 				Block.UncertainBlock next = new Block.UncertainBlock(problem, pars, sol, hash, precedingHash);
 				blockTree.Add(hash, next);
+				if(skipUpdateCheck) return;
+
 				Block.UncertainBlock prev = blockTree[precedingHash];
 				bool rb;
 				if(prev == LCA){
@@ -73,7 +75,7 @@ namespace Epicoin.Core {
 			}
 		}
 
-		private bool skipUpdateCheck = false;
+		private bool skipUpdateCheck = false; //WARNING: After skipping update checks, and setting this back to false, updateCheckBranches(true) must be called!!!
 		internal void updateCheckBranches(bool refresh = false){
 			if(skipUpdateCheck) return;
 			if(refresh){
