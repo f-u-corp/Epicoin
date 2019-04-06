@@ -42,6 +42,13 @@ namespace Epicoin.Core {
 			sendITM2Validator = validator.sendITM;
 		}
 
+		///<summary>Retrieves the solver core component.</summary>
+		public ISolver GetSolver() => solver;
+		///<summary>Retrieves the validator core component.</summary>
+		public IValidator GetValidator() => validator;
+		///<summary>Retrieves the network manager/maestro core component.</summary>
+		public INet GetNetworkManager() => null;
+
 		protected Thread vt, st, nt;
 
 		/// <summary>
