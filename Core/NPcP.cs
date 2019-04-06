@@ -11,7 +11,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
-namespace Epicoin {
+namespace Epicoin.Core {
 
 	/// <summary>
 	/// Temporary interface for dll-based problems externalization approach
@@ -95,13 +95,16 @@ namespace Epicoin {
 	/// <summary>
 	/// Solver, main component, responsible for loading and solving problems.
 	/// </summary>
-	internal class Solver : MainComponent<Solver.ITM> {
+	internal class Solver : MainComponent<Solver.ITM>, ISolver {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Solver");
 
 		public override Action<ITM> sendITM { get => sendITMAsync; }
 
-		public Solver(Epicore core) : base(core){}
+		protected bool doSolve;
+		public Solver(Epicore core, bool doSolve) : base(core){
+			this.doSolve = doSolve;
+		}
 
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 

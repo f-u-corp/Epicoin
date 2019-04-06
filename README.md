@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Fundamentally-Uncentralizable-Cookies/Epicoin.svg](https://travis-ci.org/Fundamentally-Uncentralizable-Cookies/Epicoin) [![Latest](http://github-release-version.herokuapp.com/github/Fundamentally-Uncentralizable-Cookies/Epicoin/release.svg?style=flat)](https://github.com/Fundamentally-Uncentralizable-Cookies/Epicoin/releases/latest)
+[![Build Status](https://travis-ci.org/Fundamentally-Uncentralizable-Cookies/Epicoin.svg)](https://travis-ci.org/Fundamentally-Uncentralizable-Cookies/Epicoin) [![Latest](http://github-release-version.herokuapp.com/github/Fundamentally-Uncentralizable-Cookies/Epicoin/release.svg?style=flat)](https://github.com/Fundamentally-Uncentralizable-Cookies/Epicoin/releases/latest)
 
 [![Logo](LOGO.png)](https://epitacoin.ml)
 # [Epicoin](https://epitacoin.ml)
