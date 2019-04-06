@@ -19,30 +19,111 @@ namespace Epicoin.Core {
 	/// </summary>
 	public class EFOBE {
 
-		private readonly Dictionary<string, Block> blockTree = new Dictionary<string, Block>();
+		private const int BedrockDelta = 1024, BranchLengthDelta = 1024;
+		private const string NullHash = "dGltZSB0aGVyZSBpcyBubw==";
+
+		private readonly Dictionary<string, Block.UncertainBlock> blockTree = new Dictionary<string, Block.UncertainBlock>();
+		private Block.UncertainBlock LCA;
+
+		private int longestBranch = 0;
+		private readonly List<List<string>> branches;
 
 		private readonly List<Block> bedrocks;
 
-		public EFOBE(List<Block> bedrocks){
-			this.bedrocks = new List<Block>(bedrocks);
+		public EFOBE(){
+			branches = new List<List<string>>();
+			LCA = new Block.UncertainBlock(null, null, null, NullHash, null);
+			blockTree[LCA.hash] = LCA;
+			bedrocks = new List<Block>{};
 		}
 
 
 		/// <summary>
-		/// Appends the block to the end of the EFOBE.
+		/// Adds block to the tree.
 		/// </summary>
 		internal void addBlock(string problem, string pars, string sol, string hash, string precedingHash){
 			if(blockTree.ContainsKey(precedingHash)){
-				Block next = new Block(problem, pars, sol, hash, precedingHash);
+				Block.UncertainBlock next = new Block.UncertainBlock(problem, pars, sol, hash, precedingHash);
 				blockTree.Add(hash, next);
-				blockTree[precedingHash].append(next);
+				Block.UncertainBlock prev = blockTree[precedingHash];
+				bool rb;
+				if(prev == LCA){
+					List<string> newBranch = new List<string>{hash};
+					branches.Add(newBranch);
+					next.branches.Add(newBranch);
+					longestBranch = Math.Max(longestBranch, 1);
+					rb = false;
+				} else {
+					rb = prev.append(next);
+					if(!rb){
+						var branch = prev.branches[0];
+						branch.Add(next.hash);
+						next.branches.Add(branch);
+						longestBranch = Math.Max(longestBranch, branch.Count);
+					} else {
+						var branch = prev.branches[0].TakeWhile(h => h != prev.hash).ToList();
+						branch.Add(prev.hash);
+						branch.Add(next.hash);
+						branches.Add(branch);
+						foreach(var b in branch.Select(h => blockTree[h])) b.branches.Add(branch);
+						rb = false;
+					}
+				}
+				updateCheckBranches(rb);
 			}
 		}
 
-		/// <summary>
-		/// Creates a read-only <i>view</i> of the entire EFOBE.
-		/// </summary>
-		internal ReadOnlyCollection<Block> blocksV() => new ReadOnlyCollection<Block>(blocks);
+		private bool skipUpdateCheck = false;
+		internal void updateCheckBranches(bool refresh = false){
+			if(skipUpdateCheck) return;
+			if(refresh){
+				//Full branch cash reconstruction requested
+				branches.Clear();
+				List<string> derive(List<string> branch){
+					List<string> copy = new List<string>(branch);
+					branches.Add(copy);
+					return copy;
+				}
+				void followBranch(List<string> branch, Block.UncertainBlock next){
+					next.branches.Clear();
+					var brs = new List<List<string>>{branch};
+					for(int i = 1; i < next.next.Count; i++) brs.Add(derive(branch));
+					for(int i = 0; i < next.next.Count; i++){
+						var br = brs[i];
+						var nn = blockTree[next.next[i]];
+						br.Add(nn.hash);
+						followBranch(br, nn);
+					}
+				}
+				foreach(var bs in blockTree.Values.Where(b => b.precedingHash == LCA.hash)) followBranch(derive(new List<string>()), bs);
+				foreach(var br in branches) foreach(var b in br.Select(id => blockTree[id])) b.branches.Add(br);
+			}
+			//Remove short outdated branches
+			List<List<string>> forRemoval = branches.Where(br => longestBranch - br.Count < BranchLengthDelta).ToList();
+			forRemoval.ForEach(destroyBranch);
+			//Immortalize common ancestors until next derivation, or we reach outdate threshold
+			while(longestBranch > BedrockDelta){
+				var nca = branches[0][0];
+				if(branches.All(br => br[0] == nca)){
+					bedrocks.Add(new Block(LCA));
+					var nLCA = blockTree[nca];
+					LCA = new Block.UncertainBlock(nLCA.problem, nLCA.parameters, nLCA.solution, nLCA.hash, null);
+					branches.ForEach(b => b.RemoveAt(0));
+					longestBranch--;
+				} else break;
+			}
+		}
+
+		internal void destroyBranch(List<string> branch){
+			branches.Remove(branch);
+			foreach(var b in branch.Select(b => blockTree[b])){
+				b.branches.Remove(branch);
+				if(b.branches.Count == 0){
+					blockTree.Remove(b.hash);
+					if(blockTree.ContainsKey(b.precedingHash)) blockTree[b.precedingHash].next.Remove(b.hash);
+				}
+			}
+		}
 
 		//public override string ToString() => "EFOBE{" + String.Join("=-", blocks) + "}";
 
@@ -52,25 +133,38 @@ namespace Epicoin.Core {
 			
 			public readonly string hash;
 
-			private readonly string precedingHash;
-			private readonly List<string> next;
-
-			internal Block(string problem, string pars, string sol, string hash, string precedingHash){
+			internal Block(string problem, string pars, string sol, string hash){
 				this.problem = problem;
 				this.parameters = pars;
 				this.solution = sol;
 				this.hash = hash;
-
-				this.next = new List<string>(1); //Default assumption - stable linear network
 			}
 
-			internal void append(Block block){
-				next.Add(block.hash);
-			}
+			internal Block(Block b) : this(b.problem, b.parameters, b.solution, b.hash){}
 
-			//public override string ToString() => $"[{problem} @ {hash}]";
+			public class UncertainBlock : Block {
+
+				internal List<List<string>> branches = new List<List<string>>();
+
+				internal readonly string precedingHash;
+				internal readonly List<string> next;
+
+				internal UncertainBlock(string problem, string pars, string sol, string hash, string precedingHash) : base(problem, pars, sol, hash){
+					this.precedingHash = precedingHash;
+					this.next = new List<string>(1); //Default assumption - stable linear network
+				}
+
+				internal bool append(Block block){
+					next.Add(block.hash);
+					return next.Count > 1;
+				}
+
+				//public override string ToString() => $"[{problem} @ {hash}]";
+
+			}
 
 		}
+
 	}
 
 	/// <summary>
