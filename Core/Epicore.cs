@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -29,6 +30,9 @@ namespace Epicoin {
 
 		internal bool stop { get; private set; }
 
+		/// <summary>
+		/// Creates new Epicore instance. Fast - all actual initialization happens async on startup (when Start is invoked).
+		/// </summary>
 		public Epicore(){
 			st = new Thread((solver = new Solver(this)).InitAndRun);
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
@@ -40,15 +44,28 @@ namespace Epicoin {
 
 		protected Thread vt, st, nt;
 
+		/// <summary>
+		/// Starts Epicore (and all related threads). Parallel, non-blocking - Epicore creates and manages all threads it requires automatically.
+		/// </summary>
 		public void Start(){
 			vt.Start();
 			nt.Start();
 			st.Start();
 		}
 
+		/// <summary>
+		/// Stops Epicore (and all related threads). Blocking - blocks until all Epicore components have stopped.
+		/// </summary>
 		public void Stop(){
 			stop = true;
 			while(vt.IsAlive || st.IsAlive || nt.IsAlive) Thread.Yield();
+		}
+
+		/// <summary>
+		/// Stops Epicore (and all related threads). Non-blocking - task is marked as completed when all components have stopped.
+		/// </summary>
+		public async Task StopNB(){
+			await Task.Run(Stop);
 		}
 
 	}
