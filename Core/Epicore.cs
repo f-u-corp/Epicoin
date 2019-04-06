@@ -11,7 +11,7 @@ using log4net;
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin.Core {
 
-	public class Epicore {
+	public class Epicore : IEpicore {
 
 		internal static readonly log4net.Repository.ILoggerRepository LOGREPO = LogManager.CreateRepository("Epicoin");
 		internal static readonly ILog LOG = LogManager.GetLogger("Epicoin", "Epicore");
