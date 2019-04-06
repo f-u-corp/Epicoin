@@ -171,7 +171,7 @@ namespace Epicoin.Core {
 				foreach(var br in branches) foreach(var b in br.Select(id => blockTree[id])) b.branches.Add(br);
 			}
 			//Remove short outdated branches
-			List<List<string>> forRemoval = branches.Where(br => longestBranch - br.Count < BranchLengthDelta).ToList();
+			List<List<string>> forRemoval = branches.Where(br => longestBranch - br.Count >= BranchLengthDelta).ToList();
 			forRemoval.ForEach(destroyBranch);
 			//Immortalize common ancestors until next derivation, or we reach outdate threshold
 			while(longestBranch > BedrockDelta){
