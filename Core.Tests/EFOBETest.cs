@@ -3,9 +3,11 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
+using Epicoin.Core;
+
 using NUnit.Framework;
 
-namespace Epicoin {
+namespace Epicoin.Test {
 
 	internal class DummySuspendedEpicore : Epicore {
 
