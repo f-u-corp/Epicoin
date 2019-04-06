@@ -77,6 +77,8 @@ namespace Epicoin.Core {
 
 		public Validator(Epicore core) : base(core) {}
 
+		public EFOBE GetLocalEFOBE() => efobe;
+
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 		internal override void InitAndRun(){
