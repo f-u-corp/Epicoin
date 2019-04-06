@@ -303,7 +303,7 @@ namespace Epicoin.Core {
 				} else
 				if(m is ITM.SomeoneSolvedAProblem){
 					var ssa = m as ITM.SomeoneSolvedAProblem;
-					if(efobe.CanBranch(ssa.prevHash) && validateBlock(ssa.prevHash, (ssa.problem, ssa.parms, ssa.solution, ssa.hash))){
+					if(efobe.CanBranch(ssa.prevHash) && validateBlock((ssa.problem, ssa.parms, ssa.solution, ssa.hash, ssa.prevHash))){
 						core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
 						efobe.addBlock(ssa.problem, ssa.parms, ssa.solution, ssa.hash, ssa.prevHash);
 					}
@@ -337,7 +337,7 @@ namespace Epicoin.Core {
 			return Convert.ToBase64String(hasher.ComputeHash(preHash));
 		}
 		protected bool validateSolution(string problem, string parms, string solution) => problemsRegistry[problem].check(parms, solution);
-		protected bool validateBlock(string prHash, (string problem, string parameters, string solution, string hash) b) => validateSolution(b.problem, b.parameters, b.solution) && computeHash(prHash, b.problem, b.parameters, b.solution) == b.hash;
+		protected bool validateBlock((string problem, string parameters, string solution, string hash, string prevHash) b) => validateSolution(b.problem, b.parameters, b.solution) && computeHash(b.prevHash, b.problem, b.parameters, b.solution) == b.hash;
 
 
 		/*
