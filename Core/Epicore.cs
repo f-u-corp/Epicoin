@@ -65,7 +65,7 @@ namespace Epicoin.Core {
 		/// Stops Epicore (and all related threads). Non-blocking - task is marked as completed when all components have stopped.
 		/// </summary>
 		public async Task StopNB(){
-			await Task.Run(Stop);
+			await Task.Run((Action) Stop);
 		}
 
 	}
