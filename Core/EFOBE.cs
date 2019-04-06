@@ -322,9 +322,9 @@ namespace Epicoin.Core {
 
 		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, EFOBE.Serialize(efobe));
 
-		internal string computeHash(EFOBE.Block preceding, string problem, string parms, string sol){
+		internal string computeHash(string prHash, string problem, string parms, string sol){
 			Encoding enc = Encoding.ASCII;
-			byte[] prevHash = Convert.FromBase64String(preceding.hash == null ? "dGltZSB0aGVyZSBpcyBubw==" : preceding.hash);
+			byte[] prevHash = Convert.FromBase64String(prHash);
 			int p, r, s;
 			byte[] preHash = new byte[(s = (r = (p = prevHash.Length) + enc.GetByteCount(problem)) + enc.GetByteCount(parms)) + enc.GetByteCount(sol)];
 			Array.Copy(prevHash, preHash, prevHash.Length);
@@ -333,10 +333,8 @@ namespace Epicoin.Core {
 			enc.GetBytes(sol, 0, sol.Length, preHash, s);
 			return Convert.ToBase64String(hasher.ComputeHash(preHash));
 		}
-		protected EFOBE.Block hashBlock(EFOBE.Block preceding, string problem, string parms, string sol) => new EFOBE.Block(problem, parms, sol, computeHash(preceding, problem, parms, sol));
-
 		protected bool validateSolution(string problem, string parms, string solution) => problemsRegistry[problem].check(parms, solution);
-		protected bool validateBlock(EFOBE.Block preceding, EFOBE.Block v) => validateSolution(v.problem, v.parameters, v.solution) && computeHash(preceding, v.problem, v.parameters, v.solution) == v.hash;
+		protected bool validateBlock(string prHash, (string problem, string parameters, string solution, string hash) b) => validateSolution(b.problem, b.parameters, b.solution) && computeHash(prHash, b.problem, b.parameters, b.solution) == b.hash;
 
 
 		/*
