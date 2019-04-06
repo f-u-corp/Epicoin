@@ -7,7 +7,7 @@ using System.Linq;
 
 using Newtonsoft.Json;
 
-namespace Epicoin {
+namespace Epicoin.Core {
 
 	/// <summary>
 	/// The Epic Free and Open Blockchain of Epicness itself, in all its' structural glory.

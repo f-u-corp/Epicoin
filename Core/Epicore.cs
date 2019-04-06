@@ -9,7 +9,7 @@ using System.Linq;
 using log4net;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
-namespace Epicoin {
+namespace Epicoin.Core {
 
 	public class Epicore {
 

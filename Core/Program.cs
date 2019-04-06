@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 
+using Epicoin.Core;
+
 namespace Epicoin {
 	class Program {
 		static void Main(string[] args){

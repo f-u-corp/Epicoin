@@ -9,7 +9,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
-namespace Epicoin {
+namespace Epicoin.Core {
 
 	/// <summary>
 	/// Temporary interface for dll-based problems externalization approach
