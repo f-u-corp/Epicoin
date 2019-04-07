@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Epicoin;
+using Epicoin.Core;
 
 namespace Epicoin.Problems {
 
