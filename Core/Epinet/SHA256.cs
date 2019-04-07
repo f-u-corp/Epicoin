@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Epicoin {
+namespace Epicoin.Core {
 	public class SHA256 {
 
 		public const int ibs = sizeof(int)*8;
