@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
+using Epicoin.Core;
+
 using NUnit.Framework;
 
-namespace Epicoin {
+namespace Epicoin.Test {
 
 	[TestFixture]
 	public class BitBufferTest {
