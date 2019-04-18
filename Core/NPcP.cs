@@ -39,11 +39,14 @@ namespace Epicoin.Core {
 
 		readonly ComputeProgram prog;
 		readonly ComputeKernel slv, chck;
+		readonly Type parameterT, solutionT;
 
-		public NPcProblemWrapper(ComputeProgram prog){
+		public NPcProblemWrapper(ComputeProgram prog, Type parameterT, Type solutionT){
 			this.prog = prog;
 			slv = this.prog.CreateKernel("solve");
 			chck = this.prog.CreateKernel("check");
+			this.parameterT = parameterT;
+			this.solutionT = solutionT;
 		}
 
 		public void Dispose(){
@@ -117,8 +120,9 @@ namespace Epicoin.Core {
 		protected void LoadProblems(){
 			LOG.Info("Loading problems...");
 			var reg = new Dictionary<string, NPcProblemWrapper>();
-			new DirectoryInfo("npocl").Create();
-			new DirectoryInfo("npocl").GetFiles("*.cl").ToList().ForEach(f => {});
+			var pdir = new DirectoryInfo("npocl");
+			pdir.Create();
+			foreach(var tr in pdir.GetFiles("*.cl").Select(f => (name: f.Name.Substring(f.Name.Length-3), cl: f, str: new FileInfo(f.FullName.Substring(0, f.FullName.Length-2) + "json"))).Select(tr => (name: tr.name, cl: new ComputeProgram(clContext, File.ReadAllText(tr.cl.FullName)), str: JsonStructCreator.CreateStructs(tr.name, File.ReadAllText(tr.str.FullName))))) reg.Add(tr.name, new NPcProblemWrapper(tr.cl, tr.str["Parameter"], tr.str["Solution"]));
 			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
 			this.problemsICanSolve = new HashSet<string>(problemsRegistry.Keys); //TODO persistent config? I'd say it does not belong to core...
 			LOG.Info($"Successfuly loaded problems - {problemsRegistry.Count} ({String.Join(", ", problemsRegistry.Keys)})");
