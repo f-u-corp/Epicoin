@@ -24,7 +24,7 @@ namespace Epicoin.Core {
 
 		public CBuilder Class(string name, TypeAttributes attr = TypeAttributes.Class | TypeAttributes.Public, Type parent = null) => new CBuilder(this, name, attr | TypeAttributes.AnsiClass, parent);
 
-		public CBuilder Struct(string name, TypeAttributes attr = TypeAttributes.Public) => Class(name, attr | TypeAttributes.Sealed | TypeAttributes.Serializable, typeof(ValueType));
+		public CBuilder Struct(string name, TypeAttributes attr = TypeAttributes.Public | TypeAttributes.SequentialLayout) => Class(name, attr | TypeAttributes.Sealed | TypeAttributes.Serializable, typeof(ValueType));
 
 		internal class CBuilder {
 
