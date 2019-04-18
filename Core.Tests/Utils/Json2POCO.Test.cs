@@ -29,10 +29,10 @@ namespace Epicoin.Test {
 						aff = fc.GetField("afloat", BindingFlags.Instance | BindingFlags.Public),
 						asf = fc.GetField("staticFlag", BindingFlags.Static | BindingFlags.Public),
 						aplf = fc.GetField("privateEFOBEList", BindingFlags.Instance | BindingFlags.NonPublic);
-			Assert.AreNotEqual(null, aif, "Class Creation: Field creation failed");
-			Assert.AreNotEqual(null, aff, "Class Creation: Field creation failed");
-			Assert.AreNotEqual(null, asf, "Class Creation: Field creation failed");
-			Assert.AreNotEqual(null, aplf, "Class Creation: Field creation failed");
+			Assert.IsNotNull(aif, "Class Creation: Field creation failed");
+			Assert.IsNotNull(aff, "Class Creation: Field creation failed");
+			Assert.IsNotNull(asf, "Class Creation: Field creation failed");
+			Assert.IsNotNull(aplf, "Class Creation: Field creation failed");
 
 			Assert.AreEqual(typeof(int), aif.FieldType, "Class Creation: Field Type Mismatch");
 			Assert.AreEqual(typeof(float), aff.FieldType, "Class Creation: Field Type Mismatch");
