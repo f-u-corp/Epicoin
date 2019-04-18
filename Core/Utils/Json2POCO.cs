@@ -16,9 +16,9 @@ namespace Epicoin.Core {
 			this.moduleBuilder = assemblyBuilder.DefineDynamicModule(this.assembly.Name);
 		}
 
-		public CBuilder Class(string name, TypeAttributes attr = TypeAttributes.Class, Type parent = null) => new CBuilder(this, name, attr | TypeAttributes.AnsiClass, parent);
+		public CBuilder Class(string name, TypeAttributes attr = TypeAttributes.Class | TypeAttributes.Public, Type parent = null) => new CBuilder(this, name, attr | TypeAttributes.AnsiClass, parent);
 
-		public CBuilder Struct(string name, TypeAttributes attr = 0) => Class(name, attr | TypeAttributes.Sealed | TypeAttributes.ExplicitLayout | TypeAttributes.Serializable, typeof(ValueType));
+		public CBuilder Struct(string name, TypeAttributes attr = TypeAttributes.Public) => Class(name, attr | TypeAttributes.Sealed | TypeAttributes.ExplicitLayout | TypeAttributes.Serializable, typeof(ValueType));
 
 		internal class CBuilder {
 
