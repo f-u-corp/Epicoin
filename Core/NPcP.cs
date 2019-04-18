@@ -32,12 +32,41 @@ namespace Epicoin.Core {
 		}
 
 		internal S[] solve(P[] parms){
+			long Len = parms.LongLength;
+			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly, parms))
+			using(var solBuff = new ComputeBuffer<S>(prog.Context, ComputeMemoryFlags.WriteOnly, Len)){
+				slv.SetMemoryArgument(0, parBuff);
+				slv.SetMemoryArgument(1, solBuff);
+				using(var ccq = new ComputeCommandQueue(prog.Context, prog.Devices[0], ComputeCommandQueueFlags.None)){
+					ccq.Execute(slv, null, new []{Len}, null, null);
+					S[] sols = new S[Len];
+					ccq.Finish();
+					ccq.ReadFromBuffer(solBuff, ref sols, true, null);
+					return sols;
+				}
+			}
+		}
 		public string solve(string parms) => JsonConvert.SerializeObject(solve(JsonConvert.DeserializeObject<P[]>(parms)));
 
-		internal bool check(P[] parms, S[] solution){
+		internal bool check(P[] parms, S[] solutions){
+			long Len = parms.LongLength;
+			if(Len != solutions.LongLength) throw new InvalidOperationException("Solutions must be as much as parameters!");
+			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly, parms))
+			using(var solBuff = new ComputeBuffer<S>(prog.Context, ComputeMemoryFlags.ReadOnly, solutions))
+			using(var valiBuff = new ComputeBuffer<short>(prog.Context, ComputeMemoryFlags.WriteOnly, Len)){
+				chck.SetMemoryArgument(0, parBuff);
+				chck.SetMemoryArgument(1, solBuff);
+				chck.SetMemoryArgument(2, valiBuff);
+				using(var ccq = new ComputeCommandQueue(prog.Context, prog.Devices[0], ComputeCommandQueueFlags.None)){
+					ccq.Execute(chck, null, new []{Len}, null, null);
+					short[] val = new short[Len];
+					ccq.Finish();
+					ccq.ReadFromBuffer(valiBuff, ref val, true, null);
+					return val.All(s => s != 0);
+				}
+			}
 		}
 		public bool check(string parms, string sols) => check(JsonConvert.DeserializeObject<P[]>(parms), JsonConvert.DeserializeObject<S[]>(sols));
-
 
 	}
 
