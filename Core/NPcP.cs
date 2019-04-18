@@ -6,6 +6,9 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 
+using Cloo;
+using Cloo.Extensions;
+
 using Newtonsoft.Json;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
