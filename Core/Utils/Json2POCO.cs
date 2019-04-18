@@ -1,7 +1,9 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Reflection.Emit;
 
+[assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin.Core {
 
 	internal class GroupedClassesBuilder {
