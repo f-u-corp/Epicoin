@@ -145,6 +145,12 @@ namespace Epicoin.Core {
 			InitOpenCL();
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
+			LOG.Info("Waiting for user input for CL testing...");
+			LOG.Info("Input JSON string to solve for wit NPcP-EGCD");
+			string json = Console.ReadLine();
+			Console.WriteLine(problemsRegistry["NPcP - EGCD"].solve(json));
+			LOG.Info("Waiting for input to shutdown");
+			Console.ReadKey();
 			CleanupOpenCL();
 		}
 
