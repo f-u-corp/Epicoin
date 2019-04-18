@@ -145,13 +145,30 @@ namespace Epicoin.Core {
 			InitOpenCL();
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
-			LOG.Info("Waiting for user input for CL testing...");
-			LOG.Info("Input JSON string to solve for wit NPcP-EGCD");
-			string json = Console.ReadLine();
-			Console.WriteLine(problemsRegistry["NPcP - EGCD"].solve(json));
-			LOG.Info("Waiting for input to shutdown");
-			Console.ReadKey();
+			CLIProblemTesting();
 			CleanupOpenCL();
+		}
+
+		private void CLIProblemTesting(){
+			LOG.Info("Welcome to CLI problem testing!");
+			st: LOG.Info("Input your problem!");
+			var pr = Console.ReadLine();
+			if(!problemsRegistry.ContainsKey(pr)) goto st;
+			var problem = problemsRegistry[pr];
+			LOG.Info("Input parameters to solve for");
+			string parms = Console.ReadLine();
+			string sol = problem.solve(parms);
+			Console.WriteLine(sol);
+			LOG.Info("Press a key to validate found solution");
+			Console.ReadKey();
+			bool val = problem.check(parms, sol);
+			Console.WriteLine("Solution valid: " + val);
+			re: LOG.Info("Input 'another' to test with a different problem, or 'exit' to leave CLI problem testing");
+			switch(Console.ReadLine().ToLower()){
+				case "exit": case "quit": break;
+				case "another": goto st;
+				default: goto re;
+			}
 		}
 
 		protected ComputeDevice clDevice;
