@@ -2,6 +2,10 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Collections.Generic;
+using System.Linq;
+
+using Newtonsoft.Json;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin.Core {
@@ -46,6 +50,37 @@ namespace Epicoin.Core {
 			public Type Build() => builder.CreateType();
 
 		}
+
+	}
+
+	internal class JsonStructCreator {
+
+		public static Dictionary<string, Type> CreateStructs(GroupedClassesBuilder gcb, string json){
+			var jtypes = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(json);
+			var builders = jtypes.Keys.Select(t => (name: t, t: gcb.Struct(t))).ToDictionary(p => p.name, p => p.t);
+			Type GetDType(string name){
+				if(name.EndsWith("[]")) return GetDType(name.Substring(0, name.Length-2)).MakeArrayType();
+				switch(name){
+					case "bool": case "boolean": return typeof(bool);
+					case "byte": return typeof(byte);
+					case "char": return typeof(char);
+					case "int": return typeof(int);
+					case "uint": return typeof(uint);
+					case "long": return typeof(long);
+					case "ulong": return typeof(ulong);
+					case "float": return typeof(float);
+					case "double": return typeof(double);
+					default: return builders[name].EmitBuilder;
+				}
+			}
+			foreach(var tn in builders.Keys){
+				var builder = builders[tn];
+				foreach(var nt in jtypes[tn].Select(kv => (name: kv.Key, type: GetDType(kv.Value)))) builder.Field(nt.name, nt.type);
+			}
+			return builders.Values.Select(b => b.Build()).ToDictionary(t => t.Name, t => t);
+		}
+
+		public static Dictionary<string, Type> CreateStructs(string assembly, string json) => CreateStructs(new GroupedClassesBuilder(assembly), json);
 
 	}
 

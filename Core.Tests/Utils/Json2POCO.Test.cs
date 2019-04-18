@@ -68,4 +68,61 @@ namespace Epicoin.Test {
 
 	}
 
+	[TestFixture]
+	public class JsonStructCreatorTest {
+
+		private static readonly string JSTRUCTS = @"
+{
+	""SimpleStruct"": {
+		""aBoolean"": ""bool"",
+		""aDouble"": ""double"",
+		""anUnsignedLong"": ""ulong""
+	},
+	""StructWithArray"": {
+		""byteArray"": ""byte[]"",
+		""uint3DArray"": ""uint[][][]""
+	},
+	""ReferencingStruct"": {
+		""anotherStruct"": ""SimpleStruct"",
+		""arrayOfArrays"": ""StructWithArray[]""
+	}
+}
+		";
+
+		[Test]
+		public void CreateStructs(){
+			var structs = JsonStructCreator.CreateStructs("TestJStructs", JSTRUCTS);
+			Assert.IsTrue(structs.ContainsKey("SimpleStruct"), "JsonStruct: Structure missing");
+			Assert.IsTrue(structs.ContainsKey("StructWithArray"), "JsonStruct: Structure missing");
+			Assert.IsTrue(structs.ContainsKey("ReferencingStruct"), "JsonStruct: Structure missing");
+
+			Type	sims = structs["SimpleStruct"],
+					arrs = structs["StructWithArray"],
+					refs = structs["ReferencingStruct"];
+			Assert.IsTrue(sims.IsValueType, "JsonStruct: Result is not a struct");
+			Assert.IsTrue(arrs.IsValueType, "JsonStruct: Result is not a struct");
+			Assert.IsTrue(refs.IsValueType, "JsonStruct: Result is not a struct");
+
+			Assert.IsNotNull(sims.GetField("aBoolean", BindingFlags.Instance | BindingFlags.Public), "JsonStruct: simple struct field missing");
+			Assert.IsNotNull(sims.GetField("aDouble", BindingFlags.Instance | BindingFlags.Public), "JsonStruct: simple struct field missing");
+			Assert.IsNotNull(sims.GetField("anUnsignedLong", BindingFlags.Instance | BindingFlags.Public), "JsonStruct: simple struct field missing");
+			Assert.AreEqual(typeof(bool), sims.GetField("aBoolean", BindingFlags.Instance | BindingFlags.Public).FieldType, "JsonStruct: simple struct field type mismatch");
+			Assert.AreEqual(typeof(double), sims.GetField("aDouble", BindingFlags.Instance | BindingFlags.Public).FieldType, "JsonStruct: simple struct field type mismatch");
+			Assert.AreEqual(typeof(ulong), sims.GetField("anUnsignedLong", BindingFlags.Instance | BindingFlags.Public).FieldType, "JsonStruct: simple struct field type mismatch");
+
+			Assert.IsNotNull(arrs.GetField("byteArray", BindingFlags.Instance | BindingFlags.Public), "JsonStruct: array struct field missing");
+			Assert.IsNotNull(arrs.GetField("uint3DArray", BindingFlags.Instance | BindingFlags.Public), "JsonStruct: array struct field missing");
+			Assert.IsTrue(arrs.GetField("byteArray", BindingFlags.Instance | BindingFlags.Public).FieldType.IsArray, "JsonStruct: array struct field is not an array");
+			Assert.AreEqual(typeof(byte[]), arrs.GetField("byteArray", BindingFlags.Instance | BindingFlags.Public).FieldType, "JsonStruct: array struct field type mismatch");
+			Assert.AreEqual(typeof(uint[][][]), arrs.GetField("uint3DArray", BindingFlags.Instance | BindingFlags.Public).FieldType, "JsonStruct: array struct field type mismatch");
+
+			Assert.IsNotNull(refs.GetField("anotherStruct", BindingFlags.Instance | BindingFlags.Public), "JsonStruct: referencing struct field missing");
+			Assert.IsNotNull(refs.GetField("arrayOfArrays", BindingFlags.Instance | BindingFlags.Public), "JsonStruct: referencing struct field missing");
+			Assert.IsTrue(refs.GetField("arrayOfArrays", BindingFlags.Instance | BindingFlags.Public).FieldType.IsArray, "JsonStruct: referencing struct field is not an array");
+			Assert.AreEqual(sims, refs.GetField("anotherStruct", BindingFlags.Instance | BindingFlags.Public).FieldType, "JsonStruct: referencing struct field type mismatch");
+			Assert.AreEqual(arrs.MakeArrayType(), refs.GetField("arrayOfArrays", BindingFlags.Instance | BindingFlags.Public).FieldType, "JsonStruct: referencing struct field type mismatch");
+		}
+
+	}
+
 }
