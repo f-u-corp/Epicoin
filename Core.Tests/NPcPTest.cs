@@ -11,7 +11,7 @@ namespace Epicoin.Test {
 	[TestFixture]
 	public class NPcPProblemWrapperTest {
 
-		[Test]
+		/*[Test]
 		public void Instantiation(){
 			NPcProblemWrapper wrapper = new NPcProblemWrapper(new InefficientIntFactProblem());
 			Assert.IsNotNull(wrapper, "Instatiation failed");
@@ -53,7 +53,7 @@ namespace Epicoin.Test {
 
 			public bool check(int i, List<int> facts) => facts.Aggregate(1, (p, f) => p*f) == i;
 
-		}
+		}*/
 
 	}
 
