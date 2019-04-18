@@ -166,7 +166,19 @@ namespace Epicoin.Core {
 			var reg = new Dictionary<string, NPcProblemWrapper>();
 			var pdir = new DirectoryInfo("npocl");
 			pdir.Create();
-			foreach(var tr in pdir.GetFiles("*.cl").Select(f => (name: f.Name.Substring(f.Name.Length-3), cl: f, str: new FileInfo(f.FullName.Substring(0, f.FullName.Length-2) + "json"))).Select(tr => (name: tr.name, cl: new ComputeProgram(clContext, File.ReadAllText(tr.cl.FullName)), str: JsonStructCreator.CreateStructs(tr.name, File.ReadAllText(tr.str.FullName))))) reg.Add(tr.name, new NPcProblemWrapper(tr.cl, tr.str["Parameter"], tr.str["Solution"]));
+			ComputeProgram compile(FileInfo f){
+				var p = new ComputeProgram(clContext, File.ReadAllText(f.FullName));
+				p.Build(new[]{p.Devices[0]}, null, null, IntPtr.Zero);
+				ComputeProgramBuildStatus status() => p.GetBuildStatus(p.Devices[0]);
+				if(status() == ComputeProgramBuildStatus.Success){
+					Solver.LOG.Info("Successfully Compiled program: " + f.Name);
+				} else {
+					Solver.LOG.Error("Program compilation failed: " + f.Name);
+					Solver.LOG.Error(p.GetBuildLog(p.Devices[0]));
+				}
+				return p;
+			}
+			foreach(var tr in pdir.GetFiles("*.cl").Select(f => (name: f.Name.Substring(0, f.Name.Length-3), cl: f, str: new FileInfo(f.FullName.Substring(0, f.FullName.Length-2) + "json"))).Select(tr => (name: tr.name, cl: compile(tr.cl), str: JsonStructCreator.CreateStructs(tr.name, File.ReadAllText(tr.str.FullName))))) reg.Add(tr.name, new NPcProblemWrapper(tr.cl, tr.str["Parameter"], tr.str["Solution"]));
 			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
 			this.problemsICanSolve = new HashSet<string>(problemsRegistry.Keys); //TODO persistent config? I'd say it does not belong to core...
 			LOG.Info($"Successfuly loaded problems - {problemsRegistry.Count} ({String.Join(", ", problemsRegistry.Keys)})");
