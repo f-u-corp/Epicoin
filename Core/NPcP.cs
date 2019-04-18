@@ -157,6 +157,7 @@ namespace Epicoin.Core {
 		}
 
 		protected void CleanupOpenCL(){
+			foreach(var p in problemsRegistry.Values) p.Dispose();
 			clContext.Dispose();
 		}
 
