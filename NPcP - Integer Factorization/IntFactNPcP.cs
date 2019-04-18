@@ -6,7 +6,7 @@ using Epicoin.Core;
 
 namespace Epicoin.Problems {
 
-	public class PrimeIntFactNPcP : INPcProblem<int, List<int>> {
+	public class PrimeIntFactNPcP {
 
 		public string getName() => "prime-integer-factorization";
 
