@@ -15,6 +15,26 @@ using Newtonsoft.Json;
 namespace Epicoin.Core {
 
 	/// <summary>
+	/// Temporary interface for dll-based problems externalization approach
+	/// </summary>
+	public interface INPcProblem<P, S> : INPcProblem {
+
+		S solve(P parms);
+
+		bool check(P parms, S solution);
+
+	}
+
+	/// <summary>
+	/// INTERNAL: DO NOT USE!!!
+	/// </summary>
+	public interface INPcProblem {
+
+		string getName();
+
+	}
+
+	/// <summary>
 	/// Internal future-fixed wrapper class for in-dev-mutable problems and solutions represented publically.
 	/// </summary>
 	internal struct NPcProblemWrapper : IDisposable {
@@ -37,6 +57,7 @@ namespace Epicoin.Core {
 
 
 
+<<<<<<< HEAD
 		readonly ComputeProgram prog;
 		readonly ComputeKernel slv, chck;
 		readonly Type parameterT, solutionT;
@@ -53,6 +74,19 @@ namespace Epicoin.Core {
 			slv.Dispose();
 			chck.Dispose();
 			prog.Dispose();
+=======
+		readonly INPcProblem deleg;
+		readonly Type parmsT, solT;
+
+		public NPcProblemWrapper(INPcProblem problem){
+			this.deleg = problem;
+			var gir = problem.GetType().GetInterfaces().First(iface => iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(INPcProblem<,>)).GetGenericArguments();
+			this.parmsT = gir[0];
+			this.solT = gir[1];
+
+			this.solvePi = typeof(NPcProblemWrapper).GetMethod("solveP", BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(parmsT, solT);
+			this.checkPi = typeof(NPcProblemWrapper).GetMethod("checkP", BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(parmsT, solT);
+>>>>>>> parent of b338679... Removed DLL code
 		}
 
 		/// <summary>
@@ -60,7 +94,10 @@ namespace Epicoin.Core {
 		/// </summary>
 		/// <param name="parms">Parameters to find the solution for.</param>
 		/// <returns>The solution to the problem, represented as string (in any consitent way the problem may like).</returns>
-		public string solve(string parms) => null;
+		public string solve(string parms) => (string) solvePi.Invoke(this, new object[]{parms});
+
+		private readonly MethodInfo solvePi;
+		private string solveP<P, S>(string p) => encodeSolution<S>((deleg as INPcProblem<P, S>).solve(decodeParams<P>(p)));
 
 		/// <summary>
 		/// Checks the solution to the problem for given parameters (with string representations - in any consistent way the problem may like).
@@ -68,7 +105,10 @@ namespace Epicoin.Core {
 		/// <param name="parms">Parameters to check with.</param>
 		/// <param name="solution">Solution to check. </param>
 		/// <returns>Whether the solution is correct.</returns>
-		public bool check(string parms, string solution) => false;
+		public bool check(string parms, string solution) => (bool) checkPi.Invoke(this, new object[]{parms, solution});
+
+		private readonly MethodInfo checkPi;
+		private bool checkP<P, S>(string p, string s) => (deleg as INPcProblem<P, S>).check(decodeParams<P>(p), decodeSolution<S>(s));
 
 	}
 
