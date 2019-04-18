@@ -35,6 +35,8 @@ namespace Epicoin.Core {
 				this.builder = group.moduleBuilder.DefineType(name, attr, parent);
 			}
 
+			public TypeBuilder EmitBuilder => builder;
+
 			public CBuilder Field(string name, Type type, FieldAttributes attr = FieldAttributes.Public, CustomAttributeBuilder cattr = null){
 				var f = builder.DefineField(name, type, attr);
 				if(cattr != null) f.SetCustomAttribute(cattr);
