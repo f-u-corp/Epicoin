@@ -117,8 +117,8 @@ namespace Epicoin.Core {
 		protected void LoadProblems(){
 			LOG.Info("Loading problems...");
 			var reg = new Dictionary<string, NPcProblemWrapper>();
-			new DirectoryInfo("npdlls").Create();
-			new DirectoryInfo("npdlls").GetFiles("*.dll").ToList().ForEach(f => Assembly.LoadFile(f.FullName).GetExportedTypes().Where(typeof(INPcProblem).IsAssignableFrom).Select(Activator.CreateInstance).Cast<INPcProblem>().ToList().ForEach(p => reg.Add(p.getName(), new NPcProblemWrapper(p))));
+			new DirectoryInfo("npocl").Create();
+			new DirectoryInfo("npocl").GetFiles("*.cl").ToList().ForEach(f => {});
 			this.problemsRegistry = ImmutableDictionary.ToImmutableDictionary(reg);
 			this.problemsICanSolve = new HashSet<string>(problemsRegistry.Keys); //TODO persistent config? I'd say it does not belong to core...
 			LOG.Info($"Successfuly loaded problems - {problemsRegistry.Count} ({String.Join(", ", problemsRegistry.Keys)})");
