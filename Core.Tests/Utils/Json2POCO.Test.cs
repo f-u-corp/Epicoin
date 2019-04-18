@@ -123,6 +123,78 @@ namespace Epicoin.Test {
 			Assert.AreEqual(arrs.MakeArrayType(), refs.GetField("arrayOfArrays", BindingFlags.Instance | BindingFlags.Public).FieldType, "JsonStruct: referencing struct field type mismatch");
 		}
 
+		private static readonly string	USABLESTRUCTS = @"
+{
+	""IntBoolPair"": {
+		""number"": ""int"",
+		""validates"": ""bool""
+	},
+	""Problem"": {
+		""checkedUpTo"": ""int"",
+		""poi"": ""float[]"",
+		""validation"": ""IntBoolPair[]""
+	}
+}
+",
+										SAMPLESERIALIZEDDATA = @"
+{
+	""checkedUpTo"": 58,
+	""poi"": [1.61803398875, 2.71828182846, 3.14159265359],
+	""validation"": [
+		{
+			""number"": 2,
+			""validates"": false
+		},
+		{
+			""number"": 3,
+			""validates"": false
+		},
+		{
+			""number"": 5,
+			""validates"": true
+		},
+		{
+			""number"": 7,
+			""validates"": true
+		},
+		{
+			""number"": 11,
+			""validates"": false
+		},
+		{
+			""number"": 13,
+			""validates"": true
+		}
+	]
+}
+";
+
+		[Test]
+		public void TestJNetCompat(){
+			var structs = JsonStructCreator.CreateStructs("PrimesPOIProblem", USABLESTRUCTS);
+			dynamic problem = Newtonsoft.Json.JsonConvert.DeserializeObject(SAMPLESERIALIZEDDATA, structs["Problem"]);
+
+			Assert.AreEqual(58, problem.checkedUpTo, "Dynamic deserialization failed");
+			Assert.IsTrue(problem.poi.GetType().IsArray, "Dynamic deserialization failed");
+			Assert.AreEqual(3, problem.poi.Length, "Dynamic deserialization failed");
+			Assert.AreEqual(new float[]{1.61803398875f, 2.71828182846f, 3.14159265359f}, problem.poi, "Dynamic deserialization failed");
+			Assert.IsTrue(problem.validation.GetType().IsArray, "Dynamic deserialization failed");
+			Assert.AreEqual(6, problem.validation.Length, "Dynamic deserialization failed");
+
+			Assert.AreEqual(2, problem.validation[0].number, "Dynamic deserialization failed");
+			Assert.AreEqual(false, problem.validation[0].validates, "Dynamic deserialization failed");
+			Assert.AreEqual(3, problem.validation[1].number, "Dynamic deserialization failed");
+			Assert.AreEqual(false, problem.validation[1].validates, "Dynamic deserialization failed");
+			Assert.AreEqual(5, problem.validation[2].number, "Dynamic deserialization failed");
+			Assert.AreEqual(true, problem.validation[2].validates, "Dynamic deserialization failed");
+			Assert.AreEqual(7, problem.validation[3].number, "Dynamic deserialization failed");
+			Assert.AreEqual(true, problem.validation[3].validates, "Dynamic deserialization failed");
+			Assert.AreEqual(11, problem.validation[4].number, "Dynamic deserialization failed");
+			Assert.AreEqual(false, problem.validation[4].validates, "Dynamic deserialization failed");
+			Assert.AreEqual(13, problem.validation[5].number, "Dynamic deserialization failed");
+			Assert.AreEqual(true, problem.validation[5].validates, "Dynamic deserialization failed");
+		}
+
 	}
 
 }
