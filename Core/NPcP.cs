@@ -17,7 +17,7 @@ namespace Epicoin.Core {
 	/// <summary>
 	/// Internal future-fixed wrapper class for in-dev-mutable problems and solutions represented publically.
 	/// </summary>
-	internal struct NPcProblemWrapper {
+	internal struct NPcProblemWrapper : IDisposable {
 
 		private static P decodeParams<P>(string s){
 			return JsonConvert.DeserializeObject<OFW<P>>(s).o;
@@ -29,7 +29,7 @@ namespace Epicoin.Core {
 		private static S decodeSolution<S>(string s){
 			return JsonConvert.DeserializeObject<OFW<S>>(s).o;
 		}
-		
+
 		private class OFW<T> {
 			public T o;
 			public OFW(T t) => o = t;
@@ -37,10 +37,19 @@ namespace Epicoin.Core {
 
 
 
+		readonly ComputeProgram prog;
+		readonly ComputeKernel slv, chck;
 
 		public NPcProblemWrapper(ComputeProgram prog){
 			this.prog = prog;
+			slv = this.prog.CreateKernel("solve");
+			chck = this.prog.CreateKernel("check");
+		}
 
+		public void Dispose(){
+			slv.Dispose();
+			chck.Dispose();
+			prog.Dispose();
 		}
 
 		/// <summary>
@@ -87,8 +96,22 @@ namespace Epicoin.Core {
 		}
 
 		internal override void InitAndRun(){
+			InitOpenCL();
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
+			CleanupOpenCL();
+		}
+
+		protected ComputeDevice clDevice;
+		protected ComputeContext clContext;
+
+		protected void InitOpenCL(string device = null){
+			clDevice = ComputePlatform.Platforms.SelectMany(p => p.Devices).First(d => device == null || $"{d.Name} {d.DriverVersion}" == device);
+			clContext = new ComputeContext(new[]{clDevice}, new ComputeContextPropertyList(clDevice.Platform), (info, data, size, ud) => LOG.Error("OpenCL Error: " + info), IntPtr.Zero);
+		}
+
+		protected void CleanupOpenCL(){
+			clContext.Dispose();
 		}
 
 		protected void LoadProblems(){
