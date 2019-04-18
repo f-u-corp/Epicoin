@@ -33,7 +33,7 @@ namespace Epicoin.Core {
 
 		internal S[] solve(P[] parms){
 			long Len = parms.LongLength;
-			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly, parms))
+			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.UseHostPointer, parms))
 			using(var solBuff = new ComputeBuffer<S>(prog.Context, ComputeMemoryFlags.WriteOnly, Len)){
 				slv.SetMemoryArgument(0, parBuff);
 				slv.SetMemoryArgument(1, solBuff);
@@ -51,8 +51,8 @@ namespace Epicoin.Core {
 		internal bool check(P[] parms, S[] solutions){
 			long Len = parms.LongLength;
 			if(Len != solutions.LongLength) throw new InvalidOperationException("Solutions must be as much as parameters!");
-			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly, parms))
-			using(var solBuff = new ComputeBuffer<S>(prog.Context, ComputeMemoryFlags.ReadOnly, solutions))
+			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.UseHostPointer, parms))
+			using(var solBuff = new ComputeBuffer<S>(prog.Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.UseHostPointer, solutions))
 			using(var valiBuff = new ComputeBuffer<short>(prog.Context, ComputeMemoryFlags.WriteOnly, Len)){
 				chck.SetMemoryArgument(0, parBuff);
 				chck.SetMemoryArgument(1, solBuff);
