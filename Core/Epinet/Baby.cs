@@ -315,6 +315,15 @@ namespace Epicoin.Core
 			privateKey = d;
 			publicKey = new int[] { n, e };
 		}
+
+		public static byte[] EncryptRSA(byte[] message, int[] publicKey)
+		{
+			return new BigInteger(message).modPow(publicKey[1], publicKey[0]).getBytes();
+		}
+		public static byte[] DecryptRSA(byte[] msg, int n, int privateKey)
+		{
+			return new BigInteger(msg).modPow(privateKey, n).getBytes();
+		}
 	}
 	class Friend
 	{
