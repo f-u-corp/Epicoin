@@ -58,7 +58,7 @@ namespace Epicoin.Core
 		}
 	}
 
-	class Epinet {
+	internal class Epinet {
 
 		/*
 		* ITC - will be used after merger
