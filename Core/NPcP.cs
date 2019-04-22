@@ -158,11 +158,15 @@ namespace Epicoin.Core {
 			LOG.Info("Input parameters to solve for");
 			string parms = Console.ReadLine();
 			string sol = problem.solve(parms);
+			Console.ForegroundColor = ConsoleColor.Yellow;
 			Console.WriteLine(sol);
+			Console.ForegroundColor = ConsoleColor.White;
 			LOG.Info("Press a key to validate found solution");
 			Console.ReadKey();
 			bool val = problem.check(parms, sol);
+			Console.ForegroundColor = val ? ConsoleColor.Green : ConsoleColor.Red;
 			Console.WriteLine("Solution valid: " + val);
+			Console.ForegroundColor = ConsoleColor.White;
 			re: LOG.Info("Input 'another' to test with a different problem, or 'exit' to leave CLI problem testing");
 			switch(Console.ReadLine().ToLower()){
 				case "exit": case "quit": break;
