@@ -151,6 +151,7 @@ namespace Epicoin.Core {
 
 		private void CLIProblemTesting(){
 			LOG.Info("Welcome to CLI problem testing!");
+			goto re;
 			st: LOG.Info("Input your problem!");
 			var pr = Console.ReadLine();
 			if(!problemsRegistry.ContainsKey(pr)) goto st;
