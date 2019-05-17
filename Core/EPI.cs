@@ -44,7 +44,13 @@ namespace Epicoin.Core {
 	/// Validator component of the Core. Responsible for validating problems solutions (both by-self and received) as well as the EFOBE.
 	/// </summary>
 	public interface IValidator {
-		
+
+		/// <summary>
+		/// Retrieves local EFOBE.
+		/// </summary>
+		/// <returns>Local EFOBE.</returns>
+		EFOBE GetLocalEFOBE();
+
 	}
 
 	/// <summary>

@@ -26,7 +26,7 @@ namespace Epicoin.Core {
 
 		internal Action<Solver.ITM> sendITM2Solver;
 		internal Action<Validator.ITM> sendITM2Validator;
-		internal Action sendITM2Net;
+		internal Action<Epinet.ITM> sendITM2Net;
 
 		internal bool stop { get; private set; }
 
@@ -41,6 +41,7 @@ namespace Epicoin.Core {
 
 			sendITM2Solver = solver.sendITM;
 			sendITM2Validator = validator.sendITM;
+			sendITM2Net = m => {}; //TODO wire in network component
 		}
 
 		///<summary>Retrieves the solver core component.</summary>
@@ -95,7 +96,7 @@ namespace Epicoin.Core {
 		 */
 		
 		protected InterThreadComms<ITM> itc = new InterThreadComms<ITM>();
-		public Action<ITM> sendITM { get => itc.sendMessage; }
+		public virtual Action<ITM> sendITM { get => itc.sendMessage; }
 
 		protected void readITInbox(Action<ITM> readMessage){
 			ITM m;

@@ -1,5 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -97,6 +99,8 @@ namespace Epicoin.Core {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Solver");
 
+		public override Action<ITM> sendITM { get => sendITMAsync; }
+
 		protected bool doSolve;
 		public Solver(Epicore core, bool doSolve) : base(core){
 			this.doSolve = doSolve;
@@ -105,6 +109,12 @@ namespace Epicoin.Core {
 		protected ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 		internal override void InitAndRun(){
+			init();
+			while(!core.stop) keepSolving();
+			cleanup();
+		}
+
+		internal void init(){
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
 		}
@@ -118,12 +128,72 @@ namespace Epicoin.Core {
 			LOG.Info($"Successfuly loaded problems - {problemsRegistry.Count} ({String.Join(", ", problemsRegistry.Keys)})");
 		}
 
+		protected (string pr, string pa, Task<string> sol, CancellationTokenSource cts) cur = (null, null, null, null);
+
+		protected void keepSolving(){ 
+			{
+				if(cur.sol != null && (cur.sol.IsCompleted || cur.sol.IsCanceled)){
+					if(cur.sol.IsCompletedSuccessfully) core.sendITM2Validator(new Validator.ITM.ISolvedAProblem(cur.pr, cur.pr, cur.sol.Result));
+					cur.sol.Dispose();
+					cur.cts.Dispose();
+					cur = (null, null, null, null);
+				}
+				if(cur.sol == null){
+					var m = itc.readMessageOrDefault();
+					if(m is ITM.PlsSolve){
+						var pls = m as ITM.PlsSolve;
+						CancellationTokenSource cts = new CancellationTokenSource();
+						var task = Task.Run(() => solve(pls.problem, pls.parms), cts.Token);
+						cur = (pls.problem, pls.parms, task, cts);
+					}
+				}
+			}
+		}
+
+		protected string solve(string problem, string parms) => problemsRegistry[problem].solve(parms);
+
+		internal void cleanup(){}
+
+		protected void sendITMAsync(ITM itm){
+			if(!(itm is ITM.AsyncITM)) base.sendITM(itm);
+			else {
+				if(itm is ITM.StahpSolvingUSlowpoke){
+					var stahp = itm as ITM.StahpSolvingUSlowpoke;
+					if(cur.pr == stahp.problem && cur.pa == stahp.parms && !cur.sol.IsCompleted) cur.cts.Cancel();
+				}
+			}
+		}
+
 		
 		/*
 		 * ITC
 		 */
 
 		internal class ITM : ITCMessage {
+
+			internal interface AsyncITM {}
+
+			internal class PlsSolve : ITM {
+
+				public readonly string problem, parms;
+
+				public PlsSolve(string problem, string parms){
+					this.problem = problem;
+					this.parms = parms;
+				}
+
+			}
+
+			internal class StahpSolvingUSlowpoke : ITM, AsyncITM {
+
+				public readonly string problem, parms;
+
+				public StahpSolvingUSlowpoke(string problem, string parms){
+					this.problem = problem;
+					this.parms = parms;
+				}
+
+			}
 
 		}
 
