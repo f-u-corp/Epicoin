@@ -263,7 +263,7 @@ namespace Epicoin.Core {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
 
-		protected EFOBE efobe;
+		protected EFOBE efobe = new EFOBE();
 
 		HashAlgorithm hasher = SHA256.Create();
 
