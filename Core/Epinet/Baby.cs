@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.IO;
 using System.Collections.Generic;
 using System.Net;
@@ -8,10 +9,10 @@ using System.Threading.Tasks;
 using System.Text;
 using System.Security.Cryptography;
 
-
+[assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin.Core
 {
-	class Baby
+	class Baby : INetBaby
 	{
 		public static int nbSecurityBytes = 3; //arbitrary number, the bigger the better but the longer to compute. So I put a small number for the tests
 		private static string knownParentsFile = "ressources/baby_known_parents.prnt";
@@ -35,6 +36,7 @@ namespace Epicoin.Core
 
 		public Baby(Parent parent)
 		{
+			NetworkMaestro.LOG.Info("Loading Baby");
 			//fields init routines
 			this.self = parent;
 			parent.Self = this;
@@ -43,6 +45,7 @@ namespace Epicoin.Core
 
 			//generate RSAPrivate and Public Key
 			RSA.GenerateRSAKeys(out this.RSAPrivateKey, out this.RSAPublicKey);
+			NetworkMaestro.LOG.Info("Generated RSA keys");
 
 			//making list of friends
 			using (StreamReader sr = new StreamReader(Baby.knownParentsFile))
@@ -60,8 +63,10 @@ namespace Epicoin.Core
 					}
 				}
 			}
+			NetworkMaestro.LOG.Info("Loaded friends from local cache");
 
 			//Try to connect to friends
+			NetworkMaestro.LOG.Info("Contacting old friends");
 			foreach (Friend f in this.friends)
 			{
 				Call(f);
@@ -156,14 +161,15 @@ namespace Epicoin.Core
 	static class RSA
 	{
 		//RSA keys' generation related method
-		private static bool IsPrime(int n)
+		internal static bool IsPrime(int n)
 		{
 			if (n < 2)
 				return false;
 			if (n == 2)
 				return true;
+			if(n % 2 == 0) return false;
 
-			for (int i = 2; i <= Math.Sqrt(n) + 1; i++)
+			for (int i = 3; i <= Math.Sqrt(n) + 1; i += 2)
 			{
 				if (n % i == 0)
 					return false;
@@ -171,58 +177,37 @@ namespace Epicoin.Core
 			return true;
 		}
 
-		private static int GCD(int n, int m)
+		internal static int GCD(int n, int m)
 		{
-			if (n == 0 || m == 0)
-				return 0;
-
-			if (n == m)
-				return n;
-
-			if (n > m)
-			{
-				return GCD(n - m, m);
-			}
-			else
-			{
-				return GCD(n, m - n);
-			}
+			if(m == 0 )
+			if(n == m) return n;
+			int gcrec(int i, int j) => j == 0 ? i : gcrec(j, Modulo(i, j));
+			return gcrec(Math.Max(n, m), Math.Min(n, m));
 		}
 
-		private static bool AreCoprime(int n, int m)
+		internal static bool AreCoprime(int n, int m)
 		{
 			return GCD(n, m) == 1;
 		}
 
-		private static int Sign(int n)
+		internal static int Quot(int n, int m)
 		{
-			if (n > 0)
-				return 1;
-
-			if (n == 0)
-				return 0;
-
-			return (-1);
-		}
-
-		private static int Quot(int n, int m)
-		{
-			if (Sign(m) == 1)
+			if (Math.Sign(m) == 1)
 				return n / m;
 
-			return n / m - Sign(m);
+			return n / m - Math.Sign(m);
 		}
 
-		private static int Modulo(int n, int m)
-		{
+		internal static int Modulo(int n, int m)
+		{//TODO E-gy: Reuse primitive extensions when SHA is complete
 			//assuming m is positive, but that should be enough for RSA
-			if (Sign(n) == 1)
+			if (Math.Sign(n) == 1)
 				return n % m;
 
-			return (n % m) + ((Sign(m) == 1) ? (m) : (-m));
+			return (n % m) + ((Math.Sign(m) == 1) ? (m) : (-m));
 		}
 
-		private static int[] Bezout(int n, int m)
+		internal static int[] Bezout(int n, int m)
 		{
 			if (m == 0)
 			{
@@ -235,7 +220,7 @@ namespace Epicoin.Core
 			}
 		}
 
-		private static int ModMultInv(int a, int n)
+		internal static int ModMultInv(int a, int n)
 		{
 			int[] foo = Bezout(a, n);
 			return Modulo(foo[0], n);
@@ -246,48 +231,44 @@ namespace Epicoin.Core
 			so it could be nice to implement it as a bonus.
 			However, I'm going for Erathostenes right now because it's quicker to implement
 		*/
-		private static int[] AtkinSieve(int limit)
+		internal static int[] AtkinSieve(int limit)
 		{
 			throw new NotImplementedException();
 		}
 
-		private static List<int> EratosthenesSieve(int n)
+		internal static List<int> EratosthenesSieve(int n)
 		{
 			if (n < 2)
-				throw new Exception("Eratosthenes: invalid input");
+				throw new InvalidOperationException("Eratosthenes: invalid input");
 
 			//making a list of all prime candidates
-			List<int> output = new List<int>() { 2 };
-			for (int i = 3; i < n; i = i + 2)
+			var sieve = new SortedSet<int>() { 2 };
+			for (int i = 3; i <= n; i += 2)
 			{
-				output.Add(i);
+				sieve.Add(i);
 			}
-
+			
+			var output = new List<int>();
 			//getting rid of the candidates that aren't actually prime
-			for (int i = output[0]; i < output.Count; i++)
-			{
-				for (int j = output[i + 1]; j < output.Count - 1; j++)
-				{
-					if (output[j] % i == 0)
-					{
-						output.Remove(output[j]);
-					}
-				}
+			while(sieve.Count > 0){
+				var next = sieve.Min;
+				sieve.RemoveWhere(k => k%next == 0);
+				output.Add(next);
 			}
 
 			return output;
 		}
 
-		private static int GenerateRandomNumber()
+		private static int GenerateRandomNumber() //FIXME Do you maybe want a uint here? -E-gy
 		{
 			int output = 0;
 
-			Byte[] rndByte = new byte[Baby.nbSecurityBytes];
+			var rndByte = new byte[Baby.nbSecurityBytes];
 			Baby.rngCsp.GetBytes(rndByte);
 
 			for (int i = 0; i < rndByte.Length; i++)
 			{
-				output += (int)(rndByte[i] * Math.Pow(8, i));
+				output |= rndByte[i] << (sizeof(byte)*i);
 			}
 
 			return output;
@@ -333,6 +314,15 @@ namespace Epicoin.Core
 
 			privateKey = d;
 			publicKey = new int[] { n, e };
+		}
+
+		public static byte[] EncryptRSA(byte[] message, int[] publicKey)
+		{
+			return new BigInteger(message).modPow(publicKey[1], publicKey[0]).getBytes();
+		}
+		public static byte[] DecryptRSA(byte[] msg, int n, int privateKey)
+		{
+			return new BigInteger(msg).modPow(privateKey, n).getBytes();
 		}
 	}
 	class Friend

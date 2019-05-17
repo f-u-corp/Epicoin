@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,19 +10,27 @@ using System.Threading.Tasks;
 
 namespace Epicoin.Core
 {
-	class NetworkMaestro
+	class NetworkMaestro : MainComponent<NetworkMaestro.ITM>, INet
 	{
+		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Network");
+
 		public static CancellationTokenSource cts = new CancellationTokenSource();
 		protected string OwnIp;
 
 		//usage of fixed port for now
 		public static int Port = 27945; //not in use according to https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
-		private readonly Baby baby;
-		private readonly Parent parent;
+		private /*readonly*/ Baby baby;
+		private /*readonly*/ Parent parent;
 
-		public NetworkMaestro()
+		public NetworkMaestro(Epicore core) : base(core) {}
+
+		public INetBaby GetBaby() => baby;
+		public INetParent GetParent() => parent;
+
+		internal override void InitAndRun()
 		{
+			LOG.Info("Pre-Loading networking");
 			string localIP;
 			using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
 			{
@@ -29,6 +38,8 @@ namespace Epicoin.Core
 				IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
 				localIP = endPoint.Address.ToString();
 			}
+			LOG.Info("Local IP established");
+			LOG.Info("Loading networking components");
 			this.parent = new Parent();
 			this.baby = new Baby(parent);
 		}
@@ -41,28 +52,10 @@ namespace Epicoin.Core
 			}
 
 		}
-		//static HuffmanCode();
-
-		class BinTree<T>
-		{
-			public T InnerValue { get; set; }
-			public BinTree<T> Right { get; set; }
-			public BinTree<T> Left { get; set; }
-
-			public BinTree(T val)
-			{
-				this.InnerValue = val;
-				this.Right = null;
-				this.Left = null;
-			}
-		}
-	}
-
-	internal class Epinet {
 
 		/*
-		* ITC - will be used after merger
-		*/
+		 * ITC
+		 */
 
 		internal class ITM : ITCMessage {
 
@@ -81,6 +74,20 @@ namespace Epicoin.Core
 
 			}
 
+		}
+
+		class BinTree<T>
+		{
+			public T InnerValue { get; set; }
+			public BinTree<T> Right { get; set; }
+			public BinTree<T> Left { get; set; }
+
+			public BinTree(T val)
+			{
+				this.InnerValue = val;
+				this.Right = null;
+				this.Left = null;
+			}
 		}
 	}
 

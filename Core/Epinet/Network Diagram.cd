@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Epicoin.Epicore">
+    <Position X="4.5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAQAAIEAAAAAAAgAAgCCABIQAAAIAAAAA=</HashCode>
+      <FileName>Epicore.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="maestro" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Epicoin.NetworkMaestro">
+    <Position X="4.5" Y="5" Width="1.5" />
+    <NestedTypes>
+      <Class Name="Epicoin.NetworkMaestro.BinTree&lt;T&gt;" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Epinet\NetworkMaestro.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Epicoin.NetworkMaestro.ITM" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Epinet\NetworkMaestro.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAABAAAAAAAAASAAAAAAAIAAAAAAACEA=</HashCode>
+      <FileName>Epinet\NetworkMaestro.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="baby" />
+      <Field Name="parent" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Epicoin.Baby">
+    <Position X="7.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAEQgAAAAAIYBGAAAgAABAAAgAAAAQCAAACACAAAAA=</HashCode>
+      <FileName>Epinet\Baby.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="friends" />
+      <Field Name="shoulders" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Epicoin.Parent">
+    <Position X="10.25" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAABAA=</HashCode>
+      <FileName>Epinet\Parent.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Epicoin.Friend">
+    <Position X="10.25" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAgACAAA=</HashCode>
+      <FileName>Epinet\Baby.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Epicoin.PotentialParent">
+    <Position X="10.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAQAAAAAAAAAAAAAAAAAAAAAAABgAAAAA=</HashCode>
+      <FileName>Epinet\Baby.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

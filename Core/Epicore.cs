@@ -23,10 +23,11 @@ namespace Epicoin.Core {
 
 		internal Solver solver;
 		internal Validator validator;
+		internal NetworkMaestro maestro;
 
 		internal Action<Solver.ITM> sendITM2Solver;
 		internal Action<Validator.ITM> sendITM2Validator;
-		internal Action<Epinet.ITM> sendITM2Net;
+		internal Action<NetworkMaestro.ITM> sendITM2Net;
 
 		internal bool stop { get; private set; }
 
@@ -37,11 +38,11 @@ namespace Epicoin.Core {
 		public Epicore(bool solverEnabled = true){
 			st = new Thread((solver = new Solver(this, solverEnabled)).InitAndRun);
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
-			nt = new Thread(() => {}); //TODO wire in network component
+			nt = new Thread((maestro = new NetworkMaestro(this)).InitAndRun);
 
 			sendITM2Solver = solver.sendITM;
 			sendITM2Validator = validator.sendITM;
-			sendITM2Net = m => {}; //TODO wire in network component
+			sendITM2Net = maestro.sendITM;
 		}
 
 		///<summary>Retrieves the solver core component.</summary>
@@ -49,7 +50,7 @@ namespace Epicoin.Core {
 		///<summary>Retrieves the validator core component.</summary>
 		public IValidator GetValidator() => validator;
 		///<summary>Retrieves the network manager/maestro core component.</summary>
-		public INet GetNetworkManager() => null;
+		public INet GetNetworkManager() => maestro;
 
 		protected Thread vt, st, nt;
 
