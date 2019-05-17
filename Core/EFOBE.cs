@@ -282,7 +282,7 @@ namespace Epicoin.Core {
 		internal void init(){
 			var cachedE = new FileInfo(EFOBEfile);
 			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
-			else core.sendITM2Net(new Epinet.ITM.IWantAFullEFOBE());
+			else core.sendITM2Net(new NetworkMaestro.ITM.IWantAFullEFOBE());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
 		}
@@ -303,7 +303,7 @@ namespace Epicoin.Core {
 						var prevHash = efobe.TopBlock();
 						var hash = computeHash(prevHash, sol.problem, sol.parms, sol.solution);
 						efobe.addBlock(sol.problem, sol.parms, sol.solution, hash, prevHash);
-						core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, hash));
+						core.sendITM2Net(new NetworkMaestro.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, hash));
 					}
 				} else
 				if(m is ITM.SomeoneSolvedAProblem){
