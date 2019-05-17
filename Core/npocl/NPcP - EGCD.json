@@ -1,0 +1,11 @@
+{
+	"Parameter": {
+		"a": "int",
+		"b": "int"
+	},
+	"Solution": {
+		"gcd": "int",
+		"x": "int",
+		"y": "int"
+	}
+}
