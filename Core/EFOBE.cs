@@ -341,7 +341,11 @@ namespace Epicoin.Core {
 			enc.GetBytes(sol, 0, sol.Length, preHash, s);
 			return Convert.ToBase64String(hasher.ComputeHash(preHash));
 		}
-		protected bool validateSolution(string problem, string parms, string solution) => problemsRegistry[problem].check(parms, solution);
+		protected bool validateSolution(string problem, string parms, string solution){
+			var t = problemsRegistry[problem].check(parms, solution, CancellationToken.None);
+			t.Wait();//Checking is fast, by definition
+			return t.IsCompletedSuccessfully && t.Result;
+		}
 		protected bool validateBlock((string problem, string parameters, string solution, string hash, string prevHash) b) => validateSolution(b.problem, b.parameters, b.solution) && computeHash(b.prevHash, b.problem, b.parameters, b.solution) == b.hash;
 
 
