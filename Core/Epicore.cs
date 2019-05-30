@@ -42,6 +42,10 @@ namespace Epicoin.Core {
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
 			nt = new Thread(() => {}); //TODO wire in network component
 
+			st.Name = "Solver Thread";
+			vt.Name = "Validator Thread";
+			nt.Name = "Networking Thread";
+
 			sendITM2Solver = solver.sendITM;
 			sendITM2Validator = validator.sendITM;
 		}
