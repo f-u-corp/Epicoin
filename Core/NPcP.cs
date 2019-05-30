@@ -231,7 +231,31 @@ namespace Epicoin.Core {
 			LOG.Info($"Successfuly loaded problems - {problemsRegistry.Count} ({String.Join(", ", problemsRegistry.Keys)})");
 		}
 
-		
+		//Running
+
+		protected (string problem, string parms) currentlySolvingData;
+		protected Task<string> currentlySolving;
+		protected CancellationTokenSource currentlySolvingCancellor;
+
+		public bool IsSolving() => currentlySolving != null;
+
+		protected bool StartSolving(string problem, string parms){
+			if(currentlySolving != null) return false;
+			if(!doSolve) return false;
+			if(!SolvingEnabled(problem)) return false;
+			currentlySolvingData = (problem, parms);
+			currentlySolving = problemsRegistry[problem].solve(parms, (currentlySolvingCancellor = new CancellationTokenSource()).Token);
+			return true;
+		}
+
+		protected void AttemptToCancelCurrentlySolving(){
+			currentlySolvingCancellor.Cancel();
+		}
+
+		protected void ProblemIHaveSolved(string problem, string parms, string sol){
+			//TODO
+		}
+
 		/*
 		 * ITC
 		 */
