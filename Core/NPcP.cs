@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.IO;
-using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Cloo;
 using Cloo.Extensions;
@@ -31,7 +32,7 @@ namespace Epicoin.Core {
 			prog.Dispose();
 		}
 
-		internal S[] solve(P[] parms){
+		internal async Task<S[]> solve(P[] parms, CancellationToken cancel){
 			long Len = parms.LongLength;
 			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.UseHostPointer, parms))
 			using(var solBuff = new ComputeBuffer<S>(prog.Context, ComputeMemoryFlags.WriteOnly, Len)){
@@ -46,9 +47,9 @@ namespace Epicoin.Core {
 				}
 			}
 		}
-		public string solve(string parms) => JsonConvert.SerializeObject(solve(JsonConvert.DeserializeObject<P[]>(parms)));
+		public async Task<string> solve(string parms, CancellationToken cancel) => JsonConvert.SerializeObject(await solve(JsonConvert.DeserializeObject<P[]>(parms), cancel));
 
-		internal bool check(P[] parms, S[] solutions){
+		internal async Task<bool> check(P[] parms, S[] solutions, CancellationToken cancel){
 			long Len = parms.LongLength;
 			if(Len != solutions.LongLength) throw new InvalidOperationException("Solutions must be as much as parameters!");
 			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.UseHostPointer, parms))
@@ -66,7 +67,7 @@ namespace Epicoin.Core {
 				}
 			}
 		}
-		public bool check(string parms, string sols) => check(JsonConvert.DeserializeObject<P[]>(parms), JsonConvert.DeserializeObject<S[]>(sols));
+		public async Task<bool> check(string parms, string sols, CancellationToken cancel) => await check(JsonConvert.DeserializeObject<P[]>(parms), JsonConvert.DeserializeObject<S[]>(sols), cancel);
 
 	}
 
@@ -75,8 +76,8 @@ namespace Epicoin.Core {
 	/// </summary>
 	internal interface INPcProblem : IDisposable {
 
-		string solve(string parms);
-		bool check(string parms, string sols);
+		Task<string> solve(string parms, CancellationToken cancel);
+		Task<bool> check(string parms, string sols, CancellationToken cancel);
 
 	}
 
@@ -102,16 +103,18 @@ namespace Epicoin.Core {
 		/// Solves the problem given the parameters (with string representations - in any consistent way the problem may like).
 		/// </summary>
 		/// <param name="parms">Parameters to find the solution for.</param>
+		/// <param name="cancel">Cancellation token to (attempt) to terminate the computation.</param>
 		/// <returns>The solution to the problem, represented as string (in any consitent way the problem may like).</returns>
-		public string solve(string parms) => deleg.solve(parms);
+		public Task<string> solve(string parms, CancellationToken cancel) => deleg.solve(parms, cancel);
 
 		/// <summary>
 		/// Checks the solution to the problem for given parameters (with string representations - in any consistent way the problem may like).
 		/// </summary>
 		/// <param name="parms">Parameters to check with.</param>
 		/// <param name="solution">Solution to check. </param>
+		/// <param name="cancel">Cancellation token to (attempt) to terminate the computation.</param>
 		/// <returns>Whether the solution is correct.</returns>
-		public bool check(string parms, string solution) => deleg.check(parms, solution);
+		public Task<bool> check(string parms, string solution, CancellationToken cancel) => deleg.check(parms, solution, cancel);
 
 	}
 
