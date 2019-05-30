@@ -34,6 +34,16 @@ namespace Epicoin.Core {
 	}
 
 	/// <summary>
+	/// Public events happening in the core. Allows to react to certain events taking place anywhere in the epicore.<br/>
+	/// Undefined source - for any and all event, source location / thread / ... is not defined and can take place from anywhere in epicore.<br/>
+	/// Asynchronous - all events are fired and processed asynchronously from all epicore and your threads, [thus] heavy computations can be potentially performed directly in the event handler.
+	/// </summary>
+	public interface EpicoreEvents {
+		event Action<(string Problem, string Parameters)> OnStartedSolvingProblem;
+		event Action<(string Problem, string Parameters, string Solution)> OnProblemSolved;
+	}
+
+	/// <summary>
 	/// Solver component of the Core. Responsible for loading problems (on initialization) and solving them when given the parameters, if solving problems was enabled.
 	/// </summary>
 	public interface ISolver {
