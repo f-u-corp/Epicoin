@@ -74,7 +74,7 @@ namespace Epicoin.Core {
 		/// </summary>
 		/// <param name="parms">Parameters to find the solution for.</param>
 		/// <returns>The solution to the problem, represented as string (in any consitent way the problem may like).</returns>
-		public string solve(string parms) => (string) solvePi.Invoke(this, new object[]{parms});
+		public async Task<string> solve(string parms, CancellationToken cancel) => (string) solvePi.Invoke(this, new object[]{parms});
 
 		private readonly MethodInfo solvePi;
 		private string solveP<P, S>(string p) => encodeSolution<S>((deleg as INPcProblem<P, S>).solve(decodeParams<P>(p)));
@@ -85,7 +85,7 @@ namespace Epicoin.Core {
 		/// <param name="parms">Parameters to check with.</param>
 		/// <param name="solution">Solution to check. </param>
 		/// <returns>Whether the solution is correct.</returns>
-		public bool check(string parms, string solution) => (bool) checkPi.Invoke(this, new object[]{parms, solution});
+		public async Task<bool> check(string parms, string solution, CancellationToken cancel) => (bool) checkPi.Invoke(this, new object[]{parms, solution});
 
 		private readonly MethodInfo checkPi;
 		private bool checkP<P, S>(string p, string s) => (deleg as INPcProblem<P, S>).check(decodeParams<P>(p), decodeSolution<S>(s));
@@ -143,14 +143,14 @@ namespace Epicoin.Core {
 					if(m is ITM.PlsSolve){
 						var pls = m as ITM.PlsSolve;
 						CancellationTokenSource cts = new CancellationTokenSource();
-						var task = Task.Run(() => solve(pls.problem, pls.parms), cts.Token);
+						var task = solve(pls.problem, pls.parms, cts.Token);
 						cur = (pls.problem, pls.parms, task, cts);
 					}
 				}
 			}
 		}
 
-		protected string solve(string problem, string parms) => problemsRegistry[problem].solve(parms);
+		protected Task<string> solve(string problem, string parms, CancellationToken cancel) => problemsRegistry[problem].solve(parms, cancel);
 
 		internal void cleanup(){}
 
