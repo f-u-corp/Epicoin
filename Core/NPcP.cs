@@ -242,6 +242,7 @@ namespace Epicoin.Core {
 
 		protected virtual void TakeCareOfStuffFromTimeToTime(){
 			while(!core.stop){
+				var message = itc.readMessageOrDefault();
 				if(currentlySolving != null){
 					if(currentlySolving.IsCompletedSuccessfully){
 						if(!currentlySolvingCancellor.IsCancellationRequested) ProblemIHaveSolved(currentlySolvingData.problem, currentlySolvingData.parms, currentlySolving.Result);
