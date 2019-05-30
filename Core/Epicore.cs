@@ -77,6 +77,22 @@ namespace Epicoin.Core {
 		}
 
 	}
+	
+	internal sealed class AsyncEventsManager : EpicoreEvents {
+
+		private static void RAINN(object nn, Action a){ if(nn != null) Task.Run(a); }
+		public static void FireAsync<T>(Action<T> eve, T param) => RAINN(eve, () => eve(param));
+		public static void FireAsync<T1,T2>(Action<T1,T2> eve, T1 param1, T2 param2) => RAINN(eve, () => eve(param1, param2));
+		public static void FireAsync<T1,T2,T3>(Action<T1,T2,T3> eve, T1 param1, T2 param2, T3 param3) => RAINN(eve, () => eve(param1, param2, param3));
+		public static void FireAsync<T1,T2,T3,T4>(Action<T1,T2,T3,T4> eve, T1 param1, T2 param2, T3 param3, T4 param4) => RAINN(eve, () => eve(param1, param2, param3, param4));
+		public static void FireAsync<T1,T2,T3,T4,T5>(Action<T1,T2,T3,T4,T5> eve, T1 param1, T2 param2, T3 param3, T4 param4, T5 param5) => RAINN(eve, () => eve(param1, param2, param3, param4, param5));
+
+		public event Action<(string, string)> OnStartedSolvingProblem;
+		public void FireOnStartedSolvingProblem(string problem, string parms) => FireAsync(OnStartedSolvingProblem, (problem, parms));
+		public event Action<(string, string, string)> OnProblemSolved;
+		public void FireOnProblemSolved(string problem, string parms, string sol) => FireAsync(OnProblemSolved, (problem, parms, sol));
+
+	}
 
 	/// <summary>
 	/// Internal base class for any Epicoin main component - component significant enough to be run on dedicated thread(s).
