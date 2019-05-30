@@ -32,6 +32,26 @@ namespace Epicoin.Core {
 			prog.Dispose();
 		}
 
+		internal static Task<T[]> AsyncOpenCLWrap<T>(ComputeCommandQueue ccq, ComputeKernel kernel, ComputeBuffer<T> outputReadbuffer, CancellationToken cancel, long[][] globalLocalWorkSize = null) where T : struct {
+			var olen = outputReadbuffer.Count;
+			if(globalLocalWorkSize == null) globalLocalWorkSize = new []{new []{olen}, null}; //TODO: do a better job
+			var task = new TaskCompletionSource<T[]>();
+			var eve = new List<ComputeEventBase>();
+			ccq.Execute(kernel, null, globalLocalWorkSize[0], globalLocalWorkSize[1], eve);
+			ccq.Flush();
+			eve[0].Completed += (s1,a1) => {
+				if(cancel.IsCancellationRequested) task.SetCanceled();
+				else {
+					T[] ts = new T[olen];
+					ccq.ReadFromBuffer(outputReadbuffer, ref ts, false, eve);
+					eve[1].Completed += (s2,a2) => task.SetResult(ts);
+					eve[1].Aborted += (s2,a2) => task.SetException(new Exception("OpenCL abnormal task termination occured when reading the output"));
+				}
+			};
+			eve[0].Aborted += (s1,a1) => task.SetException(new Exception("OpenCL abnormal task termination occured during computation"));
+			return task.Task;
+		}
+
 		internal async Task<S[]> solve(P[] parms, CancellationToken cancel){
 			long Len = parms.LongLength;
 			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.UseHostPointer, parms))
@@ -39,11 +59,7 @@ namespace Epicoin.Core {
 				slv.SetMemoryArgument(0, parBuff);
 				slv.SetMemoryArgument(1, solBuff);
 				using(var ccq = new ComputeCommandQueue(prog.Context, prog.Devices[0], ComputeCommandQueueFlags.None)){
-					ccq.Execute(slv, null, new []{Len}, null, null);
-					S[] sols = new S[Len];
-					ccq.Finish();
-					ccq.ReadFromBuffer(solBuff, ref sols, true, null);
-					return sols;
+					return await AsyncOpenCLWrap(ccq, slv, solBuff, cancel);
 				}
 			}
 		}
@@ -59,11 +75,7 @@ namespace Epicoin.Core {
 				chck.SetMemoryArgument(1, solBuff);
 				chck.SetMemoryArgument(2, valiBuff);
 				using(var ccq = new ComputeCommandQueue(prog.Context, prog.Devices[0], ComputeCommandQueueFlags.None)){
-					ccq.Execute(chck, null, new []{Len}, null, null);
-					short[] val = new short[Len];
-					ccq.Finish();
-					ccq.ReadFromBuffer(valiBuff, ref val, true, null);
-					return val.All(s => s != 0);
+					return (await AsyncOpenCLWrap(ccq, chck, valiBuff, cancel)).All(s => s != 0);
 				}
 			}
 		}
