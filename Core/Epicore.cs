@@ -28,6 +28,9 @@ namespace Epicoin.Core {
 		internal Action<Validator.ITM> sendITM2Validator;
 		internal Action sendITM2Net;
 
+		internal AsyncEventsManager events = new AsyncEventsManager();
+		public EpicoreEvents Events => events;
+
 		internal bool stop { get; private set; }
 
 		/// <summary>

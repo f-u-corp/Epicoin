@@ -16,6 +16,9 @@ namespace Epicoin.Core {
 		///<summary>Retrieves the network manager/maestro core component.</summary>
 		INet GetNetworkManager();
 
+		///<summary>Subscribe to Epicore events! Free entry upon presentation of a ticket!</summary>
+		EpicoreEvents Events { get; }
+
 		/// <summary>
 		/// Starts Epicore. Parallel, non-blocking - Epicore creates and manages all threads it requires automatically; returns as soon as all async components are bootstrapped (initialization is also asynchronous).
 		/// </summary>
