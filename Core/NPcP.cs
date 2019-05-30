@@ -160,40 +160,58 @@ namespace Epicoin.Core {
 			InitOpenCL();
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
-			//CLIProblemTesting();
+			AsyncCLIProblemTesting();
 			TakeCareOfStuffFromTimeToTime();
 			CleanupOpenCL();
 		}
 
-		private void CLIProblemTesting(){
-			LOG.Info("Welcome to CLI problem testing!");
-			goto re;
-			st: LOG.Info("Input your problem!");
-			var pr = Console.ReadLine();
-			if(!problemsRegistry.ContainsKey(pr)) goto st;
-			var problem = problemsRegistry[pr];
-			LOG.Info("Input parameters to solve for");
-			string parms = Console.ReadLine();
-			var solt = problem.solve(parms, new CancellationToken());
-			solt.Wait();
-			string sol = solt.Result;
-			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine(sol);
-			Console.ForegroundColor = ConsoleColor.White;
-			LOG.Info("Press a key to validate found solution");
-			Console.ReadKey();
-			var valt = problem.check(parms, sol, new CancellationToken());
-			valt.Wait();
-			bool val = valt.Result;
-			Console.ForegroundColor = val ? ConsoleColor.Green : ConsoleColor.Red;
-			Console.WriteLine("Solution valid: " + val);
-			Console.ForegroundColor = ConsoleColor.White;
-			re: LOG.Info("Input 'another' to test with a different problem, or 'exit' to leave CLI problem testing");
-			switch(Console.ReadLine().ToLower()){
-				case "exit": case "quit": break;
-				case "another": goto st;
-				default: goto re;
+		private void AsyncCLIProblemTesting(){
+			Action homeUI = null, solveUI = null;
+			Action<string, string, string> validateUI = null;
+			void wannaContinue(){
+				re: LOG.Info("Input 'another' to test with a different problem, or 'exit' to leave CLI problem testing");
+				switch(Console.ReadLine().ToLower()){
+					case "exit": case "quit": break;
+					case "another":
+						solveUI();
+						break;
+					default: goto re;
+				}
+			};
+			void solveInput(){
+				st: LOG.Info("Input your problem!");
+				var pr = Console.ReadLine();
+				if(!problemsRegistry.ContainsKey(pr)) goto st;
+				LOG.Info("Input parameters to solve for");
+				string parms = Console.ReadLine();
+				StartSolving(pr, parms);
+				var solt = currentlySolving;
+				solt.Wait();
+				if(solt.IsCompletedSuccessfully){
+					string sol = solt.Result;
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.WriteLine(sol);
+					Console.ForegroundColor = ConsoleColor.White;
+					LOG.Info("Press a key to validate found solution");
+					Console.ReadKey();
+					validateUI(pr, parms, sol);
+				} else {
+					Console.WriteLine("Task cancelled or errored :(");
+					wannaContinue();
+				}
+			};
+			void validateInput(string problem, string parms, string sol){
+				var valt = problemsRegistry[problem].check(parms, sol, CancellationToken.None);
+				valt.Wait();
+				bool val = valt.Result;
+				Console.ForegroundColor = val ? ConsoleColor.Green : ConsoleColor.Red;
+				Console.WriteLine("Solution valid: " + val);
+				Console.ForegroundColor = ConsoleColor.White;
+				wannaContinue();
 			}
+			(homeUI, solveUI, validateUI) = (wannaContinue, solveInput, validateInput);
+			LOG.Info("Welcome to CLI problem testing!");
+			Task.Run(homeUI);
 		}
 
 		protected ComputeDevice clDevice;
