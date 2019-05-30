@@ -160,7 +160,8 @@ namespace Epicoin.Core {
 			InitOpenCL();
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
-			CLIProblemTesting();
+			//CLIProblemTesting();
+			TakeCareOfStuffFromTimeToTime();
 			CleanupOpenCL();
 		}
 
@@ -238,6 +239,19 @@ namespace Epicoin.Core {
 		protected CancellationTokenSource currentlySolvingCancellor;
 
 		public bool IsSolving() => currentlySolving != null;
+
+		protected virtual void TakeCareOfStuffFromTimeToTime(){
+			while(!core.stop){
+				if(currentlySolving != null){
+					if(currentlySolving.IsCompletedSuccessfully){
+						if(!currentlySolvingCancellor.IsCancellationRequested) ProblemIHaveSolved(currentlySolvingData.problem, currentlySolvingData.parms, currentlySolving.Result);
+						currentlySolvingData = (null, null);
+						currentlySolving = null;
+						currentlySolvingCancellor = null;
+					}
+				} else Thread.Yield();
+			}
+		}
 
 		protected bool StartSolving(string problem, string parms){
 			if(currentlySolving != null) return false;
