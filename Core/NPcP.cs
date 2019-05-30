@@ -287,7 +287,12 @@ namespace Epicoin.Core {
 
 		protected void ProblemIHaveSolved(string problem, string parms, string sol){
 			//TODO
+			OnProblemSolved?.Invoke((problem, parms, sol));
 		}
+
+		// Events
+
+		public event Action<(string, string, string)> OnProblemSolved;
 
 		/*
 		 * ITC
