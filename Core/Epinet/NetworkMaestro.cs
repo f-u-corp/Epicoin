@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Epicoin.Core
 {
-	class NetworkMaestro : MainComponent<NetworkMaestro.ITM>, INet
+	class NetworkMaestro : MainComponent<Epicoin.Core.Net.ITM>, INet
 	{
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Network");
 
@@ -50,15 +50,6 @@ namespace Epicoin.Core
 			{
 				baby.Cry(); 
 			}
-
-		}
-
-		/*
-		 * ITC
-		 */
-
-		internal class ITM : ITCMessage
-		{
 
 		}
 	}
