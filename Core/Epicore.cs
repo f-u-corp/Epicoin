@@ -28,6 +28,9 @@ namespace Epicoin.Core {
 		internal Action<Validator.ITM> sendITM2Validator;
 		internal Action<Epinet.ITM> sendITM2Net;
 
+		internal AsyncEventsManager events = new AsyncEventsManager();
+		public EpicoreEvents Events => events;
+
 		internal bool stop { get; private set; }
 
 		/// <summary>
@@ -38,6 +41,10 @@ namespace Epicoin.Core {
 			st = new Thread((solver = new Solver(this, solverEnabled)).InitAndRun);
 			vt = new Thread((validator = new Validator(this)).InitAndRun);
 			nt = new Thread(() => {}); //TODO wire in network component
+
+			st.Name = "Solver Thread";
+			vt.Name = "Validator Thread";
+			nt.Name = "Networking Thread";
 
 			sendITM2Solver = solver.sendITM;
 			sendITM2Validator = validator.sendITM;
@@ -76,6 +83,22 @@ namespace Epicoin.Core {
 		public async Task StopNB(){
 			await Task.Run((Action) Stop);
 		}
+
+	}
+	
+	internal sealed class AsyncEventsManager : EpicoreEvents {
+
+		private static void RAINN(object nn, Action a){ if(nn != null) Task.Run(a); }
+		public static void FireAsync<T>(Action<T> eve, T param) => RAINN(eve, () => eve(param));
+		public static void FireAsync<T1,T2>(Action<T1,T2> eve, T1 param1, T2 param2) => RAINN(eve, () => eve(param1, param2));
+		public static void FireAsync<T1,T2,T3>(Action<T1,T2,T3> eve, T1 param1, T2 param2, T3 param3) => RAINN(eve, () => eve(param1, param2, param3));
+		public static void FireAsync<T1,T2,T3,T4>(Action<T1,T2,T3,T4> eve, T1 param1, T2 param2, T3 param3, T4 param4) => RAINN(eve, () => eve(param1, param2, param3, param4));
+		public static void FireAsync<T1,T2,T3,T4,T5>(Action<T1,T2,T3,T4,T5> eve, T1 param1, T2 param2, T3 param3, T4 param4, T5 param5) => RAINN(eve, () => eve(param1, param2, param3, param4, param5));
+
+		public event Action<(string, string)> OnStartedSolvingProblem;
+		public void FireOnStartedSolvingProblem(string problem, string parms) => FireAsync(OnStartedSolvingProblem, (problem, parms));
+		public event Action<(string, string, string)> OnProblemSolved;
+		public void FireOnProblemSolved(string problem, string parms, string sol) => FireAsync(OnProblemSolved, (problem, parms, sol));
 
 	}
 

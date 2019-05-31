@@ -170,31 +170,22 @@ namespace Epicoin.Core {
 		 */
 
 		internal class ITM : ITCMessage {
+			internal class ProblemToBeSolved : ITM { //From Network
+				public readonly string Problem, Parameters;
 
-			internal interface AsyncITM {}
-
-			internal class PlsSolve : ITM {
-
-				public readonly string problem, parms;
-
-				public PlsSolve(string problem, string parms){
-					this.problem = problem;
-					this.parms = parms;
+				public ProblemToBeSolved(string problem, string parms){
+					this.Problem = problem;
+					this.Parameters = parms;
 				}
-
 			}
+			internal class CancelPendingProblem : ITM { //From Validator
+				public readonly string Problem, Parameters;
 
-			internal class StahpSolvingUSlowpoke : ITM, AsyncITM {
-
-				public readonly string problem, parms;
-
-				public StahpSolvingUSlowpoke(string problem, string parms){
-					this.problem = problem;
-					this.parms = parms;
+				public CancelPendingProblem(string problem, string parms){
+					this.Problem = problem;
+					this.Parameters = parms;
 				}
-
 			}
-
 		}
 
 	}
