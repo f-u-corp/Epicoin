@@ -26,7 +26,7 @@ namespace Epicoin.Core {
 
 		internal Action<Solver.ITM> sendITM2Solver;
 		internal Action<Validator.ITM> sendITM2Validator;
-		internal Action<Epinet.ITM> sendITM2Net;
+		internal Action<Epicoin.Core.Net.ITM> sendITM2Net;
 
 		internal AsyncEventsManager events = new AsyncEventsManager();
 		public EpicoreEvents Events => events;
