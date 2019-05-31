@@ -134,6 +134,14 @@ namespace Epicoin.Core {
 				}
 			}
 
+			internal class EFOBEReqReply : ITM {
+				public readonly string cachedEFOBEFile;
+
+				public EFOBEReqReply(string cache){
+					this.cachedEFOBEFile = cache;
+				}
+			}
+
 		}
 
 	}

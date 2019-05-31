@@ -26,5 +26,8 @@ namespace Epicoin.Core.Net {
 				this.NewHash = newHash;
 			}
 		}
+		internal class EFOBERequest : ITM {
+
+		}
 	}
 }
