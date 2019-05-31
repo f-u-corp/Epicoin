@@ -47,8 +47,20 @@ namespace Epicoin.Core {
 		event Action<IValidator> OnValidatorInitialized;
 		event Action<INet> OnNetworkingInitialized;
 
+		event Action<EFOBE> OnEFOBEAcquired;
+
 		event Action<(string Problem, string Parameters)> OnStartedSolvingProblem;
 		event Action<(string Problem, string Parameters, string Solution)> OnProblemSolved;
+	}
+
+	/// <summary>
+	/// Public events taking place in the EFOBE. Follow the same async execution as Epicore events
+	/// </summary>
+	public interface EFOBEEvents {
+		event Action<(string Problem, string Parameters, string Solution, string Parent, string Hash)> OnBlockAdded;
+		event Action<(string Problem, string Parameters, string Solution, string Hash)> OnBlockImmortalized;
+		event Action<(string Problem, string Parameters, string Solution, string Hash)> OnLCAChanged;
+		event Action<(string Problem, string Parameters, string Solution, string OldParent, string OldHash, string NewParent, string NewHash)> OnBranchRebased;
 	}
 
 	/// <summary>
