@@ -135,10 +135,10 @@ namespace Epicoin.Core {
 			}
 
 			internal class EFOBEReqReply : ITM {
-				public readonly string cachedEFOBEFile;
+				public readonly FileInfo cachedEFOBE;
 
-				public EFOBEReqReply(string cache){
-					this.cachedEFOBEFile = cache;
+				public EFOBEReqReply(FileInfo cache){
+					this.cachedEFOBE = cache;
 				}
 			}
 
