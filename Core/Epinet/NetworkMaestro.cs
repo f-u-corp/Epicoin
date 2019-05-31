@@ -41,21 +41,6 @@ namespace Epicoin.Core
 			}
 
 		}
-		//static HuffmanCode();
-
-		class BinTree<T>
-		{
-			public T InnerValue { get; set; }
-			public BinTree<T> Right { get; set; }
-			public BinTree<T> Left { get; set; }
-
-			public BinTree(T val)
-			{
-				this.InnerValue = val;
-				this.Right = null;
-				this.Left = null;
-			}
-		}
 	}
 
 	class Epinet {
