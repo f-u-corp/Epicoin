@@ -17,7 +17,7 @@ namespace Epicoin.Core {
 	/// <summary>
 	/// The Epic Free and Open Blockchain of Epicness itself, in all its' structural glory.
 	/// </summary>
-	public class EFOBE {
+	public class EFOBE : EFOBEEvents {
 
 		/// <summary>
 		/// Serializes EFOBE into JSON string.
@@ -253,6 +253,16 @@ namespace Epicoin.Core {
 			}
 
 		}
+
+		//Events
+		public event Action<(string Problem, string Parameters, string Solution, string Parent, string Hash)> OnBlockAdded;
+		private void FireOnBlockAdded(string Problem, string Parameters, string Solution, string Parent, string Hash) => AsyncEventsManager.FireAsync(OnBlockAdded, (Problem, Parameters, Solution, Parent, Hash));
+		public event Action<(string Problem, string Parameters, string Solution, string Hash)> OnBlockImmortalized;
+		private void FireOnBlockImmortalized(string Problem, string Parameters, string Solution, string Hash) => AsyncEventsManager.FireAsync(OnBlockImmortalized, (Problem, Parameters, Solution, Hash));
+		public event Action<(string Problem, string Parameters, string Solution, string Hash)> OnLCAChanged;
+		private void FireOnLCAChanged(string Problem, string Parameters, string Solution, string Hash) => AsyncEventsManager.FireAsync(OnLCAChanged, (Problem, Parameters, Solution, Hash));
+		public event Action<(string Problem, string Parameters, string Solution, string OldParent, string OldHash, string NewParent, string NewHash)> OnBranchRebased;
+		private void FireOnBranchRebased(string Problem, string Parameters, string Solution, string OldParent, string OldHash, string NewParent, string NewHash) => AsyncEventsManager.FireAsync(OnBranchRebased, (Problem, Parameters, Solution, OldParent, OldHash, NewParent, NewHash));
 
 	}
 

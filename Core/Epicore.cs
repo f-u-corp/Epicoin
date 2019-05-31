@@ -96,6 +96,16 @@ namespace Epicoin.Core {
 		public static void FireAsync<T1,T2,T3,T4>(Action<T1,T2,T3,T4> eve, T1 param1, T2 param2, T3 param3, T4 param4) => RAINN(eve, () => eve(param1, param2, param3, param4));
 		public static void FireAsync<T1,T2,T3,T4,T5>(Action<T1,T2,T3,T4,T5> eve, T1 param1, T2 param2, T3 param3, T4 param4, T5 param5) => RAINN(eve, () => eve(param1, param2, param3, param4, param5));
 
+		public event Action<ISolver> OnSolverInitialized;
+		public void FireOnSolverInitialized(Solver solver) => FireAsync(OnSolverInitialized, solver);
+		public event Action<IValidator> OnValidatorInitialized;
+		public void FireOnValidatorInitialized(Validator validator) => FireAsync(OnValidatorInitialized, validator);
+		public event Action<INet> OnNetworkingInitialized;
+		public void FireOnNetworkingInitialized(INet net) => FireAsync(OnNetworkingInitialized, net);
+
+		public event Action<EFOBE> OnEFOBEAcquired;
+		public void FireOneEFOBEAcquired(EFOBE efobe) => FireAsync(OnEFOBEAcquired, efobe);
+
 		public event Action<(string, string)> OnStartedSolvingProblem;
 		public void FireOnStartedSolvingProblem(string problem, string parms) => FireAsync(OnStartedSolvingProblem, (problem, parms));
 		public event Action<(string, string, string)> OnProblemSolved;

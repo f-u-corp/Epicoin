@@ -37,7 +37,7 @@ namespace Epicoin.Test {
 			validator.init();
 
 			var tmpE = new FileInfo("temp-test-efobe.json");
-			File.WriteAllText(tmpE.FullName, "{ \"blocks\": [] }");
+			File.WriteAllText(tmpE.FullName, "[]");
 			validator.sendITM(new Validator.ITM.EFOBEReqReply(tmpE));
 			validator.keepChecking(); //Will receive and bind EFOBE
 			var efobe = validator.GetLocalEFOBE();
@@ -54,12 +54,12 @@ namespace Epicoin.Test {
 
 			var top = validator.GetLocalEFOBE().TopBlock();
 			var gp = (pro: ifp.getName(), par: "{ \"o\": 242 }", sol: "{ \"o\": [2,11,11] }");
-			validator.sendITM(new Validator.ITM.EFOBERemoteBlockAdded(gp.pro, gp.par, gp.sol, validator.computeHash(top, gp.pro, gp.par, gp.sol), top));
+			validator.sendITM(new Validator.ITM.EFOBERemoteBlockAdded(gp.pro, gp.par, gp.sol, top, validator.computeHash(top, gp.pro, gp.par, gp.sol)));
 			validator.keepChecking();
 			Assert.IsTrue(efobe.TotalBlockCount == 3, "Valid hash did not pass validation.");
 			
 			top = validator.GetLocalEFOBE().TopBlock();
-			validator.sendITM(new Validator.ITM.EFOBERemoteBlockAdded(gp.pro, gp.par, gp.sol, validator.computeHash("Z2c=", gp.pro, gp.par, gp.sol), top));
+			validator.sendITM(new Validator.ITM.EFOBERemoteBlockAdded(gp.pro, gp.par, gp.sol, top, validator.computeHash("Z2c=", gp.pro, gp.par, gp.sol)));
 			validator.keepChecking();
 			Assert.IsTrue(efobe.TotalBlockCount == 3, "Invalid hash passed validation.");
 
