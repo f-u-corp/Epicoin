@@ -22,18 +22,18 @@ namespace Epicoin.Test {
 			NPcProblemWrapper wrapper = new NPcProblemWrapper(new InefficientIntFactProblem());
 			const string p1 = "{\"o\":242}";
 
-			string s1 = wrapper.solve(p1);
+			string s1 = wrapper.solve(p1, System.Threading.CancellationToken.None).Result;
 			Assert.AreEqual("{\"o\":[2,11,11]}", s1, "Solving failed - unexpected result");
-			Assert.True(wrapper.check(p1, s1), "Solution check [242] failed - false negative");
+			Assert.True(wrapper.check(p1, s1, System.Threading.CancellationToken.None).Result, "Solution check [242] failed - false negative");
 
 			Random random = new Random();
 			for(int i = 0; i < 100; i++){
 				int n = random.Next(25, 12500);
 				if(n == 242) continue;
 				string p2 = "{ o: " + n + " }";
-				string s2 = wrapper.solve(p2);
-				Assert.True(wrapper.check(p2, s2), "Solution [rand] solve/check failed");
-				Assert.False(wrapper.check(p1, s2), "Solution [rand] check failed - false positive (against 242)");
+				string s2 = wrapper.solve(p2, System.Threading.CancellationToken.None).Result;
+				Assert.True(wrapper.check(p2, s2, System.Threading.CancellationToken.None).Result, "Solution [rand] solve/check failed");
+				Assert.False(wrapper.check(p1, s2, System.Threading.CancellationToken.None).Result, "Solution [rand] check failed - false positive (against 242)");
 			}
 		}
 

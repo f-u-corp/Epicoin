@@ -105,7 +105,7 @@ namespace Epicoin.Core {
 		/// </summary>
 		/// <param name="parms">Parameters to find the solution for.</param>
 		/// <returns>The solution to the problem, represented as string (in any consitent way the problem may like).</returns>
-		public string solve(string parms) => deleg.solve(parms);
+		public async Task<string> solve(string parms, CancellationToken cancel) => deleg.solve(parms);
 
 		/// <summary>
 		/// Checks the solution to the problem for given parameters (with string representations - in any consistent way the problem may like).
@@ -113,7 +113,7 @@ namespace Epicoin.Core {
 		/// <param name="parms">Parameters to check with.</param>
 		/// <param name="solution">Solution to check. </param>
 		/// <returns>Whether the solution is correct.</returns>
-		public bool check(string parms, string solution) => deleg.check(parms, solution);
+		public async Task<bool> check(string parms, string solution, CancellationToken cancel) => deleg.check(parms, solution);
 
 	}
 
@@ -237,14 +237,14 @@ namespace Epicoin.Core {
 					if(m is ITM.PlsSolve){
 						var pls = m as ITM.PlsSolve;
 						CancellationTokenSource cts = new CancellationTokenSource();
-						var task = Task.Run(() => solve(pls.problem, pls.parms), cts.Token);
+						var task = solve(pls.problem, pls.parms, cts.Token);
 						cur = (pls.problem, pls.parms, task, cts);
 					}
 				}
 			}
 		}
 
-		protected string solve(string problem, string parms) => problemsRegistry[problem].solve(parms);
+		protected Task<string> solve(string problem, string parms, CancellationToken cancel) => problemsRegistry[problem].solve(parms, cancel);
 
 		internal void cleanup(){}
 
@@ -264,31 +264,22 @@ namespace Epicoin.Core {
 		 */
 
 		internal class ITM : ITCMessage {
+			internal class ProblemToBeSolved : ITM { //From Network
+				public readonly string Problem, Parameters;
 
-			internal interface AsyncITM {}
-
-			internal class PlsSolve : ITM {
-
-				public readonly string problem, parms;
-
-				public PlsSolve(string problem, string parms){
-					this.problem = problem;
-					this.parms = parms;
+				public ProblemToBeSolved(string problem, string parms){
+					this.Problem = problem;
+					this.Parameters = parms;
 				}
-
 			}
+			internal class CancelPendingProblem : ITM { //From Validator
+				public readonly string Problem, Parameters;
 
-			internal class StahpSolvingUSlowpoke : ITM, AsyncITM {
-
-				public readonly string problem, parms;
-
-				public StahpSolvingUSlowpoke(string problem, string parms){
-					this.problem = problem;
-					this.parms = parms;
+				public CancelPendingProblem(string problem, string parms){
+					this.Problem = problem;
+					this.Parameters = parms;
 				}
-
 			}
-
 		}
 
 	}

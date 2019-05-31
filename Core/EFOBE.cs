@@ -341,7 +341,11 @@ namespace Epicoin.Core {
 			enc.GetBytes(sol, 0, sol.Length, preHash, s);
 			return Convert.ToBase64String(hasher.ComputeHash(preHash));
 		}
-		protected bool validateSolution(string problem, string parms, string solution) => problemsRegistry[problem].check(parms, solution);
+		protected bool validateSolution(string problem, string parms, string solution){
+			var t = problemsRegistry[problem].check(parms, solution, CancellationToken.None);
+			t.Wait();//Checking is fast, by definition
+			return t.IsCompletedSuccessfully && t.Result;
+		}
 		protected bool validateBlock((string problem, string parameters, string solution, string hash, string prevHash) b) => validateSolution(b.problem, b.parameters, b.solution) && computeHash(b.prevHash, b.problem, b.parameters, b.solution) == b.hash;
 
 
@@ -351,7 +355,7 @@ namespace Epicoin.Core {
 
 		internal class ITM : ITCMessage {
 
-			internal class GetProblemsRegistry : ITM {
+			internal class GetProblemsRegistry : ITM { //From Solver
 
 				public readonly ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
@@ -359,40 +363,46 @@ namespace Epicoin.Core {
 
 			}
 
-			internal class ISolvedAProblem : ITM {
+			internal class ProblemSolved : ITM { //From Solver
+				public readonly string Problem, Parameters, Solution;
 
-				public readonly string problem, parms, solution;
-
-				public ISolvedAProblem(string problem, string parms, string sol){
-					this.problem = problem;
-					this.parms = parms;
-					this.solution = sol;
+				public ProblemSolved(string problem, string parms, string sol){
+					this.Problem = problem;
+					this.Parameters = parms;
+					this.Solution = sol;
 				}
-
 			}
 
-			internal class HeresYourEFOBE : ITM {
+			internal class EFOBERemoteBlockAdded : ITM { //From Network
+				public readonly string Problem, Parameters, Solution;
+				public readonly string Parent, Hash;
 
-				public readonly FileInfo tmpCacheLoc;
-
-				public HeresYourEFOBE(FileInfo tmpCacheLoc){
-					this.tmpCacheLoc = tmpCacheLoc;
+				public EFOBERemoteBlockAdded(string problem, string parms, string sol, string parent, string hash){
+					this.Problem = problem;
+					this.Parameters = parms;
+					this.Solution = sol;
+					this.Parent = parent;
+					this.Hash = hash;
 				}
-
 			}
 
-			internal class SomeoneSolvedAProblem : ITM {
+			internal class EFOBERemoteBlockRebase : ITM { //From Network
+				public readonly string Hash;
+				public readonly string NewParent, NewHash;
 
-				public readonly string problem, parms, solution, hash, prevHash;
-
-				public SomeoneSolvedAProblem(string problem, string parms, string sol, string hash, string prevHash){
-					this.problem = problem;
-					this.parms = parms;
-					this.solution = sol;
-					this.hash = hash;
-					this.prevHash = prevHash;
+				public EFOBERemoteBlockRebase(string hash, string newParent, string newHash){
+					this.Hash = hash;
+					this.NewParent = newParent;
+					this.NewHash = newHash;
 				}
+			}
 
+			internal class EFOBEReqReply : ITM {
+				public readonly FileInfo cachedEFOBE;
+
+				public EFOBEReqReply(FileInfo cache){
+					this.cachedEFOBE = cache;
+				}
 			}
 
 		}
