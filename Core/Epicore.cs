@@ -101,6 +101,9 @@ namespace Epicoin.Core {
 		public event Action<INet> OnNetworkingInitialized;
 		public void FireOnNetworkingInitialized(INet net) => FireAsync(OnNetworkingInitialized, net);
 
+		public event Action<EFOBE> OnEFOBEAcquired;
+		public void FireOneEFOBEAcquired(EFOBE efobe) => FireAsync(OnEFOBEAcquired, efobe);
+
 		public event Action<(string, string)> OnStartedSolvingProblem;
 		public void FireOnStartedSolvingProblem(string problem, string parms) => FireAsync(OnStartedSolvingProblem, (problem, parms));
 		public event Action<(string, string, string)> OnProblemSolved;
