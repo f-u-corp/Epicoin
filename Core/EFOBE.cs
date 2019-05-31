@@ -126,6 +126,12 @@ namespace Epicoin.Core {
 			internal class EFOBERemoteBlockRebase : ITM { //From Network
 				public readonly string Hash;
 				public readonly string NewParent, NewHash;
+
+				public EFOBERemoteBlockRebase(string hash, string newParent, string newHash){
+					this.Hash = hash;
+					this.NewParent = newParent;
+					this.NewHash = newHash;
+				}
 			}
 
 		}
