@@ -42,6 +42,11 @@ namespace Epicoin.Core {
 	/// Asynchronous - all events are fired and processed asynchronously from all epicore and your threads, [thus] heavy computations can be potentially performed directly in the event handler.
 	/// </summary>
 	public interface EpicoreEvents {
+
+		event Action<ISolver> OnSolverInitialized;
+		event Action<IValidator> OnValidatorInitialized;
+		event Action<INet> OnNetworkingInitialized;
+
 		event Action<(string Problem, string Parameters)> OnStartedSolvingProblem;
 		event Action<(string Problem, string Parameters, string Solution)> OnProblemSolved;
 	}
