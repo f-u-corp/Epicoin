@@ -161,7 +161,7 @@ namespace Epicoin.Core {
 
 		internal class ITM : ITCMessage {
 
-			internal class GetProblemsRegistry : ITM {
+			internal class GetProblemsRegistry : ITM { //From Solver
 
 				public readonly ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
@@ -169,39 +169,46 @@ namespace Epicoin.Core {
 
 			}
 
-			internal class ISolvedAProblem : ITM {
+			internal class ProblemSolved : ITM { //From Solver
+				public readonly string Problem, Parameters, Solution;
 
-				public readonly string problem, parms, solution;
-
-				public ISolvedAProblem(string problem, string parms, string sol){
-					this.problem = problem;
-					this.parms = parms;
-					this.solution = sol;
+				public ProblemSolved(string problem, string parms, string sol){
+					this.Problem = problem;
+					this.Parameters = parms;
+					this.Solution = sol;
 				}
-
 			}
 
-			internal class HeresYourEFOBE : ITM {
+			internal class EFOBERemoteBlockAdded : ITM { //From Network
+				public readonly string Problem, Parameters, Solution;
+				public readonly string Parent, Hash;
 
-				public readonly FileInfo tmpCacheLoc;
-
-				public HeresYourEFOBE(FileInfo tmpCacheLoc){
-					this.tmpCacheLoc = tmpCacheLoc;
+				public EFOBERemoteBlockAdded(string problem, string parms, string sol, string parent, string hash){
+					this.Problem = problem;
+					this.Parameters = parms;
+					this.Solution = sol;
+					this.Parent = parent;
+					this.Hash = hash;
 				}
-
 			}
 
-			internal class SomeoneSolvedAProblem : ITM {
+			internal class EFOBERemoteBlockRebase : ITM { //From Network
+				public readonly string Hash;
+				public readonly string NewParent, NewHash;
 
-				public readonly string problem, parms, solution, hash;
-
-				public SomeoneSolvedAProblem(string problem, string parms, string sol, string hash){
-					this.problem = problem;
-					this.parms = parms;
-					this.solution = sol;
-					this.hash = hash;
+				public EFOBERemoteBlockRebase(string hash, string newParent, string newHash){
+					this.Hash = hash;
+					this.NewParent = newParent;
+					this.NewHash = newHash;
 				}
+			}
 
+			internal class EFOBEReqReply : ITM {
+				public readonly FileInfo cachedEFOBE;
+
+				public EFOBEReqReply(FileInfo cache){
+					this.cachedEFOBE = cache;
+				}
 			}
 
 		}
