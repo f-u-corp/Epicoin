@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.IO;
-using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Cloo;
 using Cloo.Extensions;
@@ -33,24 +34,40 @@ namespace Epicoin.Core {
 			prog.Dispose();
 		}
 
-		internal S[] solve(P[] parms){
+		internal static Task<T[]> AsyncOpenCLWrap<T>(ComputeCommandQueue ccq, ComputeKernel kernel, ComputeBuffer<T> outputReadbuffer, CancellationToken cancel, long[][] globalLocalWorkSize = null) where T : struct {
+			var olen = outputReadbuffer.Count;
+			if(globalLocalWorkSize == null) globalLocalWorkSize = new []{new []{olen}, null}; //TODO: do a better job
+			var task = new TaskCompletionSource<T[]>();
+			var eve = new List<ComputeEventBase>();
+			ccq.Execute(kernel, null, globalLocalWorkSize[0], globalLocalWorkSize[1], eve);
+			ccq.Flush();
+			eve[0].Completed += (s1,a1) => {
+				if(cancel.IsCancellationRequested) task.SetCanceled();
+				else {
+					T[] ts = new T[olen];
+					ccq.ReadFromBuffer(outputReadbuffer, ref ts, false, eve);
+					eve[1].Completed += (s2,a2) => task.SetResult(ts);
+					eve[1].Aborted += (s2,a2) => task.SetException(new Exception("OpenCL abnormal task termination occured when reading the output"));
+				}
+			};
+			eve[0].Aborted += (s1,a1) => task.SetException(new Exception("OpenCL abnormal task termination occured during computation"));
+			return task.Task;
+		}
+
+		internal async Task<S[]> solve(P[] parms, CancellationToken cancel){
 			long Len = parms.LongLength;
 			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.UseHostPointer, parms))
 			using(var solBuff = new ComputeBuffer<S>(prog.Context, ComputeMemoryFlags.WriteOnly, Len)){
 				slv.SetMemoryArgument(0, parBuff);
 				slv.SetMemoryArgument(1, solBuff);
 				using(var ccq = new ComputeCommandQueue(prog.Context, prog.Devices[0], ComputeCommandQueueFlags.None)){
-					ccq.Execute(slv, null, new []{Len}, null, null);
-					S[] sols = new S[Len];
-					ccq.Finish();
-					ccq.ReadFromBuffer(solBuff, ref sols, true, null);
-					return sols;
+					return await AsyncOpenCLWrap(ccq, slv, solBuff, cancel);
 				}
 			}
 		}
-		public string solve(string parms) => JsonConvert.SerializeObject(solve(JsonConvert.DeserializeObject<P[]>(parms)));
+		public async Task<string> solve(string parms, CancellationToken cancel) => JsonConvert.SerializeObject(await solve(JsonConvert.DeserializeObject<P[]>(parms), cancel));
 
-		internal bool check(P[] parms, S[] solutions){
+		internal async Task<bool> check(P[] parms, S[] solutions, CancellationToken cancel){
 			long Len = parms.LongLength;
 			if(Len != solutions.LongLength) throw new InvalidOperationException("Solutions must be as much as parameters!");
 			using(var parBuff = new ComputeBuffer<P>(prog.Context, ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.UseHostPointer, parms))
@@ -60,15 +77,11 @@ namespace Epicoin.Core {
 				chck.SetMemoryArgument(1, solBuff);
 				chck.SetMemoryArgument(2, valiBuff);
 				using(var ccq = new ComputeCommandQueue(prog.Context, prog.Devices[0], ComputeCommandQueueFlags.None)){
-					ccq.Execute(chck, null, new []{Len}, null, null);
-					short[] val = new short[Len];
-					ccq.Finish();
-					ccq.ReadFromBuffer(valiBuff, ref val, true, null);
-					return val.All(s => s != 0);
+					return (await AsyncOpenCLWrap(ccq, chck, valiBuff, cancel)).All(s => s != 0);
 				}
 			}
 		}
-		public bool check(string parms, string sols) => check(JsonConvert.DeserializeObject<P[]>(parms), JsonConvert.DeserializeObject<S[]>(sols));
+		public async Task<bool> check(string parms, string sols, CancellationToken cancel) => await check(JsonConvert.DeserializeObject<P[]>(parms), JsonConvert.DeserializeObject<S[]>(sols), cancel);
 
 	}
 
@@ -77,8 +90,8 @@ namespace Epicoin.Core {
 	/// </summary>
 	internal interface INPcProblem : IDisposable {
 
-		string solve(string parms);
-		bool check(string parms, string sols);
+		Task<string> solve(string parms, CancellationToken cancel);
+		Task<bool> check(string parms, string sols, CancellationToken cancel);
 
 	}
 
@@ -104,16 +117,18 @@ namespace Epicoin.Core {
 		/// Solves the problem given the parameters (with string representations - in any consistent way the problem may like).
 		/// </summary>
 		/// <param name="parms">Parameters to find the solution for.</param>
+		/// <param name="cancel">Cancellation token to (attempt) to terminate the computation.</param>
 		/// <returns>The solution to the problem, represented as string (in any consitent way the problem may like).</returns>
-		public async Task<string> solve(string parms, CancellationToken cancel) => deleg.solve(parms);
+		public Task<string> solve(string parms, CancellationToken cancel) => deleg.solve(parms, cancel);
 
 		/// <summary>
 		/// Checks the solution to the problem for given parameters (with string representations - in any consistent way the problem may like).
 		/// </summary>
 		/// <param name="parms">Parameters to check with.</param>
 		/// <param name="solution">Solution to check. </param>
+		/// <param name="cancel">Cancellation token to (attempt) to terminate the computation.</param>
 		/// <returns>Whether the solution is correct.</returns>
-		public async Task<bool> check(string parms, string solution, CancellationToken cancel) => deleg.check(parms, solution);
+		public Task<bool> check(string parms, string solution, CancellationToken cancel) => deleg.check(parms, solution, cancel);
 
 	}
 
@@ -147,7 +162,8 @@ namespace Epicoin.Core {
 
 		internal override void InitAndRun(){
 			init();
-			while(!core.stop) keepSolving();
+			AsyncCLIProblemTesting();
+			TakeCareOfStuffFromTimeToTime();
 			cleanup();
 		}
 
@@ -155,35 +171,59 @@ namespace Epicoin.Core {
 			InitOpenCL();
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
-			CLIProblemTesting();
+		}
+
+		internal void cleanup(){
 			CleanupOpenCL();
 		}
 
-		private void CLIProblemTesting(){
-			LOG.Info("Welcome to CLI problem testing!");
-			goto re;
-			st: LOG.Info("Input your problem!");
-			var pr = Console.ReadLine();
-			if(!problemsRegistry.ContainsKey(pr)) goto st;
-			var problem = problemsRegistry[pr];
-			LOG.Info("Input parameters to solve for");
-			string parms = Console.ReadLine();
-			string sol = problem.solve(parms);
-			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine(sol);
-			Console.ForegroundColor = ConsoleColor.White;
-			LOG.Info("Press a key to validate found solution");
-			Console.ReadKey();
-			bool val = problem.check(parms, sol);
-			Console.ForegroundColor = val ? ConsoleColor.Green : ConsoleColor.Red;
-			Console.WriteLine("Solution valid: " + val);
-			Console.ForegroundColor = ConsoleColor.White;
-			re: LOG.Info("Input 'another' to test with a different problem, or 'exit' to leave CLI problem testing");
-			switch(Console.ReadLine().ToLower()){
-				case "exit": case "quit": break;
-				case "another": goto st;
-				default: goto re;
+		private void AsyncCLIProblemTesting(){
+			Action homeUI = null, solveUI = null;
+			Action<string, string, string> validateUI = null;
+			void wannaContinue(){
+				re: LOG.Info("Input 'another' to test with a different problem, or 'exit' to leave CLI problem testing");
+				switch(Console.ReadLine().ToLower()){
+					case "exit": case "quit": break;
+					case "another":
+						solveUI();
+						break;
+					default: goto re;
+				}
+			};
+			void solveInput(){
+				st: LOG.Info("Input your problem!");
+				var pr = Console.ReadLine();
+				if(!problemsRegistry.ContainsKey(pr)) goto st;
+				LOG.Info("Input parameters to solve for");
+				string parms = Console.ReadLine();
+				StartSolving(pr, parms);
+				var solt = currentlySolving;
+				solt.Wait();
+				if(solt.IsCompletedSuccessfully){
+					string sol = solt.Result;
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.WriteLine(sol);
+					Console.ForegroundColor = ConsoleColor.White;
+					LOG.Info("Press a key to validate found solution");
+					Console.ReadKey();
+					validateUI(pr, parms, sol);
+				} else {
+					Console.WriteLine("Task cancelled or errored :(");
+					wannaContinue();
+				}
+			};
+			void validateInput(string problem, string parms, string sol){
+				var valt = problemsRegistry[problem].check(parms, sol, CancellationToken.None);
+				valt.Wait();
+				bool val = valt.Result;
+				Console.ForegroundColor = val ? ConsoleColor.Green : ConsoleColor.Red;
+				Console.WriteLine("Solution valid: " + val);
+				Console.ForegroundColor = ConsoleColor.White;
+				wannaContinue();
 			}
+			(homeUI, solveUI, validateUI) = (wannaContinue, solveInput, validateInput);
+			LOG.Info("Welcome to CLI problem testing!");
+			Task.Run(homeUI);
 		}
 
 		protected ComputeDevice clDevice;
@@ -222,43 +262,50 @@ namespace Epicoin.Core {
 			LOG.Info($"Successfuly loaded problems - {problemsRegistry.Count} ({String.Join(", ", problemsRegistry.Keys)})");
 		}
 
-		protected (string pr, string pa, Task<string> sol, CancellationTokenSource cts) cur = (null, null, null, null);
+		//Running
 
-		protected void keepSolving(){ 
-			{
-				if(cur.sol != null && (cur.sol.IsCompleted || cur.sol.IsCanceled)){
-					if(cur.sol.IsCompletedSuccessfully) core.sendITM2Validator(new Validator.ITM.ISolvedAProblem(cur.pr, cur.pr, cur.sol.Result));
-					cur.sol.Dispose();
-					cur.cts.Dispose();
-					cur = (null, null, null, null);
-				}
-				if(cur.sol == null){
-					var m = itc.readMessageOrDefault();
-					if(m is ITM.PlsSolve){
-						var pls = m as ITM.PlsSolve;
-						CancellationTokenSource cts = new CancellationTokenSource();
-						var task = solve(pls.problem, pls.parms, cts.Token);
-						cur = (pls.problem, pls.parms, task, cts);
+		protected (string problem, string parms) currentlySolvingData;
+		protected Task<string> currentlySolving;
+		protected CancellationTokenSource currentlySolvingCancellor;
+
+		public bool IsSolving() => currentlySolving != null;
+
+		protected virtual void TakeCareOfStuffFromTimeToTime(){
+			while(!core.stop){
+				var message = itc.readMessageOrDefault();
+				if(currentlySolving != null){
+					if(currentlySolving.IsCompletedSuccessfully){
+						if(!currentlySolvingCancellor.IsCancellationRequested) ProblemIHaveSolved(currentlySolvingData.problem, currentlySolvingData.parms, currentlySolving.Result);
+						currentlySolvingData = (null, null);
+						currentlySolving = null;
+						currentlySolvingCancellor = null;
 					}
-				}
+				} else Thread.Yield();
 			}
 		}
 
-		protected Task<string> solve(string problem, string parms, CancellationToken cancel) => problemsRegistry[problem].solve(parms, cancel);
-
-		internal void cleanup(){}
-
-		protected void sendITMAsync(ITM itm){
-			if(!(itm is ITM.AsyncITM)) base.sendITM(itm);
-			else {
-				if(itm is ITM.StahpSolvingUSlowpoke){
-					var stahp = itm as ITM.StahpSolvingUSlowpoke;
-					if(cur.pr == stahp.problem && cur.pa == stahp.parms && !cur.sol.IsCompleted) cur.cts.Cancel();
-				}
-			}
+		protected bool StartSolving(string problem, string parms){
+			if(currentlySolving != null) return false;
+			if(!doSolve) return false;
+			if(!SolvingEnabled(problem)) return false;
+			currentlySolvingData = (problem, parms);
+			currentlySolving = problemsRegistry[problem].solve(parms, (currentlySolvingCancellor = new CancellationTokenSource()).Token);
+			return true;
 		}
 
-		
+		protected void AttemptToCancelCurrentlySolving(){
+			currentlySolvingCancellor.Cancel();
+		}
+
+		protected void ProblemIHaveSolved(string problem, string parms, string sol){
+			//TODO
+			OnProblemSolved?.Invoke((problem, parms, sol));
+		}
+
+		// Events
+
+		public event Action<(string, string, string)> OnProblemSolved;
+
 		/*
 		 * ITC
 		 */

@@ -78,6 +78,10 @@ namespace Epicoin.Core {
 		/// <param name="doSolve">Whether to solve these problems</param>
 		void SetSolvingEnabled(string problem, bool doSolve);
 
+		bool IsSolving();
+
+		event Action<(string problem, string parameters, string solution)> OnProblemSolved;
+
 	}
 
 	/// <summary>
