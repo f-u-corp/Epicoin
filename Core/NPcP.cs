@@ -124,7 +124,12 @@ namespace Epicoin.Core {
 		 */
 
 		internal class ITM : ITCMessage {
+			internal class ProblemToBeSolved : ITM { //From Network
 
+			}
+			internal class CancelPendingProblem : ITM { //From Validator
+
+			}
 		}
 
 	}

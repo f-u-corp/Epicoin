@@ -92,11 +92,23 @@ namespace Epicoin.Core {
 
 		internal class ITM : ITCMessage {
 
-			internal class GetProblemsRegistry : ITM {
+			internal class GetProblemsRegistry : ITM { //From Solver
 
 				public readonly ImmutableDictionary<string, NPcProblemWrapper> problemsRegistry;
 
 				public GetProblemsRegistry(IDictionary<string, NPcProblemWrapper> reg) => problemsRegistry = reg is ImmutableDictionary<string, NPcProblemWrapper> ? reg as ImmutableDictionary<string, NPcProblemWrapper> : ImmutableDictionary.ToImmutableDictionary(reg);
+
+			}
+
+			internal class ProblemSolved : ITM { //From Solver
+
+			}
+
+			internal class EFOBERemoteBlockAdded : ITM { //From Network
+
+			}
+
+			internal class EFOBERemoteBlockRebase : ITM { //From Network
 
 			}
 
