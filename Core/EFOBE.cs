@@ -282,7 +282,7 @@ namespace Epicoin.Core {
 		internal void init(){
 			var cachedE = new FileInfo(EFOBEfile);
 			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
-			else core.sendITM2Net(new NetworkMaestro.ITM.IWantAFullEFOBE());
+			else core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBERequest());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
 		}
@@ -290,27 +290,27 @@ namespace Epicoin.Core {
 		internal void keepChecking(){
 			{
 				var m = itc.readMessageOrDefault();
-				if(m is ITM.HeresYourEFOBE){
-					var receivedEFOBELoc = (m as ITM.HeresYourEFOBE).tmpCacheLoc;
+				if(m is ITM.EFOBEReqReply){
+					var receivedEFOBELoc = (m as ITM.EFOBEReqReply).cachedEFOBE;
 					var decomp = JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(File.ReadAllText(receivedEFOBELoc.FullName));
 					if(!decomp.All(validateBlock)) goto finaly;
 					this.efobe = EFOBE.Compile(decomp);
 					finaly: receivedEFOBELoc.Delete();
 				} else
-				if(m is ITM.ISolvedAProblem){
-					var sol = m as ITM.ISolvedAProblem;
-					if(validateSolution(sol.problem, sol.parms, sol.solution)){
+				if(m is ITM.ProblemSolved){
+					var sol = m as ITM.ProblemSolved;
+					if(validateSolution(sol.Problem, sol.Parameters, sol.Solution)){
 						var prevHash = efobe.TopBlock();
-						var hash = computeHash(prevHash, sol.problem, sol.parms, sol.solution);
-						efobe.addBlock(sol.problem, sol.parms, sol.solution, hash, prevHash);
-						core.sendITM2Net(new NetworkMaestro.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, hash));
+						var hash = computeHash(prevHash, sol.Problem, sol.Parameters, sol.Solution);
+						efobe.addBlock(sol.Problem, sol.Parameters, sol.Solution, hash, prevHash);
+						core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBELocalBlockAdded(sol.Problem, sol.Parameters, sol.Solution, prevHash, hash));
 					}
 				} else
-				if(m is ITM.SomeoneSolvedAProblem){
-					var ssa = m as ITM.SomeoneSolvedAProblem;
-					if(efobe.CanBranch(ssa.prevHash) && validateBlock((ssa.problem, ssa.parms, ssa.solution, ssa.hash, ssa.prevHash))){
-						core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
-						efobe.addBlock(ssa.problem, ssa.parms, ssa.solution, ssa.hash, ssa.prevHash);
+				if(m is ITM.EFOBERemoteBlockAdded){
+					var ssa = m as ITM.EFOBERemoteBlockAdded;
+					if(efobe.CanBranch(ssa.Parent) && validateBlock((ssa.Problem, ssa.Parameters, ssa.Solution, ssa.Hash, ssa.Parent))){
+						core.sendITM2Solver(new Solver.ITM.CancelPendingProblem(ssa.Problem, ssa.Parameters));
+						efobe.addBlock(ssa.Problem, ssa.Parameters, ssa.Solution, ssa.Hash, ssa.Parent);
 					}
 				} else {
 					Thread.Yield();

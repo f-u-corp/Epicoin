@@ -139,7 +139,7 @@ namespace Epicoin.Core {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Solver");
 
-		public override Action<ITM> sendITM { get => sendITMAsync; }
+		//public override Action<ITM> sendITM { get => sendITMAsync; }
 
 		protected bool doSolve;
 		public Solver(Epicore core, bool doSolve) : base(core){
