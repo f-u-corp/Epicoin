@@ -89,7 +89,7 @@ namespace Epicoin.Core {
 		internal void init(){
 			var cachedE = new FileInfo(EFOBEfile);
 			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
-			else core.sendITM2Net(new Epinet.ITM.IWantAFullEFOBE());
+			else core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBERequest());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
 		}
