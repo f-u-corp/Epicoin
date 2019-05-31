@@ -17,6 +17,9 @@ namespace Epicoin.Core {
 		///<summary>Retrieves the network manager/maestro core component.</summary>
 		INet GetNetworkManager();
 
+		///<summary>Subscribe to Epicore events! Free entry upon presentation of a ticket!</summary>
+		EpicoreEvents Events { get; }
+
 		/// <summary>
 		/// Starts Epicore. Parallel, non-blocking - Epicore creates and manages all threads it requires automatically; returns as soon as all async components are bootstrapped (initialization is also asynchronous).
 		/// </summary>
@@ -32,6 +35,16 @@ namespace Epicoin.Core {
 		/// </summary>
 		System.Threading.Tasks.Task StopNB();
 
+	}
+
+	/// <summary>
+	/// Public events happening in the core. Allows to react to certain events taking place anywhere in the epicore.<br/>
+	/// Undefined source - for any and all event, source location / thread / ... is not defined and can take place from anywhere in epicore.<br/>
+	/// Asynchronous - all events are fired and processed asynchronously from all epicore and your threads, [thus] heavy computations can be potentially performed directly in the event handler.
+	/// </summary>
+	public interface EpicoreEvents {
+		event Action<(string Problem, string Parameters)> OnStartedSolvingProblem;
+		event Action<(string Problem, string Parameters, string Solution)> OnProblemSolved;
 	}
 
 	/// <summary>
