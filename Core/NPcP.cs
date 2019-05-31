@@ -133,18 +133,18 @@ namespace Epicoin.Core {
 		protected void keepSolving(){ 
 			{
 				if(cur.sol != null && (cur.sol.IsCompleted || cur.sol.IsCanceled)){
-					if(cur.sol.IsCompletedSuccessfully) core.sendITM2Validator(new Validator.ITM.ISolvedAProblem(cur.pr, cur.pr, cur.sol.Result));
+					if(cur.sol.IsCompletedSuccessfully) core.sendITM2Validator(new Validator.ITM.ProblemSolved(cur.pr, cur.pr, cur.sol.Result));
 					cur.sol.Dispose();
 					cur.cts.Dispose();
 					cur = (null, null, null, null);
 				}
 				if(cur.sol == null){
 					var m = itc.readMessageOrDefault();
-					if(m is ITM.PlsSolve){
-						var pls = m as ITM.PlsSolve;
+					if(m is ITM.ProblemToBeSolved){
+						var pls = m as ITM.ProblemToBeSolved;
 						CancellationTokenSource cts = new CancellationTokenSource();
-						var task = solve(pls.problem, pls.parms, cts.Token);
-						cur = (pls.problem, pls.parms, task, cts);
+						var task = solve(pls.Problem, pls.Parameters, cts.Token);
+						cur = (pls.Problem, pls.Parameters, task, cts);
 					}
 				}
 			}
@@ -155,12 +155,9 @@ namespace Epicoin.Core {
 		internal void cleanup(){}
 
 		protected void sendITMAsync(ITM itm){
-			if(!(itm is ITM.AsyncITM)) base.sendITM(itm);
-			else {
-				if(itm is ITM.StahpSolvingUSlowpoke){
-					var stahp = itm as ITM.StahpSolvingUSlowpoke;
-					if(cur.pr == stahp.problem && cur.pa == stahp.parms && !cur.sol.IsCompleted) cur.cts.Cancel();
-				}
+			if(itm is ITM.CancelPendingProblem){
+				var stahp = itm as ITM.CancelPendingProblem;
+				if(cur.pr == stahp.Problem && cur.pa == stahp.Parameters && !cur.sol.IsCompleted) cur.cts.Cancel();
 			}
 		}
 
