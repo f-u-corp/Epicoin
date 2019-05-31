@@ -97,27 +97,27 @@ namespace Epicoin.Core {
 		internal void keepChecking(){
 			{
 				var m = itc.readMessageOrDefault();
-				if(m is ITM.HeresYourEFOBE){
-					var receivedEFOBELoc = (m as ITM.HeresYourEFOBE).tmpCacheLoc;
+				if(m is ITM.EFOBEReqReply){
+					var receivedEFOBELoc = (m as ITM.EFOBEReqReply).cachedEFOBE;
 					var recEFOBE = loadEFOBE(receivedEFOBELoc);
 					EFOBE.Block prev = default(EFOBE.Block);
 					foreach(var nb in recEFOBE.blocksV()) if(!validateBlock(prev, prev = nb)) goto finaly;
 					this.efobe = recEFOBE;
 					finaly: receivedEFOBELoc.Delete();
 				} else
-				if(m is ITM.ISolvedAProblem){
-					var sol = m as ITM.ISolvedAProblem;
-					if(validateSolution(sol.problem, sol.parms, sol.solution)){
-						var blok = hashBlock(efobe.TopBlock(), sol.problem, sol.parms, sol.solution);
+				if(m is ITM.ProblemSolved){
+					var sol = m as ITM.ProblemSolved;
+					if(validateSolution(sol.Problem, sol.Parameters, sol.Solution)){
+						var blok = hashBlock(efobe.TopBlock(), sol.Problem, sol.Parameters, sol.Solution);
 						efobe.addBlock(blok);
-						core.sendITM2Net(new Epinet.ITM.TellEveryoneIKnowHowToMeth(sol.problem, sol.parms, sol.solution, blok.hash));
+						core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBELocalBlockAdded(sol.Problem, sol.Parameters, sol.Solution, /*TODO*/"parent", blok.hash));
 					}
 				} else
-				if(m is ITM.SomeoneSolvedAProblem){
-					var ssa = m as ITM.SomeoneSolvedAProblem;
-					var blok = new EFOBE.Block(ssa.problem, ssa.parms, ssa.solution, ssa.hash);
+				if(m is ITM.EFOBERemoteBlockAdded){
+					var ssa = m as ITM.EFOBERemoteBlockAdded;
+					var blok = new EFOBE.Block(ssa.Problem, ssa.Parameters, ssa.Solution, ssa.Hash);//TODO
 					if(validateBlock(efobe.TopBlock(), blok)){
-						core.sendITM2Solver(new Solver.ITM.StahpSolvingUSlowpoke(ssa.problem, ssa.parms));
+						core.sendITM2Solver(new Solver.ITM.CancelPendingProblem(ssa.Problem, ssa.Parameters));
 						efobe.addBlock(blok);
 					}
 				} else {
