@@ -125,10 +125,20 @@ namespace Epicoin.Core {
 
 		internal class ITM : ITCMessage {
 			internal class ProblemToBeSolved : ITM { //From Network
+				public readonly string Problem, Parameters;
 
+				public ProblemToBeSolved(string problem, string parms){
+					this.Problem = problem;
+					this.Parameters = parms;
+				}
 			}
 			internal class CancelPendingProblem : ITM { //From Validator
+				public readonly string Problem, Parameters;
 
+				public CancelPendingProblem(string problem, string parms){
+					this.Problem = problem;
+					this.Parameters = parms;
+				}
 			}
 		}
 

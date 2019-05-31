@@ -101,15 +101,31 @@ namespace Epicoin.Core {
 			}
 
 			internal class ProblemSolved : ITM { //From Solver
+				public readonly string Problem, Parameters, Solution;
 
+				public ProblemSolved(string problem, string parms, string sol){
+					this.Problem = problem;
+					this.Parameters = parms;
+					this.Solution = sol;
+				}
 			}
 
 			internal class EFOBERemoteBlockAdded : ITM { //From Network
+				public readonly string Problem, Parameters, Solution;
+				public readonly string Parent, Hash;
 
+				public EFOBERemoteBlockAdded(string problem, string parms, string sol, string parent, string hash){
+					this.Problem = problem;
+					this.Parameters = parms;
+					this.Solution = sol;
+					this.Parent = parent;
+					this.Hash = hash;
+				}
 			}
 
 			internal class EFOBERemoteBlockRebase : ITM { //From Network
-
+				public readonly string Hash;
+				public readonly string NewParent, NewHash;
 			}
 
 		}
