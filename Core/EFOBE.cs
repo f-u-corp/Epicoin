@@ -336,9 +336,13 @@ namespace Epicoin.Core {
 			cleanup();
 		}
 
+		internal void efobeAcquired(EFOBE efobe){
+			core.events.FireOneEFOBEAcquired(this.efobe = efobe);
+		}
+
 		internal void init(){
 			var cachedE = new FileInfo(EFOBEfile);
-			if(cachedE.Exists) core.events.FireOneEFOBEAcquired(efobe = loadEFOBE(cachedE));
+			if(cachedE.Exists) efobeAcquired(loadEFOBE(cachedE));
 			else core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBERequest());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
@@ -354,7 +358,7 @@ namespace Epicoin.Core {
 					var decomp = JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(File.ReadAllText(receivedEFOBELoc.FullName));
 					if(!decomp.All(validateBlock)) goto finaly;
 					LOG.Info("Received efobe valid - keeping");
-					core.events.FireOneEFOBEAcquired(this.efobe = EFOBE.Compile(decomp, computeHash));
+					efobeAcquired(EFOBE.Compile(decomp, computeHash));
 					finaly: receivedEFOBELoc.Delete();
 				} else
 				if(m is ITM.ProblemSolved){
