@@ -372,6 +372,15 @@ namespace Epicoin.Core {
 						core.sendITM2Solver(new Solver.ITM.CancelPendingProblem(ssa.Problem, ssa.Parameters));
 						efobe.addBlock(ssa.Problem, ssa.Parameters, ssa.Solution, ssa.Hash, ssa.Parent);
 					}
+				} else 
+				if(m is ITM.EFOBERemoteBlockRebase){
+					var rbr = m as ITM.EFOBERemoteBlockRebase;
+					efobe.rebase(rbr.Hash, rbr.NewParent);
+				} else
+				if(m is ITM.EFOBESendRequest){
+					var esr = m as ITM.EFOBESendRequest;
+					File.WriteAllText(esr.cacheEFOBEHere.FullName, EFOBE.Serialize(efobe));
+					core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBESendRequestReply(esr.cacheEFOBEHere));
 				} else {
 					Thread.Yield();
 					Thread.Sleep(10); //Nuffin to do
