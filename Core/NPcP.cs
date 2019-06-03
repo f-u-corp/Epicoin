@@ -268,7 +268,7 @@ namespace Epicoin.Core {
 				}
 				if(message is ITM.CancelPendingProblem){
 					var cpp = message as ITM.CancelPendingProblem;
-					if(currentlySolvingData == (cpp.Problem, cpp.Parameters)) currentlySolvingCancellor.Cancel();
+					if(currentlySolvingData.problem == cpp.Problem && currentlySolvingData.parms == cpp.Parameters) currentlySolvingCancellor.Cancel();
 					else if(toBeSolvedQueue.Contains((cpp.Problem, cpp.Parameters))){
 						var tbsl = toBeSolvedQueue.ToList();
 						tbsl.Remove((cpp.Problem, cpp.Parameters));
