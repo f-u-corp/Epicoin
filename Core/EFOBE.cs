@@ -61,8 +61,8 @@ namespace Epicoin.Core {
 		/// </summary>
 		/// <param name="raw">Decompiled EFOBE representation</param>
 		/// <returns>Compiled EFOBE</returns>
-		public static EFOBE Compile(List<(string problem, string parameters, string solution, string hash, string prevHash)> raw){
-			EFOBE efobe = new EFOBE();
+		public static EFOBE Compile(List<(string problem, string parameters, string solution, string hash, string prevHash)> raw, Func<string, string, string, string, string> hasher){
+			EFOBE efobe = new EFOBE(hasher);
 			efobe.skipUpdateCheck = true;
 			raw.ForEach(b => efobe.addBlock(b.problem, b.parameters, b.solution, b.hash, b.prevHash));
 			efobe.skipUpdateCheck = false;
@@ -72,6 +72,9 @@ namespace Epicoin.Core {
 
 		private const int BedrockDelta = 1024, BranchLengthDelta = 1024;
 		private const string NullHash = "dGltZSB0aGVyZSBpcyBubw==";
+
+		///<summary>Hashing function: (previousHash, problem, parameters, solution) -> hash</summary>
+		private readonly Func<string, string, string, string, string> hasher;
 
 		private readonly Dictionary<string, Block.UncertainBlock> blockTree = new Dictionary<string, Block.UncertainBlock>();
 		///<summary>Locked Common Ancestor - transcending block, block whose certainty has been confirmed, yet he must exist in the tree awaiting arrival of the next chosen one.</summary>
@@ -89,7 +92,8 @@ namespace Epicoin.Core {
 		/// <summary>
 		/// Creates new empty EFOBE.
 		/// </summary>
-		public EFOBE(){
+		public EFOBE(Func<string, string, string, string, string> hasher){
+			this.hasher = hasher;
 			branches = new List<List<string>>();
 			LCA = new Block.UncertainBlock(null, null, null, NullHash, null);
 			blockTree[LCA.hash] = LCA;
@@ -273,11 +277,13 @@ namespace Epicoin.Core {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
 
-		protected EFOBE efobe = new EFOBE();
+		protected EFOBE efobe;
 
 		HashAlgorithm hasher = SHA256.Create();
 
-		public Validator(Epicore core) : base(core) {}
+		public Validator(Epicore core) : base(core){
+			efobe = new EFOBE(computeHash);
+		}
 
 		public EFOBE GetLocalEFOBE() => efobe;
 
@@ -304,7 +310,7 @@ namespace Epicoin.Core {
 					var receivedEFOBELoc = (m as ITM.EFOBEReqReply).cachedEFOBE;
 					var decomp = JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(File.ReadAllText(receivedEFOBELoc.FullName));
 					if(!decomp.All(validateBlock)) goto finaly;
-					this.efobe = EFOBE.Compile(decomp);
+					this.efobe = EFOBE.Compile(decomp, computeHash);
 					finaly: receivedEFOBELoc.Delete();
 				} else
 				if(m is ITM.ProblemSolved){
