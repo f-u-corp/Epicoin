@@ -252,6 +252,7 @@ namespace Epicoin.Core {
 
 		//Running
 
+		protected Queue<(string problem, string parms)> toBeSolvedQueue = new Queue<(string problem, string parms)>();
 		protected (string problem, string parms) currentlySolvingData;
 		protected Task<string> currentlySolving;
 		protected CancellationTokenSource currentlySolvingCancellor;
@@ -261,6 +262,19 @@ namespace Epicoin.Core {
 		protected virtual void TakeCareOfStuffFromTimeToTime(){
 			while(!core.stop){
 				var message = itc.readMessageOrDefault();
+				if(message is ITM.ProblemToBeSolved){
+					var ptbs = message as ITM.ProblemToBeSolved;
+					toBeSolvedQueue.Append((ptbs.Problem, ptbs.Parameters));
+				}
+				if(message is ITM.CancelPendingProblem){
+					var cpp = message as ITM.CancelPendingProblem;
+					if(currentlySolvingData == (cpp.Problem, cpp.Parameters)) currentlySolvingCancellor.Cancel();
+					else if(toBeSolvedQueue.Contains((cpp.Problem, cpp.Parameters))){
+						var tbsl = toBeSolvedQueue.ToList();
+						tbsl.Remove((cpp.Problem, cpp.Parameters));
+						toBeSolvedQueue = new Queue<(string problem, string parms)>(tbsl);
+					}
+				}
 				if(currentlySolving != null){
 					if(currentlySolving.IsCompletedSuccessfully){
 						if(!currentlySolvingCancellor.IsCancellationRequested) ProblemIHaveSolved(currentlySolvingData.problem, currentlySolvingData.parms, currentlySolving.Result);
@@ -268,7 +282,11 @@ namespace Epicoin.Core {
 						currentlySolving = null;
 						currentlySolvingCancellor = null;
 					}
-				} else Thread.Yield();
+				}
+				if(currentlySolving == null){
+					if(toBeSolvedQueue.TryDequeue(out (string problem, string parms) next)) StartSolving(next.problem, next.parms);
+					else Thread.Yield();
+				}
 			}
 		}
 
