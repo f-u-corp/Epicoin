@@ -401,7 +401,7 @@ namespace Epicoin.Core {
 
 		internal const string EFOBEfile = "EFOBE.json";
 
-		internal EFOBE loadEFOBE(FileInfo file) => EFOBE.Deserialize(File.ReadAllText(file.FullName));
+		internal EFOBE loadEFOBE(FileInfo file) => EFOBE.Deserialize(File.ReadAllText(file.FullName), computeHash);
 
 		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, EFOBE.Serialize(efobe));
 
