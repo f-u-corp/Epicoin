@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 using Epicoin.Core;
 
@@ -28,6 +29,13 @@ namespace Epicoin.Core.Net {
 		}
 		internal class EFOBERequest : ITM {
 
+		}
+		internal class EFOBESendRequestReply : ITM {
+			public readonly FileInfo cacheEFOBEHere;
+
+			public EFOBESendRequestReply(FileInfo cache){
+				this.cacheEFOBEHere = cache;
+			}
 		}
 	}
 }
