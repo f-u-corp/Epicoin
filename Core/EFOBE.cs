@@ -338,6 +338,8 @@ namespace Epicoin.Core {
 
 		internal void efobeAcquired(EFOBE efobe){
 			core.events.FireOneEFOBEAcquired(this.efobe = efobe);
+			this.efobe.OnBlockAdded += b => core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBELocalBlockAdded(b.Problem, b.Parameters, b.Solution, b.Parent, b.Hash));
+			this.efobe.OnBranchRebased += b => core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBELocalBlockRebase(b.OldHash, b.NewParent, b.NewHash));
 		}
 
 		internal void init(){
@@ -368,7 +370,7 @@ namespace Epicoin.Core {
 						var hash = computeHash(prevHash, sol.Problem, sol.Parameters, sol.Solution);
 						efobe.addBlock(sol.Problem, sol.Parameters, sol.Solution, hash, prevHash);
 						core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBELocalBlockAdded(sol.Problem, sol.Parameters, sol.Solution, prevHash, hash));
-					}
+					} else core.sendITM2Solver(new Solver.ITM.ProblemToBeSolved(sol.Problem, sol.Parameters));
 				} else
 				if(m is ITM.EFOBERemoteBlockAdded){
 					var ssa = m as ITM.EFOBERemoteBlockAdded;
