@@ -147,6 +147,7 @@ namespace Epicoin.Core {
 						rb = false;
 					}
 				}
+				FireOnBlockAdded(problem, pars, sol, precedingHash, hash);
 				updateCheckBranches(rb);
 				return true;
 			}
@@ -197,12 +198,14 @@ namespace Epicoin.Core {
 				var nca = branches[0][0];
 				if(branches.All(br => br[0] == nca)){
 					bedrocks.Add(new Block(LCA));
+					FireOnBlockImmortalized(LCA.problem, LCA.parameters, LCA.solution, LCA.hash);
 					blockTree.Remove(LCA.hash);
 					var nLCA = blockTree[nca];
 					LCA = new Block.UncertainBlock(nLCA.problem, nLCA.parameters, nLCA.solution, nLCA.hash, null);
 					blockTree[LCA.hash] = LCA;
 					branches.ForEach(b => b.RemoveAt(0));
 					longestBranch--;
+					FireOnLCAChanged(LCA.problem, LCA.parameters, LCA.solution, LCA.hash);
 				} else break;
 			}
 		}
@@ -237,6 +240,7 @@ namespace Epicoin.Core {
 				blockTree[newBlock.hash] = newBlock;
 				foreach(var childRebase in oldBlock.next) rebase(childRebase, newBlock.hash);
 				if(!skipUpdateCheck) updateCheckBranches(true);
+				FireOnBranchRebased(oldBlock.problem, oldBlock.parameters, oldBlock.solution, oldParent.hash, hash, newPrecedingHash, newBlock.hash);
 				return true;
 			}
 			return false;
