@@ -350,8 +350,10 @@ namespace Epicoin.Core {
 				var m = itc.readMessageOrDefault();
 				if(m is ITM.EFOBEReqReply){
 					var receivedEFOBELoc = (m as ITM.EFOBEReqReply).cachedEFOBE;
+					LOG.Info("Received requested EFOBE");
 					var decomp = JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(File.ReadAllText(receivedEFOBELoc.FullName));
 					if(!decomp.All(validateBlock)) goto finaly;
+					LOG.Info("Received efobe valid - keeping");
 					core.events.FireOneEFOBEAcquired(this.efobe = EFOBE.Compile(decomp, computeHash));
 					finaly: receivedEFOBELoc.Delete();
 				} else
