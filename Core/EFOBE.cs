@@ -338,10 +338,11 @@ namespace Epicoin.Core {
 
 		internal void init(){
 			var cachedE = new FileInfo(EFOBEfile);
-			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
+			if(cachedE.Exists) core.events.FireOneEFOBEAcquired(efobe = loadEFOBE(cachedE));
 			else core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBERequest());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
+			core.events.FireOnValidatorInitialized(this);
 		}
 
 		internal void keepChecking(){
@@ -351,7 +352,7 @@ namespace Epicoin.Core {
 					var receivedEFOBELoc = (m as ITM.EFOBEReqReply).cachedEFOBE;
 					var decomp = JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(File.ReadAllText(receivedEFOBELoc.FullName));
 					if(!decomp.All(validateBlock)) goto finaly;
-					this.efobe = EFOBE.Compile(decomp, computeHash);
+					core.events.FireOneEFOBEAcquired(this.efobe = EFOBE.Compile(decomp, computeHash));
 					finaly: receivedEFOBELoc.Delete();
 				} else
 				if(m is ITM.ProblemSolved){
