@@ -193,6 +193,7 @@ namespace Epicoin.Core {
 		}
 
 		/// <summary>
+		/// Deprecated, use rebase instead
 		/// Terminates existence of a branch, and all blocks existing [exclusively] on it.
 		/// </summary>
 		internal void destroyBranch(List<string> branch){
@@ -204,6 +205,26 @@ namespace Epicoin.Core {
 					if(blockTree.ContainsKey(b.precedingHash)) blockTree[b.precedingHash].next.Remove(b.hash);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Terminates existence of a branch, and all blocks existing [exclusively] on it.
+		/// </summary>
+		internal bool rebase(string hash, string newPrecedingHash, bool ucb = true){
+			if(blockTree.ContainsKey(hash) && blockTree.ContainsKey(newPrecedingHash) && hash != LCA.hash){
+				var newParent = blockTree[newPrecedingHash];
+				var oldBlock = blockTree[hash];
+				var oldParent = blockTree[oldBlock.precedingHash];
+				oldParent?.next?.Remove(oldBlock.hash);
+				var newBlock = new Block.UncertainBlock(oldBlock.problem, oldBlock.parameters, oldBlock.solution, hasher(newPrecedingHash, oldBlock.problem, oldBlock.parameters, oldBlock.solution), newPrecedingHash);
+				newParent.append(newBlock);
+				blockTree.Remove(hash);
+				blockTree[hash] = newBlock;
+				foreach(var childRebase in oldBlock.next) rebase(childRebase, newBlock.hash);
+				if(ucb) updateCheckBranches(true);
+				return true;
+			}
+			return false;
 		}
 
 		/*
