@@ -234,7 +234,7 @@ namespace Epicoin.Core {
 				var newBlock = new Block.UncertainBlock(oldBlock.problem, oldBlock.parameters, oldBlock.solution, hasher(newPrecedingHash, oldBlock.problem, oldBlock.parameters, oldBlock.solution), newPrecedingHash);
 				newParent.append(newBlock);
 				blockTree.Remove(hash);
-				blockTree[hash] = newBlock;
+				blockTree[newBlock.hash] = newBlock;
 				foreach(var childRebase in oldBlock.next) rebase(childRebase, newBlock.hash);
 				if(!skipUpdateCheck) updateCheckBranches(true);
 				return true;
