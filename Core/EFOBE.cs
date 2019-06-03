@@ -100,11 +100,13 @@ namespace Epicoin.Core {
 			bedrocks = new List<Block>{};
 		}
 
+		protected List<string> LongestBranch() => branches.OrderByDescending(br => br.Count).First();
+
 		/// <summary>
 		/// Returns the hash of the top-most block (last block on the longest branch).
 		/// </summary>
 		/// <returns>Hash of last block on the longest branch.</returns>
-		public string TopBlock() => branches.Count == 0 ? LCA.hash : branches.OrderByDescending(br => br.Count).First().Last();
+		public string TopBlock() => branches.Count == 0 ? LCA.hash : LongestBranch().Last();
 
 		/// <summary>
 		/// Checks whether a branch can grow or derive from block with given hash.
