@@ -117,11 +117,11 @@ namespace Epicoin.Core {
 		/// <summary>
 		/// Adds block to the tree.
 		/// </summary>
-		internal void addBlock(string problem, string pars, string sol, string hash, string precedingHash){
+		internal bool addBlock(string problem, string pars, string sol, string hash, string precedingHash){
 			if(blockTree.ContainsKey(precedingHash)){
 				Block.UncertainBlock next = new Block.UncertainBlock(problem, pars, sol, hash, precedingHash);
 				blockTree.Add(hash, next);
-				if(skipUpdateCheck) return;
+				if(skipUpdateCheck) return true;
 
 				Block.UncertainBlock prev = blockTree[precedingHash];
 				bool rb;
@@ -148,7 +148,9 @@ namespace Epicoin.Core {
 					}
 				}
 				updateCheckBranches(rb);
+				return true;
 			}
+			return false;
 		}
 
 		private bool skipUpdateCheck = false; //WARNING: After skipping update checks, and setting this back to false, updateCheckBranches(true) must be called!!!
@@ -176,17 +178,20 @@ namespace Epicoin.Core {
 				foreach(var bs in blockTree.Values.Where(b => b.precedingHash == LCA.hash)) followBranch(derive(new List<string>()), bs);
 				foreach(var br in branches) foreach(var b in br.Select(id => blockTree[id])) b.branches.Add(br);
 			}
-			//Remove short outdated branches
+			//Rebase short outdated branches
+			skipUpdateCheck = true;
 			List<List<string>> forRebase = branches.Where(br => longestBranch - br.Count >= BranchLengthDelta).ToList();
 			foreach(var br in forRebase){
 				var lb = LongestBranch();
 				var firstDerivedFromLongest = br[0];
 				for(int i = br.Count-1; i > 0; i--) if(lb.Contains(br[i-1])) firstDerivedFromLongest = br[i];
-				if(rebase(firstDerivedFromLongest, lb.Last(), false)){
+				if(rebase(firstDerivedFromLongest, lb.Last())){
+					skipUpdateCheck = false;
 					refresh = true;
 					goto brecalc;
 				}
 			}
+			skipUpdateCheck = false;
 			//Immortalize common ancestors until next derivation, or we reach outdate threshold
 			while(longestBranch > BedrockDelta){
 				var nca = branches[0][0];
@@ -220,7 +225,7 @@ namespace Epicoin.Core {
 		/// <summary>
 		/// Terminates existence of a branch, and all blocks existing [exclusively] on it.
 		/// </summary>
-		internal bool rebase(string hash, string newPrecedingHash, bool ucb = true){
+		internal bool rebase(string hash, string newPrecedingHash){
 			if(blockTree.ContainsKey(hash) && blockTree.ContainsKey(newPrecedingHash) && hash != LCA.hash){
 				var newParent = blockTree[newPrecedingHash];
 				var oldBlock = blockTree[hash];
@@ -231,7 +236,7 @@ namespace Epicoin.Core {
 				blockTree.Remove(hash);
 				blockTree[hash] = newBlock;
 				foreach(var childRebase in oldBlock.next) rebase(childRebase, newBlock.hash);
-				if(ucb) updateCheckBranches(true);
+				if(!skipUpdateCheck) updateCheckBranches(true);
 				return true;
 			}
 			return false;
