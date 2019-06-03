@@ -465,6 +465,14 @@ namespace Epicoin.Core {
 				}
 			}
 
+			internal class EFOBESendRequest : ITM {
+				public readonly FileInfo cacheEFOBEHere;
+
+				public EFOBESendRequest(FileInfo cache){
+					this.cacheEFOBEHere = cache;
+				}
+			}
+
 		}
 
 	}
