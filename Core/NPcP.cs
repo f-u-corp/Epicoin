@@ -305,6 +305,7 @@ namespace Epicoin.Core {
 		}
 
 		protected void ProblemIHaveSolved(string problem, string parms, string sol){
+			core.sendITM2Validator(new Validator.ITM.ProblemSolved(problem, parms, sol));
 			core.events.FireOnProblemSolved(problem, parms, sol);
 		}
 
