@@ -31,7 +31,7 @@ namespace Epicoin.Core {
 		/// </summary>
 		/// <param name="efobe">JSON string for EFOBE deserialization.</param>
 		/// <returns>Deserialized EFOBE from JSON string.</returns>
-		public static EFOBE Deserialize(string efobe) => Compile(JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(efobe));
+		public static EFOBE Deserialize(string efobe, Func<string, string, string, string, string> hasher) => Compile(JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(efobe), hasher);
 
 		/// <summary>
 		/// Decompiles EFOBE into more basic data structure.
