@@ -154,7 +154,7 @@ namespace Epicoin.Core {
 		private bool skipUpdateCheck = false; //WARNING: After skipping update checks, and setting this back to false, updateCheckBranches(true) must be called!!!
 		internal void updateCheckBranches(bool refresh = false){
 			if(skipUpdateCheck) return;
-			if(refresh){
+			brecalc: if(refresh){
 				//Full branch cash reconstruction requested
 				branches.Clear();
 				List<string> derive(List<string> branch){
@@ -177,8 +177,16 @@ namespace Epicoin.Core {
 				foreach(var br in branches) foreach(var b in br.Select(id => blockTree[id])) b.branches.Add(br);
 			}
 			//Remove short outdated branches
-			List<List<string>> forRemoval = branches.Where(br => longestBranch - br.Count >= BranchLengthDelta).ToList();
-			forRemoval.ForEach(destroyBranch);
+			List<List<string>> forRebase = branches.Where(br => longestBranch - br.Count >= BranchLengthDelta).ToList();
+			foreach(var br in forRebase){
+				var lb = LongestBranch();
+				var firstDerivedFromLongest = br[0];
+				for(int i = br.Count-1; i > 0; i--) if(lb.Contains(br[i-1])) firstDerivedFromLongest = br[i];
+				if(rebase(firstDerivedFromLongest, lb.Last(), false)){
+					refresh = true;
+					goto brecalc;
+				}
+			}
 			//Immortalize common ancestors until next derivation, or we reach outdate threshold
 			while(longestBranch > BedrockDelta){
 				var nca = branches[0][0];
