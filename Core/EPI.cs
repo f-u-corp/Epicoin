@@ -26,6 +26,11 @@ namespace Epicoin.Core {
 		void Start();
 
 		/// <summary>
+		/// Requests Epicoin to solve given problem - adds it to local queue (if solving is enabled) and tells everyone around as wel.
+		/// </summary>
+		void SolveAProblem(string problem, string parameters);
+
+		/// <summary>
 		/// Stops Epicore. Blocking - blocks until all Epicore components have stopped.
 		/// </summary>
 		void Stop();

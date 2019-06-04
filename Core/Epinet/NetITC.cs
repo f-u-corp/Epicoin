@@ -5,6 +5,14 @@ using Epicoin.Core;
 
 namespace Epicoin.Core.Net {
 	internal class ITM : ITCMessage {
+		internal class ProblemToSolve : ITM {
+			public readonly string Problem, Parameters;
+
+			public ProblemToSolve(string problem, string parms){
+				this.Problem = problem;
+				this.Parameters = parms;
+			}
+		}
 		internal class EFOBELocalBlockAdded : ITM { //From EFOBE/Validator
 			public readonly string Problem, Parameters, Solution;
 			public readonly string Parent, Hash;
