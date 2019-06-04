@@ -324,9 +324,7 @@ namespace Epicoin.Core {
 
 		SHA3 sha = SHA3.SHA256;
 
-		public Validator(Epicore core) : base(core){
-			efobe = new EFOBE(computeHash);
-		}
+		public Validator(Epicore core) : base(core){}
 
 		public EFOBE GetLocalEFOBE() => efobe;
 
@@ -347,7 +345,10 @@ namespace Epicoin.Core {
 		internal void init(){
 			var cachedE = new FileInfo(EFOBEfile);
 			if(cachedE.Exists) efobeAcquired(loadEFOBE(cachedE));
-			else core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBERequest());
+			else {
+				efobeAcquired(new EFOBE(computeHash));
+				core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBERequest());
+			}
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
 			core.events.FireOnValidatorInitialized(this);
