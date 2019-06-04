@@ -13,6 +13,6 @@ deploy:
   api_key:
     secure: $GITACCESSTOKEN
   skip_cleanup: true
-  file: "./Core/bin/Release/netcoreapp2.1/*"
+  file: "./Core/bin/Release/netcoreapp2.1/*.dll"
   on:
     tags: true
