@@ -8,3 +8,16 @@ install:
 script:
  - dotnet build
  - dotnet test
+before_deploy:
+ - dotnet pack "./Core/Epicoin Core.csproj" -c Release -o nugets
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITACCESSTOKEN
+  skip_cleanup: true
+  file_glob: true
+  file:
+    - "./Core/bin/Release/netcoreapp2.1/*"
+    - "./Core/nugets/*.nupkg"
+  on:
+    tags: true
