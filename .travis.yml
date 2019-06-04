@@ -8,7 +8,7 @@ install:
 script:
  - dotnet build
  - dotnet test
- - dotnet pack "./core/Epicoin Core.csproj" -c Release -o nugets
+ - dotnet pack "./Core/Epicoin Core.csproj" -c Release -o nugets
 deploy:
   provider: releases
   api_key:
