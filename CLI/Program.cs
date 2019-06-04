@@ -14,17 +14,22 @@ namespace Epicoin.CLI {
 		static void Main(string[] args){
 			IEpicore core = new Epicore();
 			ILog LOG = LogManager.GetLogger("Epicoin", "CLI");
+			void Info(string t, ConsoleColor c){
+				Console.ForegroundColor = c;
+				Console.WriteLine(t);
+				Console.ForegroundColor = ConsoleColor.White;
+			}
 			LOG.Info("Starting up...");
 			core.Start();
 			core.Events.OnValidatorInitialized += v => valInit = true;
 			core.Events.OnSolverInitialized += s => solInit = true;
-			core.Events.OnStartedSolvingProblem += p => LOG.Info($"Started solving: {p.Problem}?>{p.Parameters}");
-			core.Events.OnProblemSolved += p => LOG.Info($"Problem solved: {p.Problem}?>{p.Parameters}-->{p.Solution}");
+			core.Events.OnStartedSolvingProblem += p => Info($"Started solving: {p.Problem}?>{p.Parameters}", ConsoleColor.DarkGreen);
+			core.Events.OnProblemSolved += p => Info($"Problem solved: {p.Problem}?>{p.Parameters}-->{p.Solution}", ConsoleColor.Green);
 			core.Events.OnEFOBEAcquired += efobe => {
-				efobe.OnBlockAdded += b => LOG.Info($"Local Block Added: [{b.Hash}] {b.Problem}?>{b.Parameters}-->{b.Solution}");
-				efobe.OnBlockImmortalized += b => LOG.Info($"Block immortalized: [{b.Hash}]");
-				efobe.OnLCAChanged += b => LOG.Info($"New LCA: [{b.Hash}] {b.Problem}?>{b.Parameters}");
-				efobe.OnBranchRebased += br => LOG.Info($"Branch rebased: from {br.OldHash} to {br.NewHash} - {br.Problem}?>{br.Parameters}");
+				efobe.OnBlockAdded += b => Info($"Local Block Added: [{b.Hash}] {b.Problem}?>{b.Parameters}-->{b.Solution}", ConsoleColor.Magenta);
+				efobe.OnBlockImmortalized += b => Info($"Block immortalized: [{b.Hash}]", ConsoleColor.DarkBlue);
+				efobe.OnLCAChanged += b => Info($"New LCA: [{b.Hash}] {b.Problem}?>{b.Parameters}", ConsoleColor.Cyan);
+				efobe.OnBranchRebased += br => Info($"Branch rebased: from {br.OldHash} to {br.NewHash} - {br.Problem}?>{br.Parameters}", ConsoleColor.DarkYellow);
 			};
 			LOG.Info("Start up successful.");
 			while(!(valInit && solInit)) Thread.Yield();
