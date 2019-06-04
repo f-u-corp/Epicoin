@@ -7,8 +7,8 @@ install:
  - dotnet restore
 script:
  - dotnet build
- - dotnet build "./Core/Epicoin Core.csproj" -c Release
  - dotnet test
+ - dotnet pack "./core/Epicoin Core.csproj" -c Release -o nugets
 deploy:
   provider: releases
   api_key:
