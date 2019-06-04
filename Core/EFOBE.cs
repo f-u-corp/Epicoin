@@ -2,7 +2,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.IO;
 using System.Text;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,6 +9,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 using Newtonsoft.Json;
+
+using SHA3_CS;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin.Core {
@@ -71,7 +72,7 @@ namespace Epicoin.Core {
 		}
 
 		private const int BedrockDelta = 1024, BranchLengthDelta = 1024;
-		private const string NullHash = "dGltZSB0aGVyZSBpcyBubw==";
+		private const string NullHash = "7o/P3537WPFwljnB2UGGTfjuleiCjZYT0nmFwYKWSfo=";
 
 		///<summary>Hashing function: (previousHash, problem, parameters, solution) -> hash</summary>
 		private readonly Func<string, string, string, string, string> hasher;
@@ -321,7 +322,7 @@ namespace Epicoin.Core {
 
 		protected EFOBE efobe;
 
-		HashAlgorithm hasher = SHA256.Create();
+		SHA3 sha = SHA3.SHA256;
 
 		public Validator(Epicore core) : base(core){
 			efobe = new EFOBE(computeHash);
@@ -397,7 +398,6 @@ namespace Epicoin.Core {
 
 		internal void cleanup(){
 			saveEFOBE(efobe, new FileInfo(EFOBEfile));
-			hasher.Dispose();
 		}
 
 		internal const string EFOBEfile = "EFOBE.json";
@@ -408,14 +408,13 @@ namespace Epicoin.Core {
 
 		internal string computeHash(string prHash, string problem, string parms, string sol){
 			Encoding enc = Encoding.ASCII;
-			byte[] prevHash = Convert.FromBase64String(prHash);
+			var prevHash = BitString.FromBase64(prHash);
 			int p, r, s;
-			byte[] preHash = new byte[(s = (r = (p = prevHash.Length) + enc.GetByteCount(problem)) + enc.GetByteCount(parms)) + enc.GetByteCount(sol)];
-			Array.Copy(prevHash, preHash, prevHash.Length);
+			byte[] preHash = new byte[(s = (r = (p = 0) + enc.GetByteCount(problem)) + enc.GetByteCount(parms)) + enc.GetByteCount(sol)];
 			enc.GetBytes(problem, 0, problem.Length, preHash, p);
 			enc.GetBytes(parms, 0, parms.Length, preHash, r);
 			enc.GetBytes(sol, 0, sol.Length, preHash, s);
-			return Convert.ToBase64String(hasher.ComputeHash(preHash));
+			return sha.Hash(prevHash + BitString.FromBytesLE(preHash)).ToBase64();
 		}
 		protected bool validateSolution(string problem, string parms, string solution){
 			var t = problemsRegistry[problem].check(parms, solution, CancellationToken.None);
