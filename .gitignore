@@ -13,6 +13,9 @@ bld
 [Ll]og
 [Ll]ogs
 
+# Nugets
+Core/nugets
+
 # Visual Studio 2015/2017
 .vs/
 Generated\ Files/
