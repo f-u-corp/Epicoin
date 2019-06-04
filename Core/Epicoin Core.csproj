@@ -16,4 +16,8 @@
     <PackageReference Include="Newtonsoft.JSON" Version="12.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SHA3-CS\SHA3-CS\SHA3-CS.csproj" />
+  </ItemGroup>
+
 </Project>
