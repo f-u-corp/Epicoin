@@ -70,6 +70,11 @@ namespace Epicoin.Core {
 			st.Start();
 		}
 
+		public void SolveAProblem(string problem, string parameters){
+			sendITM2Net(new Epicoin.Core.Net.ITM.ProblemToSolve(problem, parameters));
+			sendITM2Solver(new Solver.ITM.ProblemToBeSolved(problem, parameters));
+		}
+
 		/// <summary>
 		/// Stops Epicore (and all related threads). Blocking - blocks until all Epicore components have stopped.
 		/// </summary>

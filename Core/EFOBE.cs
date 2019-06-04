@@ -2,7 +2,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.IO;
 using System.Text;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,6 +9,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 using Newtonsoft.Json;
+
+using SHA3_CS;
 
 [assembly: InternalsVisibleTo("Core.Tests")]
 namespace Epicoin.Core {
@@ -31,7 +32,7 @@ namespace Epicoin.Core {
 		/// </summary>
 		/// <param name="efobe">JSON string for EFOBE deserialization.</param>
 		/// <returns>Deserialized EFOBE from JSON string.</returns>
-		public static EFOBE Deserialize(string efobe) => Compile(JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(efobe));
+		public static EFOBE Deserialize(string efobe, Func<string, string, string, string, string> hasher) => Compile(JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(efobe), hasher);
 
 		/// <summary>
 		/// Decompiles EFOBE into more basic data structure.
@@ -61,8 +62,8 @@ namespace Epicoin.Core {
 		/// </summary>
 		/// <param name="raw">Decompiled EFOBE representation</param>
 		/// <returns>Compiled EFOBE</returns>
-		public static EFOBE Compile(List<(string problem, string parameters, string solution, string hash, string prevHash)> raw){
-			EFOBE efobe = new EFOBE();
+		public static EFOBE Compile(List<(string problem, string parameters, string solution, string hash, string prevHash)> raw, Func<string, string, string, string, string> hasher){
+			EFOBE efobe = new EFOBE(hasher);
 			efobe.skipUpdateCheck = true;
 			raw.ForEach(b => efobe.addBlock(b.problem, b.parameters, b.solution, b.hash, b.prevHash));
 			efobe.skipUpdateCheck = false;
@@ -71,7 +72,10 @@ namespace Epicoin.Core {
 		}
 
 		private const int BedrockDelta = 1024, BranchLengthDelta = 1024;
-		private const string NullHash = "dGltZSB0aGVyZSBpcyBubw==";
+		private const string NullHash = "7o/P3537WPFwljnB2UGGTfjuleiCjZYT0nmFwYKWSfo=";
+
+		///<summary>Hashing function: (previousHash, problem, parameters, solution) -> hash</summary>
+		private readonly Func<string, string, string, string, string> hasher;
 
 		private readonly Dictionary<string, Block.UncertainBlock> blockTree = new Dictionary<string, Block.UncertainBlock>();
 		///<summary>Locked Common Ancestor - transcending block, block whose certainty has been confirmed, yet he must exist in the tree awaiting arrival of the next chosen one.</summary>
@@ -89,18 +93,21 @@ namespace Epicoin.Core {
 		/// <summary>
 		/// Creates new empty EFOBE.
 		/// </summary>
-		public EFOBE(){
+		public EFOBE(Func<string, string, string, string, string> hasher){
+			this.hasher = hasher;
 			branches = new List<List<string>>();
 			LCA = new Block.UncertainBlock(null, null, null, NullHash, null);
 			blockTree[LCA.hash] = LCA;
 			bedrocks = new List<Block>{};
 		}
 
+		protected List<string> LongestBranch() => branches.OrderByDescending(br => br.Count).First();
+
 		/// <summary>
 		/// Returns the hash of the top-most block (last block on the longest branch).
 		/// </summary>
 		/// <returns>Hash of last block on the longest branch.</returns>
-		public string TopBlock() => branches.Count == 0 ? LCA.hash : branches.OrderByDescending(br => br.Count).First().Last();
+		public string TopBlock() => branches.Count == 0 ? LCA.hash : LongestBranch().Last();
 
 		/// <summary>
 		/// Checks whether a branch can grow or derive from block with given hash.
@@ -111,11 +118,11 @@ namespace Epicoin.Core {
 		/// <summary>
 		/// Adds block to the tree.
 		/// </summary>
-		internal void addBlock(string problem, string pars, string sol, string hash, string precedingHash){
+		internal bool addBlock(string problem, string pars, string sol, string hash, string precedingHash){
 			if(blockTree.ContainsKey(precedingHash)){
 				Block.UncertainBlock next = new Block.UncertainBlock(problem, pars, sol, hash, precedingHash);
 				blockTree.Add(hash, next);
-				if(skipUpdateCheck) return;
+				if(skipUpdateCheck) return true;
 
 				Block.UncertainBlock prev = blockTree[precedingHash];
 				bool rb;
@@ -141,14 +148,17 @@ namespace Epicoin.Core {
 						rb = false;
 					}
 				}
+				FireOnBlockAdded(problem, pars, sol, precedingHash, hash);
 				updateCheckBranches(rb);
+				return true;
 			}
+			return false;
 		}
 
 		private bool skipUpdateCheck = false; //WARNING: After skipping update checks, and setting this back to false, updateCheckBranches(true) must be called!!!
 		internal void updateCheckBranches(bool refresh = false){
 			if(skipUpdateCheck) return;
-			if(refresh){
+			brecalc: if(refresh){
 				//Full branch cash reconstruction requested
 				branches.Clear();
 				List<string> derive(List<string> branch){
@@ -168,27 +178,43 @@ namespace Epicoin.Core {
 					}
 				}
 				foreach(var bs in blockTree.Values.Where(b => b.precedingHash == LCA.hash)) followBranch(derive(new List<string>()), bs);
+				//followBranch(derive(new List<string>{LCA.hash}), LCA);
 				foreach(var br in branches) foreach(var b in br.Select(id => blockTree[id])) b.branches.Add(br);
+				longestBranch = branches.Count > 0 ? LongestBranch().Count : 0;
 			}
-			//Remove short outdated branches
-			List<List<string>> forRemoval = branches.Where(br => longestBranch - br.Count >= BranchLengthDelta).ToList();
-			forRemoval.ForEach(destroyBranch);
+			//Rebase short outdated branches
+			skipUpdateCheck = true;
+			List<List<string>> forRebase = branches.Where(br => longestBranch - br.Count >= BranchLengthDelta).ToList();
+			foreach(var br in forRebase){
+				var lb = LongestBranch();
+				var firstDerivedFromLongest = br[0];
+				for(int i = br.Count-1; i > 0; i--) if(lb.Contains(br[i-1])) firstDerivedFromLongest = br[i];
+				if(rebase(firstDerivedFromLongest, lb.Last())){
+					skipUpdateCheck = false;
+					refresh = true;
+					goto brecalc;
+				}
+			}
+			skipUpdateCheck = false;
 			//Immortalize common ancestors until next derivation, or we reach outdate threshold
 			while(longestBranch > BedrockDelta){
 				var nca = branches[0][0];
 				if(branches.All(br => br[0] == nca)){
 					bedrocks.Add(new Block(LCA));
+					FireOnBlockImmortalized(LCA.problem, LCA.parameters, LCA.solution, LCA.hash);
 					blockTree.Remove(LCA.hash);
 					var nLCA = blockTree[nca];
 					LCA = new Block.UncertainBlock(nLCA.problem, nLCA.parameters, nLCA.solution, nLCA.hash, null);
 					blockTree[LCA.hash] = LCA;
 					branches.ForEach(b => b.RemoveAt(0));
 					longestBranch--;
+					FireOnLCAChanged(LCA.problem, LCA.parameters, LCA.solution, LCA.hash);
 				} else break;
 			}
 		}
 
 		/// <summary>
+		/// Deprecated, use rebase instead
 		/// Terminates existence of a branch, and all blocks existing [exclusively] on it.
 		/// </summary>
 		internal void destroyBranch(List<string> branch){
@@ -200,6 +226,27 @@ namespace Epicoin.Core {
 					if(blockTree.ContainsKey(b.precedingHash)) blockTree[b.precedingHash].next.Remove(b.hash);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Terminates existence of a branch, and all blocks existing [exclusively] on it.
+		/// </summary>
+		internal bool rebase(string hash, string newPrecedingHash){
+			if(blockTree.ContainsKey(hash) && blockTree.ContainsKey(newPrecedingHash) && hash != LCA.hash){
+				var newParent = blockTree[newPrecedingHash];
+				var oldBlock = blockTree[hash];
+				var oldParent = blockTree[oldBlock.precedingHash];
+				oldParent?.next?.Remove(oldBlock.hash);
+				var newBlock = new Block.UncertainBlock(oldBlock.problem, oldBlock.parameters, oldBlock.solution, hasher(newPrecedingHash, oldBlock.problem, oldBlock.parameters, oldBlock.solution), newPrecedingHash);
+				newParent.append(newBlock);
+				blockTree.Remove(hash);
+				blockTree[newBlock.hash] = newBlock;
+				foreach(var childRebase in oldBlock.next) rebase(childRebase, newBlock.hash);
+				if(!skipUpdateCheck) updateCheckBranches(true);
+				FireOnBranchRebased(oldBlock.problem, oldBlock.parameters, oldBlock.solution, oldParent.hash, hash, newPrecedingHash, newBlock.hash);
+				return true;
+			}
+			return false;
 		}
 
 		/*
@@ -273,11 +320,13 @@ namespace Epicoin.Core {
 
 		internal readonly static log4net.ILog LOG = log4net.LogManager.GetLogger("Epicoin", "Epicore-Validator");
 
-		protected EFOBE efobe = new EFOBE();
+		protected EFOBE efobe;
 
-		HashAlgorithm hasher = SHA256.Create();
+		SHA3 sha = SHA3.SHA256;
 
-		public Validator(Epicore core) : base(core) {}
+		public Validator(Epicore core) : base(core){
+			efobe = new EFOBE(computeHash);
+		}
 
 		public EFOBE GetLocalEFOBE() => efobe;
 
@@ -289,12 +338,19 @@ namespace Epicoin.Core {
 			cleanup();
 		}
 
+		internal void efobeAcquired(EFOBE efobe){
+			core.events.FireOneEFOBEAcquired(this.efobe = efobe);
+			this.efobe.OnBlockAdded += b => core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBELocalBlockAdded(b.Problem, b.Parameters, b.Solution, b.Parent, b.Hash));
+			this.efobe.OnBranchRebased += b => core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBELocalBlockRebase(b.OldHash, b.NewParent, b.NewHash));
+		}
+
 		internal void init(){
 			var cachedE = new FileInfo(EFOBEfile);
-			if (cachedE.Exists) efobe = loadEFOBE(cachedE);
+			if(cachedE.Exists) efobeAcquired(loadEFOBE(cachedE));
 			else core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBERequest());
 			problemsRegistry = waitForITMessageOfType<ITM.GetProblemsRegistry>().problemsRegistry;
 			LOG.Info("Received problems registry.");
+			core.events.FireOnValidatorInitialized(this);
 		}
 
 		internal void keepChecking(){
@@ -302,9 +358,11 @@ namespace Epicoin.Core {
 				var m = itc.readMessageOrDefault();
 				if(m is ITM.EFOBEReqReply){
 					var receivedEFOBELoc = (m as ITM.EFOBEReqReply).cachedEFOBE;
+					LOG.Info("Received requested EFOBE");
 					var decomp = JsonConvert.DeserializeObject<List<(string problem, string parameters, string solution, string hash, string prevHash)>>(File.ReadAllText(receivedEFOBELoc.FullName));
 					if(!decomp.All(validateBlock)) goto finaly;
-					this.efobe = EFOBE.Compile(decomp);
+					LOG.Info("Received efobe valid - keeping");
+					efobeAcquired(EFOBE.Compile(decomp, computeHash));
 					finaly: receivedEFOBELoc.Delete();
 				} else
 				if(m is ITM.ProblemSolved){
@@ -314,7 +372,7 @@ namespace Epicoin.Core {
 						var hash = computeHash(prevHash, sol.Problem, sol.Parameters, sol.Solution);
 						efobe.addBlock(sol.Problem, sol.Parameters, sol.Solution, hash, prevHash);
 						core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBELocalBlockAdded(sol.Problem, sol.Parameters, sol.Solution, prevHash, hash));
-					}
+					} else core.sendITM2Solver(new Solver.ITM.ProblemToBeSolved(sol.Problem, sol.Parameters));
 				} else
 				if(m is ITM.EFOBERemoteBlockAdded){
 					var ssa = m as ITM.EFOBERemoteBlockAdded;
@@ -322,6 +380,15 @@ namespace Epicoin.Core {
 						core.sendITM2Solver(new Solver.ITM.CancelPendingProblem(ssa.Problem, ssa.Parameters));
 						efobe.addBlock(ssa.Problem, ssa.Parameters, ssa.Solution, ssa.Hash, ssa.Parent);
 					}
+				} else 
+				if(m is ITM.EFOBERemoteBlockRebase){
+					var rbr = m as ITM.EFOBERemoteBlockRebase;
+					efobe.rebase(rbr.Hash, rbr.NewParent);
+				} else
+				if(m is ITM.EFOBESendRequest){
+					var esr = m as ITM.EFOBESendRequest;
+					File.WriteAllText(esr.cacheEFOBEHere.FullName, EFOBE.Serialize(efobe));
+					core.sendITM2Net(new Epicoin.Core.Net.ITM.EFOBESendRequestReply(esr.cacheEFOBEHere));
 				} else {
 					Thread.Yield();
 					Thread.Sleep(10); //Nuffin to do
@@ -331,25 +398,23 @@ namespace Epicoin.Core {
 
 		internal void cleanup(){
 			saveEFOBE(efobe, new FileInfo(EFOBEfile));
-			hasher.Dispose();
 		}
 
 		internal const string EFOBEfile = "EFOBE.json";
 
-		internal EFOBE loadEFOBE(FileInfo file) => EFOBE.Deserialize(File.ReadAllText(file.FullName));
+		internal EFOBE loadEFOBE(FileInfo file) => EFOBE.Deserialize(File.ReadAllText(file.FullName), computeHash);
 
 		internal void saveEFOBE(EFOBE efobe, FileInfo file) => File.WriteAllText(file.FullName, EFOBE.Serialize(efobe));
 
 		internal string computeHash(string prHash, string problem, string parms, string sol){
 			Encoding enc = Encoding.ASCII;
-			byte[] prevHash = Convert.FromBase64String(prHash);
+			var prevHash = BitString.FromBase64(prHash);
 			int p, r, s;
-			byte[] preHash = new byte[(s = (r = (p = prevHash.Length) + enc.GetByteCount(problem)) + enc.GetByteCount(parms)) + enc.GetByteCount(sol)];
-			Array.Copy(prevHash, preHash, prevHash.Length);
+			byte[] preHash = new byte[(s = (r = (p = 0) + enc.GetByteCount(problem)) + enc.GetByteCount(parms)) + enc.GetByteCount(sol)];
 			enc.GetBytes(problem, 0, problem.Length, preHash, p);
 			enc.GetBytes(parms, 0, parms.Length, preHash, r);
 			enc.GetBytes(sol, 0, sol.Length, preHash, s);
-			return Convert.ToBase64String(hasher.ComputeHash(preHash));
+			return sha.Hash(prevHash + BitString.FromBytesLE(preHash)).ToBase64();
 		}
 		protected bool validateSolution(string problem, string parms, string solution){
 			var t = problemsRegistry[problem].check(parms, solution, CancellationToken.None);
@@ -412,6 +477,14 @@ namespace Epicoin.Core {
 
 				public EFOBEReqReply(FileInfo cache){
 					this.cachedEFOBE = cache;
+				}
+			}
+
+			internal class EFOBESendRequest : ITM {
+				public readonly FileInfo cacheEFOBEHere;
+
+				public EFOBESendRequest(FileInfo cache){
+					this.cacheEFOBEHere = cache;
 				}
 			}
 
