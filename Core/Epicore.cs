@@ -148,7 +148,9 @@ namespace Epicoin.Core {
 
 		protected ConcurrentQueue<M> messages = new ConcurrentQueue<M>();
 
-		public void sendMessage(M message) => messages.Enqueue(message);
+		public void sendMessage(M message){
+			if(message != null) messages.Enqueue(message);
+		}
 
 		public M readMessageOrDefault() => messages.TryDequeue(out M m) ? m : default(M);
 
