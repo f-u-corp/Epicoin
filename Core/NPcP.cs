@@ -171,6 +171,7 @@ namespace Epicoin.Core {
 			InitOpenCL();
 			LoadProblems();
 			core.sendITM2Validator(new Validator.ITM.GetProblemsRegistry(problemsRegistry));
+			core.events.FireOnSolverInitialized(this);
 		}
 
 		internal void cleanup(){
