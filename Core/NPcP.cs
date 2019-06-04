@@ -282,6 +282,10 @@ namespace Epicoin.Core {
 						currentlySolvingData = (null, null);
 						currentlySolving = null;
 						currentlySolvingCancellor = null;
+					} else if(currentlySolving.IsCompleted){
+						currentlySolvingData = (null, null);
+						currentlySolving = null;
+						currentlySolvingCancellor = null;
 					}
 				}
 				if(currentlySolving == null){
