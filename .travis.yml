@@ -17,7 +17,7 @@ deploy:
   skip_cleanup: true
   file_glob: true
   file:
-    - "./Core/bin/Release/netcoreapp2.1/*.dll"
-    - "./nugets/*.nupkg"
+    - "./Core/bin/Release/netcoreapp2.1/*"
+    - "./Core/nugets/*.nupkg"
   on:
     tags: true
