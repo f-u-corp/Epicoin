@@ -265,7 +265,7 @@ namespace Epicoin.Core {
 				var message = itc.readMessageOrDefault();
 				if(message is ITM.ProblemToBeSolved){
 					var ptbs = message as ITM.ProblemToBeSolved;
-					toBeSolvedQueue.Append((ptbs.Problem, ptbs.Parameters));
+					toBeSolvedQueue.Enqueue((ptbs.Problem, ptbs.Parameters));
 				}
 				if(message is ITM.CancelPendingProblem){
 					var cpp = message as ITM.CancelPendingProblem;
