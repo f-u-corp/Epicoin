@@ -14,6 +14,8 @@ deploy:
   api_key:
     secure: $GITACCESSTOKEN
   skip_cleanup: true
-  file: "./Core/bin/Release/netcoreapp2.1/*.dll"
+  file:
+    - "./Core/bin/Release/netcoreapp2.1/*.dll"
+    - "./nugets/*.nupkg"
   on:
     tags: true
