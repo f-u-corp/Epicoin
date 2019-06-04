@@ -8,3 +8,11 @@ install:
 script:
  - dotnet build
  - dotnet test
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITACCESSTOKEN
+  skip_cleanup: true
+  file: "./Core/bin/Release/netcoreapp2.1/*"
+  on:
+    tags: true
