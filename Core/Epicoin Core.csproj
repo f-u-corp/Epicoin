@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
 	<PackageId>Epicoin.Epicore</PackageId>
-	<PackageVersion>0.0.1</PackageVersion>
+	<PackageVersion>0.0.2</PackageVersion>
 	<Authors>E-gy, Mihdi, ashwinsk01, Abdnabs</Authors>
 	<Description>Core library of epicoin.</Description>
 	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-	<PackageReleaseNotes>Test releases</PackageReleaseNotes>
+	<PackageReleaseNotes>Somewhat functional core library</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
