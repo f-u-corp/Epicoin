@@ -40,7 +40,6 @@ namespace Epicoin.Core {
 			var task = new TaskCompletionSource<T[]>();
 			var eve = new List<ComputeEventBase>();
 			ccq.Execute(kernel, null, globalLocalWorkSize[0], globalLocalWorkSize[1], eve);
-			ccq.Flush();
 			eve[0].Completed += (s1,a1) => {
 				if(cancel.IsCancellationRequested) task.SetCanceled();
 				else {
@@ -48,9 +47,11 @@ namespace Epicoin.Core {
 					ccq.ReadFromBuffer(outputReadbuffer, ref ts, false, eve);
 					eve[1].Completed += (s2,a2) => task.SetResult(ts);
 					eve[1].Aborted += (s2,a2) => task.SetException(new Exception("OpenCL abnormal task termination occured when reading the output"));
+					ccq.Flush();
 				}
 			};
 			eve[0].Aborted += (s1,a1) => task.SetException(new Exception("OpenCL abnormal task termination occured during computation"));
+			ccq.Flush();
 			return task.Task;
 		}
 
@@ -291,6 +292,10 @@ namespace Epicoin.Core {
 				if(currentlySolving != null){
 					if(currentlySolving.IsCompletedSuccessfully){
 						if(!currentlySolvingCancellor.IsCancellationRequested) ProblemIHaveSolved(currentlySolvingData.problem, currentlySolvingData.parms, currentlySolving.Result);
+						currentlySolvingData = (null, null);
+						currentlySolving = null;
+						currentlySolvingCancellor = null;
+					} else if(currentlySolving.IsCompleted){
 						currentlySolvingData = (null, null);
 						currentlySolving = null;
 						currentlySolvingCancellor = null;
