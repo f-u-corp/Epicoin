@@ -165,12 +165,16 @@ namespace Epicoin.Core {
 
 		protected ConcurrentQueue<M> messages = new ConcurrentQueue<M>();
 
-		public void sendMessage(M message) => messages.Enqueue(message);
+		public void sendMessage(M message){
+			if(message != null) messages.Enqueue(message);
+		}
 
 		public M readMessageOrDefault() => messages.TryDequeue(out M m) ? m : default(M);
 
 		protected ConcurrentQueue<M> stash = new ConcurrentQueue<M>();
-		public void stashReadMessage(M message) => stash.Enqueue(message);
+		public void stashReadMessage(M message){
+			if(message != null) stash.Enqueue(message);
+		}
 
 		public void readdStash(){
 			while(stash.TryDequeue(out M m)) messages.Enqueue(m);
