@@ -162,7 +162,7 @@ namespace Epicoin.Core {
 
 		internal override void InitAndRun(){
 			init();
-			AsyncCLIProblemTesting();
+			//AsyncCLIProblemTesting();
 			TakeCareOfStuffFromTimeToTime();
 			cleanup();
 		}
