@@ -7,6 +7,7 @@ install:
  - dotnet restore
 script:
  - dotnet build
+ - dotnet build "./core/Epicoin Core.csproj" -c Release
  - dotnet test
 deploy:
   provider: releases
