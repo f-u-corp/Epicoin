@@ -102,8 +102,6 @@ namespace Epicoin.Core {
 
 		bool IsSolving();
 
-		event Action<(string problem, string parameters, string solution)> OnProblemSolved;
-
 	}
 
 	/// <summary>
