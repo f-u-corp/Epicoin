@@ -1,0 +1,3 @@
+[submodule "SHA3-CS"]
+	path = SHA3-CS
+	url = https://github.com/E-gy/SHA3-CS
