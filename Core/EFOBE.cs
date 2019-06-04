@@ -177,8 +177,9 @@ namespace Epicoin.Core {
 					}
 				}
 				foreach(var bs in blockTree.Values.Where(b => b.precedingHash == LCA.hash)) followBranch(derive(new List<string>()), bs);
+				//followBranch(derive(new List<string>{LCA.hash}), LCA);
 				foreach(var br in branches) foreach(var b in br.Select(id => blockTree[id])) b.branches.Add(br);
-				longestBranch = LongestBranch().Count;
+				longestBranch = branches.Count > 0 ? LongestBranch().Count : 0;
 			}
 			//Rebase short outdated branches
 			skipUpdateCheck = true;
