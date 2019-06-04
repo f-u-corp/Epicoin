@@ -40,8 +40,8 @@ namespace Epicoin.Core
 			}
 			LOG.Info("Local IP established");
 			LOG.Info("Loading networking components");
-			this.parent = new Parent();
-			this.baby = new Baby(parent);
+			//this.parent = new Parent();
+			//this.baby = new Baby(parent);
 		}
 		public void NetworkLogic()
 		{
