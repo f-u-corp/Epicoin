@@ -24,9 +24,9 @@ namespace Epicoin.CLI {
 			core.Events.OnValidatorInitialized += v => valInit = true;
 			core.Events.OnSolverInitialized += s => solInit = true;
 			core.Events.OnStartedSolvingProblem += p => Info($"Started solving: {p.Problem}?>{p.Parameters}", ConsoleColor.DarkGreen);
-			core.Events.OnProblemSolved += p => Info($"Problem solved: {p.Problem}?>{p.Parameters}-->{p.Solution}", ConsoleColor.Green);
+			core.Events.OnProblemSolved += p => Info($"Problem solved: {p.Problem}?>\n	{p.Parameters}\n-->\n	{p.Solution}", ConsoleColor.Green);
 			core.Events.OnEFOBEAcquired += efobe => {
-				efobe.OnBlockAdded += b => Info($"Local Block Added: [{b.Hash}] {b.Problem}?>{b.Parameters}-->{b.Solution}", ConsoleColor.Magenta);
+				efobe.OnBlockAdded += b => Info($"Local Block Added: [{b.Hash}] {b.Problem}?>\n	{b.Parameters}\n-->\n	{b.Solution}", ConsoleColor.Magenta);
 				efobe.OnBlockImmortalized += b => Info($"Block immortalized: [{b.Hash}]", ConsoleColor.DarkBlue);
 				efobe.OnLCAChanged += b => Info($"New LCA: [{b.Hash}] {b.Problem}?>{b.Parameters}", ConsoleColor.Cyan);
 				efobe.OnBranchRebased += br => Info($"Branch rebased: from {br.OldHash} to {br.NewHash} - {br.Problem}?>{br.Parameters}", ConsoleColor.DarkYellow);
